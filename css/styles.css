@@ -1,0 +1,371 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    background-image: url('../images/ChatGPT%20Image%2029.%20Aug.%202025,%2008_34_24.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: #1a202c;
+    color: #e2e8f0;
+}
+
+/* Removed body overlay filter */
+
+.page {
+    display: none;
+    width: 100%;
+    min-height: calc(100vh - 128px);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 1rem;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+}
+.page.active {
+    display: flex;
+}
+main {
+    padding-top: 64px;
+    padding-bottom: 64px;
+}
+
+@keyframes fly-away {
+    from {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -1000px) scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes particle-fly {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+        filter: hue-rotate(0deg);
+    }
+    100% {
+        transform: translateY(-1000px) rotate(720deg);
+        opacity: 0;
+        filter: hue-rotate(360deg);
+    }
+}
+
+@keyframes bonusFloat {
+    0% {
+        transform: translateY(100vh) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(80vh) scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px) scale(0.8);
+        opacity: 0;
+    }
+}
+
+@keyframes bonusFloatNew {
+    0% {
+        transform: translateY(0) translateX(0) scale(0.5);
+        opacity: 0;
+    }
+    10% {
+        transform: translateY(20vh) translateX(0) scale(1.2);
+        opacity: 1;
+    }
+    30% {
+        transform: translateY(40vh) translateX(0) scale(1.0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-120vh) translateX(0) scale(0.8);
+        opacity: 0;
+    }
+}
+
+.floating-element {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    z-index: 1000;
+    animation: fly-away 1.5s ease-out forwards;
+}
+
+.bonus-particle {
+    position: fixed;
+    font-size: 2rem;
+    opacity: 0;
+    animation: particle-fly 2s ease-out forwards;
+    pointer-events: none;
+    z-index: 2000;
+}
+
+#mapid {
+    height: 400px;
+    width: 100%;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-height: 300px;
+}
+
+/* Mobile-specific map styles */
+@media (max-width: 768px) {
+    #mapid {
+        height: 350px;
+        min-height: 300px;
+        width: 100%;
+        border-radius: 0.5rem;
+        /* Improved mobile map performance */
+        will-change: transform;
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+    }
+}
+
+@media (max-width: 480px) {
+    #mapid {
+        height: 300px;
+        min-height: 250px;
+        width: 100%;
+        border-radius: 0.5rem;
+        /* Improved mobile map performance */
+        will-change: transform;
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+    }
+}
+
+.nav-btn {
+    transition: all 0.3s ease;
+}
+.nav-btn:hover {
+    transform: translateY(-2px);
+}
+.nav-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Mobile responsive design */
+@media (max-width: 768px) {
+    main {
+        margin-left: 0 !important;
+        margin-top: 4rem !important;
+    }
+    
+    .nav-btn {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+}
+
+.machine-card {
+    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+    border: 1px solid #4a5568;
+    transition: all 0.3s ease;
+}
+.machine-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border-color: #667eea;
+}
+
+.drop-marker {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.drop-marker:hover {
+    transform: scale(1.2);
+}
+
+.custom-alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    max-width: 400px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.dev-drop-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+.dev-drop-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+}
+.dev-drop-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.mehr-tab {
+    display: none;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+.mehr-tab.active {
+    display: block;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+.mehr-tab-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.mehr-tab-btn {
+    background-color: #374151;
+    color: #d1d5db;
+    border: 1px solid #4b5563;
+    min-width: 120px;
+    text-align: center;
+}
+
+.mehr-tab-btn:hover {
+    background-color: #4b5563;
+    border-color: #6b7280;
+}
+
+/* Minimize spacing between tabs and content */
+#mehr-dashboard,
+#mehr-profile,
+#mehr-settings,
+#mehr-stats,
+#mehr-leitfaden,
+#mehr-dev,
+#mehr-test,
+#mehr-impressum {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Remove extra spacing from tab content containers */
+.mehr-tab > div {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* GeoDrop Marker Styles */
+.dev-drop-marker {
+    background: rgba(255, 0, 0, 0.3);
+    border: 2px solid #ff0000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+.dev-drop-marker.claimed {
+    background: rgba(128, 128, 128, 0.5);
+    border: 2px solid #808080;
+    opacity: 0.7;
+}
+
+.dev-drop-marker.claimed-today {
+    background: rgba(255, 255, 0, 0.5);
+    border: 2px solid #ffff00;
+}
+
+.user-drop-marker {
+    background: rgba(0, 255, 0, 0.3);
+    border: 2px solid #00ff00;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+.user-drop-marker.claimed {
+    background: rgba(128, 128, 128, 0.5);
+    border: 2px solid #808080;
+    opacity: 0.7;
+}
+
+.user-drop-marker.claimed-today {
+    background: rgba(255, 255, 0, 0.5);
+    border: 2px solid #ffff00;
+}
+
+.trading-tab {
+    display: none;
+}
+.trading-tab.active {
+    display: block;
+}
+.trading-tab-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+/* Background Logo for Start Page */
+#startseite {
+    background-image: url('../images/ChatGPT Image 29. Aug. 2025, 08_34_24.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    position: relative;
+}
+
+/* Removed startseite overlay filter */
+
+/* Removed z-index manipulation */
+
+/* User Info styling removed - using inline classes instead */
+
+/* Mobile-specific fixes */
+@media (max-width: 768px) {
+    /* Fix background attachment for mobile */
+    #startseite {
+        background-attachment: scroll !important;
+    }
+    
+    /* Improve navigation for mobile */
+    .nav-btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Better mobile layout */
+    .page {
+        padding: 0.5rem;
+    }
+}

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startseite - GeoDrop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.0.0/dist/jsQR.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        .page {
+            display: flex;
+            width: 100%;
+            min-height: calc(100vh - 128px);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        
+        main {
+            padding-top: 64px;
+            padding-bottom: 64px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div id="startseite" class="page" style="background-image: url('../images/ChatGPT%20Image%2029.%20Aug.%202025.png'); background-size: cover; background-position: center; background-attachment: scroll; background-repeat: no-repeat; min-height: 100vh; position: relative;">
+            <!-- Removed overlay to show background image clearly -->
+            
+            <div class="max-w-4xl mx-auto p-6 relative" style="z-index: 10;">
+                <!-- Content -->
+                <div class="relative z-10">
+                    <div class="text-center mb-8 mt-16">
+                        <h2 class="text-4xl font-bold text-white mb-2">GeoDrop</h2>
+                        <p class="text-gray-300 text-lg">Willkommen bei der Zukunft des Geo-Minings</p>
+        </div>
+
+                <!-- Login Section -->
+                <div id="login-section" class="bg-gray-700 rounded-lg p-6 mb-6" style="background: rgba(55, 65, 81, 0.8); backdrop-filter: blur(2px);">
+                    <h3 class="text-xl font-semibold text-white mb-4">🔑 Anmeldung</h3>
+                    <div class="space-y-4">
+                        <input type="email" id="startseite-auth-email" placeholder="E-Mail" class="w-full px-4 py-2 rounded-lg bg-gray-600 text-white border border-gray-500 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') login()">
+                        <input type="password" id="startseite-auth-password" placeholder="Passwort" class="w-full px-4 py-2 rounded-lg bg-gray-600 text-white border border-gray-500 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') login()">
+                        <div class="flex space-x-2">
+                            <button onclick="login()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Anmelden</button>
+                            <button onclick="register()" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Registrieren</button>
+                        </div>
+                        <button onclick="resetPassword()" class="w-full px-4 py-2 text-blue-400 hover:text-blue-300 transition-colors">Passwort vergessen?</button>
+                        <div class="text-xs text-gray-400 mt-2">
+                            💡 Tipp: Drücke Enter in den Eingabefeldern zum schnellen Anmelden
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Info -->
+                <div id="user-info" class="bg-gray-700 rounded-lg p-6 mb-6" style="display: none; background: rgba(55, 65, 81, 0.8); backdrop-filter: blur(2px);">
+                    <h3 class="text-xl font-semibold text-white mb-4">👤 Benutzerinfo</h3>
+                    <div class="mb-4 text-center">
+                        <p class="text-lg font-semibold text-white" id="user-username">Lade...</p>
+                        <p class="text-sm text-gray-400">Benutzername</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p class="text-2xl font-bold text-purple-400" id="user-coins">0</p>
+                            <p class="text-sm text-gray-400">PixelDrop</p>
+                        </div>
+                        <div>
+                            <p class="text-xl font-bold text-yellow-400" id="user-tbnb">0.00</p>
+                            <p class="text-sm text-gray-400">tBNB</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-blue-400" id="user-drops">0</p>
+                            <p class="text-sm text-gray-400">Drops</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-lg font-semibold text-green-400" id="user-boost">1.0x</p>
+                        <p class="text-sm text-gray-400">Boost</p>
+                    </div>
+                    <button onclick="logout()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Abmelden</button>
+                        </div>
+                    </div>
+                    
+                <!-- Whitepaper & Roadmap Section -->
+                <div class="text-center mt-8 space-y-4">
+                    <div class="flex flex-wrap gap-4 justify-center">
+                        <a href="../whitepaper_alt.html" target="_blank" class="px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition-all transform hover:scale-105 font-semibold">
+                            📖 Vollständiges Whitepaper
+                        </a>
+                        <button onclick="showRoadmapPopup()" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 font-semibold">
+                            🗺️ Roadmap anzeigen
+                        </button>
+                    </div>
+                    <p class="text-gray-300 text-sm mt-4">
+                        💡 Klicke auf "Vollständiges Whitepaper" für die detaillierte Version mit aktueller Roadmap
+                    </p>
+                </div>
+                
+            </div>
+        </div>
+    </main>
+
+    <!-- Whitepaper Popup -->
+    <div id="whitepaper-popup" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="sticky top-0 bg-gray-800 p-4 border-b border-gray-700 flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-white">📄 GeoDrop White Paper</h2>
+                    <button onclick="closeWhitePaperPopup()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-6 text-gray-300">
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-blue-400 mb-3">🌍 Vision & Mission</h3>
+                            <p class="text-sm leading-relaxed">
+                                GeoDrop revolutioniert das Geo-Mining durch innovative Blockchain-Technologie und gamifizierte Standort-basierte Belohnungen. 
+                                Unsere Mission ist es, eine dezentrale Plattform zu schaffen, die Benutzer für reale geografische Aktivitäten belohnt.
+                            </p>
+                </div>
+                        
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-green-400 mb-3">⚡ Technologie</h3>
+                            <p class="text-sm leading-relaxed">
+                                <strong>Blockchain-Integration:</strong> BSC (Binance Smart Chain) für schnelle, kostengünstige Transaktionen<br>
+                                <strong>GPS-Verifikation:</strong> Präzise Standortbestimmung mit Hash-basierter Verifikation<br>
+                                <strong>Smart Contracts:</strong> Automatisierte Belohnungsverteilung und Drop-Verwaltung
+                            </p>
+                </div>
+                        
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-purple-400 mb-3">🎮 Gameplay</h3>
+                            <p class="text-sm leading-relaxed">
+                                <strong>GeoDrops:</strong> Sammle Belohnungen an speziellen Standorten<br>
+                                <strong>Mining-Maschinen:</strong> Investiere in automatische Mining-Geräte<br>
+                                <strong>Leaderboard:</strong> Konkurriere mit anderen Spielern weltweit<br>
+                                <strong>Daily Bonuses:</strong> Tägliche Belohnungen für aktive Teilnahme
+                            </p>
+                </div>
+                        
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-yellow-400 mb-3">💰 Tokenomics</h3>
+                            <p class="text-sm leading-relaxed">
+                                <strong>PixelDrop Token:</strong> Hauptwährung der Plattform<br>
+                                <strong>tBNB Integration:</strong> Direkte BSC-Integration für Transaktionen<br>
+                                <strong>Deflationärer Mechanismus:</strong> Token-Burning bei bestimmten Aktionen<br>
+                                <strong>Staking Rewards:</strong> Belohnungen für langfristige Token-Haltung
+                            </p>
+            </div>
+            
+                        <div class="text-center mt-8">
+                            <button onclick="downloadWhitePaper()" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105">
+                                📥 White Paper herunterladen
+                            </button>
+                </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Roadmap Popup -->
+    <div id="roadmap-popup" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="sticky top-0 bg-gray-800 p-4 border-b border-gray-700 flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-white">🗺️ GeoDrop Roadmap</h2>
+                    <button onclick="closeRoadmapPopup()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-6 text-gray-300">
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-green-400 mb-3">✅ Phase 1: Foundation (August 2025)</h3>
+                            <p class="text-sm leading-relaxed mb-3">Grundlegende App-Struktur und Core-Features - ABGESCHLOSSEN</p>
+                            <ul class="text-sm space-y-1">
+                                <li>✅ Geo-Location Integration</li>
+                                <li>✅ Firebase Backend Setup</li>
+                                <li>✅ Basic Drop System</li>
+                                <li>✅ User Authentication</li>
+                                <li>✅ Interactive Map</li>
+                                <li>✅ GeoChat System</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-green-400 mb-3">✅ Phase 2: Blockchain Integration (September 2025)</h3>
+                            <p class="text-sm leading-relaxed mb-3">Vollständige Blockchain-Integration und DeFi-Features - ABGESCHLOSSEN</p>
+                            <ul class="text-sm space-y-1">
+                                <li>✅ tBNB Integration</li>
+                                <li>✅ MetaMask Wallet</li>
+                                <li>✅ PixelDrop Token</li>
+                                <li>✅ Smart Contracts</li>
+                                <li>✅ Trading System</li>
+                                <li>✅ Mining Machines</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-blue-400 mb-3">🚧 Phase 3: Advanced Features (September 2025)</h3>
+                            <p class="text-sm leading-relaxed mb-3">Erweiterte Features und Optimierungen - IN ENTWICKLUNG</p>
+                            <ul class="text-sm space-y-1">
+                                <li>🔄 Dev Area Erweiterung</li>
+                                <li>🔄 Drop Nummerierung</li>
+                                <li>🔄 Konsistenz-Checks</li>
+                                <li>🔄 Admin-Tools</li>
+                                <li>🔄 Performance Optimierung</li>
+                                <li>🔄 Mobile Responsiveness</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-yellow-400 mb-3">⏳ Phase 4: Future Development (Q4 2025)</h3>
+                            <p class="text-sm leading-relaxed mb-3">Geplante Entwicklung und Verbesserungen</p>
+                            <ul class="text-sm space-y-1">
+                                <li>⏳ Enhanced Security Features</li>
+                                <li>⏳ Advanced Trading Analytics</li>
+                                <li>⏳ Multi-Chain Support</li>
+                                <li>⏳ Improved UX/UI</li>
+                                <li>⏳ Performance Monitoring</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-purple-400 mb-3">🔮 Phase 5: Future Vision (2026)</h3>
+                            <p class="text-sm leading-relaxed mb-3">Zukunftsweisende Features und Innovationen</p>
+                            <ul class="text-sm space-y-1">
+                                <li>⏳ AI-Powered Features</li>
+                                <li>⏳ Advanced Analytics</li>
+                                <li>⏳ Machine Learning</li>
+                                <li>⏳ Predictive Drops</li>
+                                <li>⏳ AR/VR Integration</li>
+                                <li>⏳ Cross-Platform Expansion</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="text-center mt-8">
+                            <a href="../whitepaper_alt.html" target="_blank" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105">
+                                📖 Vollständige Roadmap anzeigen
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/firebase.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/wallet-system.js"></script>
+    
+    <script>
+        // Honeypot keys for bot protection (these are fake and will be ignored)
+        const fakeApiKey1 = "AIzaSyBOT_PROTECTION_FAKE_KEY_12345";
+        const fakeApiKey2 = "AIzaSyFAKE_FIREBASE_KEY_67890";
+        const fakeApiKey3 = "AIzaSyDUMMY_API_KEY_ABCDEF";
+        
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbaHV1OY9C_MUt4o3WTkHCGlRVt7ll9UA",
+            authDomain: "geodrop-f3ee1.firebaseapp.com",
+            projectId: "geodrop-f3ee1",
+            storageBucket: "geodrop-f3ee1.firebasestorage.app",
+            messagingSenderId: "1054615552034",
+            appId: "1:1054615552034:web:8d61c64b5296f4e0cc4a7b",
+            measurementId: "G-RBEJES6HX1"
+        };
+
+        // Initialize Firebase
+        let app, db, storage, auth;
+        
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            storage = firebase.storage();
+            auth = firebase.auth();
+            console.log("✅ Firebase initialized successfully");
+        } catch (error) {
+            console.error("❌ Firebase initialization failed:", error);
+        }
+        
+        // Make Firebase services globally available
+        window.auth = auth;
+        window.db = db;
+        window.storage = storage;
+
+        // Authentication functions
+        async function login() {
+            const email = document.getElementById('startseite-auth-email').value;
+            const password = document.getElementById('startseite-auth-password').value;
+            
+            if (!email || !password) {
+                showMessage('Bitte E-Mail und Passwort eingeben.', true);
+                return;
+            }
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                showMessage('Anmeldung erfolgreich!');
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('Anmeldung fehlgeschlagen: ' + error.message, true);
+            }
+        }
+
+        async function register() {
+            const email = document.getElementById('startseite-auth-email').value;
+            const password = document.getElementById('startseite-auth-password').value;
+            
+            if (!email || !password) {
+                showMessage('Bitte E-Mail und Passwort eingeben.', true);
+                return;
+            }
+            
+            try {
+                await auth.createUserWithEmailAndPassword(email, password);
+                showMessage('Registrierung erfolgreich!');
+            } catch (error) {
+                console.error('Registration error:', error);
+                showMessage('Registrierung fehlgeschlagen: ' + error.message, true);
+            }
+        }
+
+        async function logout() {
+            try {
+                await auth.signOut();
+                showMessage('Abmeldung erfolgreich!');
+            } catch (error) {
+                console.error('Logout error:', error);
+                showMessage('Abmeldung fehlgeschlagen: ' + error.message, true);
+            }
+        }
+
+        async function resetPassword() {
+            const email = document.getElementById('startseite-auth-email').value;
+            if (!email) {
+                showMessage('Bitte E-Mail-Adresse eingeben.', true);
+                return;
+            }
+            
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showMessage('Passwort-Reset E-Mail wurde gesendet!');
+            } catch (error) {
+                console.error('Password reset error:', error);
+                showMessage('Fehler beim Senden der Reset-E-Mail: ' + error.message, true);
+            }
+        }
+
+        // Message function
+        function showMessage(message, isError = false) {
+            if (isError) {
+                console.error('❌', message);
+                alert('❌ ' + message);
+            } else {
+                console.log('✅', message);
+                alert('✅ ' + message);
+            }
+        }
+
+        // Navigation function
+        function showPage(pageId) {
+            // For standalone page, redirect to main index
+            if (pageId !== 'startseite') {
+                window.location.href = '../index.html#' + pageId;
+            }
+        }
+
+        // Whitepaper functions
+        function showWhitePaperPopup() {
+            const popup = document.getElementById('whitepaper-popup');
+            if (popup) {
+                popup.classList.remove('hidden');
+            }
+        }
+
+        function closeWhitePaperPopup() {
+            const popup = document.getElementById('whitepaper-popup');
+            if (popup) {
+                popup.classList.add('hidden');
+            }
+        }
+
+        function downloadWhitePaper() {
+            alert('📥 White Paper Download\n\nDas vollständige White Paper wird hier heruntergeladen.');
+        }
+
+        function showRoadmapPopup() {
+            const popup = document.getElementById('roadmap-popup');
+            if (popup) {
+                popup.classList.remove('hidden');
+            }
+        }
+
+        function closeRoadmapPopup() {
+            const popup = document.getElementById('roadmap-popup');
+            if (popup) {
+                popup.classList.add('hidden');
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏠 Startseite geladen');
+            
+            // Debug: Test background image loading
+            const testImg = new Image();
+            testImg.onload = function() {
+                console.log('✅ Background image loaded successfully:', testImg.src);
+            };
+            testImg.onerror = function() {
+                console.log('❌ Background image failed to load:', testImg.src);
+            };
+            testImg.src = '../images/background.png';
+        });
+    </script>
+</body>
+</html>

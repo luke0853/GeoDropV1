@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoDrop Whitepaper - Revolutionäre Geo-Location App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .hero-bg {
+            background-image: url('images/ChatGPT Image 29. Aug. 2025, 08_34_24.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .hero-overlay {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .glass-effect:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        .section-fade {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        .section-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-gray-800 bg-opacity-90 backdrop-blur-md z-50 shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <img src="images/logo.png" alt="GeoDrop Logo" class="h-8 w-8">
+                    <h1 class="text-xl font-bold text-purple-400">GeoDrop Whitepaper</h1>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#executive-summary" class="text-gray-300 hover:text-white transition-colors">Zusammenfassung</a>
+                    <a href="#technology" class="text-gray-300 hover:text-white transition-colors">Technologie</a>
+                    <a href="#features" class="text-gray-300 hover:text-white transition-colors">Features</a>
+                    <a href="#roadmap" class="text-gray-300 hover:text-white transition-colors">Roadmap</a>
+                    <a href="index.html" class="bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">Zur App</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg pt-24 pb-16 relative">
+        <div class="hero-overlay absolute inset-0"></div>
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                GeoDrop Whitepaper
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-200 mb-8 max-w-4xl mx-auto">
+                Revolutionäre Geo-Location App mit vollständiger Blockchain-Integration, Trading-System, Mining-Maschinen und innovativen Social Features - Aktualisiert für 2025
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#geolocation" class="glass-effect px-6 py-4 rounded-xl hover:bg-opacity-20 transition-all duration-300 cursor-pointer">
+                    <div class="text-2xl mb-2">🌍</div>
+                    <div class="font-bold">Geo-Location</div>
+                </a>
+                <a href="#blockchain" class="glass-effect px-6 py-4 rounded-xl hover:bg-opacity-20 transition-all duration-300 cursor-pointer">
+                    <div class="text-2xl mb-2">🔗</div>
+                    <div class="font-bold">Blockchain</div>
+                </a>
+                <a href="#trading" class="glass-effect px-6 py-4 rounded-xl hover:bg-opacity-20 transition-all duration-300 cursor-pointer">
+                    <div class="text-2xl mb-2">💰</div>
+                    <div class="font-bold">Trading</div>
+                </a>
+                <a href="#mining" class="glass-effect px-6 py-4 rounded-xl hover:bg-opacity-20 transition-all duration-300 cursor-pointer">
+                    <div class="text-2xl mb-2">⛏️</div>
+                    <div class="font-bold">Mining</div>
+                </a>
+                <a href="#social" class="glass-effect px-6 py-4 rounded-xl hover:bg-opacity-20 transition-all duration-300 cursor-pointer">
+                    <div class="text-2xl mb-2">💬</div>
+                    <div class="font-bold">Social Features</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Executive Summary -->
+    <section id="executive-summary" class="py-16 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-purple-400">Executive Summary</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-gray-800 p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-purple-300">Vision</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        GeoDrop revolutioniert die Art, wie Menschen mit ihrer Umgebung interagieren. 
+                        Durch die Kombination von Geo-Location-Technologie, Blockchain-Integration und 
+                        KI-gestützter Entwicklung schaffen wir eine einzigartige Plattform für 
+                        digitale Schatzsuche, soziale Interaktion und immersive Erlebnisse.
+                    </p>
+                </div>
+                <div class="bg-gray-800 p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-purple-300">Mission</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        Unsere Mission ist es, die physische und digitale Welt nahtlos zu verbinden. 
+                        Wir ermöglichen es Nutzern, digitale "Drops" an realen Standorten zu platzieren, 
+                        zu entdecken und zu interagieren - alles in einer sicheren, dezentralisierten 
+                        und benutzerfreundlichen Umgebung.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technology Stack -->
+    <section id="blockchain" class="py-16 bg-gray-800 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-purple-400">Technologie-Stack</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-gray-700 p-6 rounded-xl text-center">
+                    <div class="text-4xl mb-4">🌐</div>
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">Frontend</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>HTML5 & CSS3</li>
+                        <li>JavaScript (ES6+)</li>
+                        <li>Tailwind CSS</li>
+                        <li>Leaflet Maps</li>
+                        <li>Progressive Web App</li>
+                    </ul>
+                </div>
+                <div class="bg-gray-700 p-6 rounded-xl text-center">
+                    <div class="text-4xl mb-4">🔥</div>
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">Backend & Cloud</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>Firebase Firestore</li>
+                        <li>Firebase Storage</li>
+                        <li>Firebase Authentication</li>
+                        <li>Cloud Functions</li>
+                        <li>Real-time Database</li>
+                    </ul>
+                </div>
+                <div class="bg-gray-700 p-6 rounded-xl text-center">
+                    <div class="text-4xl mb-4">🔗</div>
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">Blockchain & DeFi</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>tBNB Integration</li>
+                        <li>Smart Contracts</li>
+                        <li>Ethers.js v6</li>
+                        <li>MetaMask Wallet</li>
+                        <li>PixelDrop Token</li>
+                        <li>Trading System</li>
+                    </ul>
+                </div>
+                <div class="bg-gray-700 p-6 rounded-xl text-center">
+                    <div class="text-4xl mb-4">🤖</div>
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">AWS Rekognition KI</h3>
+                    <ul class="text-gray-300 space-y-2">
+                        <li>Gesichtserkennung</li>
+                        <li>Objekterkennung</li>
+                        <li>Bildvergleich</li>
+                        <li>Hand-vor-Gesicht-Detection</li>
+                        <li>5.000 Validierungen/Monat</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="geolocation" class="py-16 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-purple-400">Kern-Features</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- GeoCard -->
+                <div class="bg-gray-800 p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🗺️</div>
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">GeoCard</h3>
+                    <p class="text-gray-300 mb-4">
+                        Interaktive Karte mit allen Drops, Standortverfolgung und 
+                        erweiterten Navigationsfunktionen.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Real-time Standortverfolgung</li>
+                        <li>• Drop-Marker mit Details</li>
+                        <li>• Routing & Navigation</li>
+                        <li>• Offline-Karten</li>
+                    </ul>
+                </div>
+
+                <!-- GeoChat -->
+                <div id="social" class="bg-gray-800 p-6 rounded-xl">
+                    <div class="text-3xl mb-4">💬</div>
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">GeoChat</h3>
+                    <p class="text-gray-300 mb-4">
+                        Standortbasierte Chat-Funktion mit QR-Code-Scanning und 
+                        direkter Kommunikation.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Standortbasierte Chats</li>
+                        <li>• QR-Code Scanner</li>
+                        <li>• Direkte Nachrichten</li>
+                        <li>• Gruppen-Chats</li>
+                    </ul>
+                </div>
+
+                <!-- Dev Area -->
+                <div class="bg-gray-800 p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🔧</div>
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">Dev Area</h3>
+                    <p class="text-gray-300 mb-4">
+                        Entwickler-Bereich mit erweiterten Funktionen für 
+                        Testing und Debugging.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Dev Drop Erstellung</li>
+                        <li>• Drop Nummerierung</li>
+                        <li>• Admin-Funktionen</li>
+                        <li>• Debug-Tools</li>
+                    </ul>
+                </div>
+
+                <!-- Mining System -->
+                <div class="bg-gray-800 p-6 rounded-xl">
+                    <div class="text-3xl mb-4">⛏️</div>
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">Mining System</h3>
+                    <p class="text-gray-300 mb-4">
+                        Kryptowährungs-Mining-Integration mit 
+                        Echtzeit-Dashboard und Statistiken.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Mining Dashboard</li>
+                        <li>• Echtzeit-Statistiken</li>
+                        <li>• Wallet Integration</li>
+                        <li>• Mining Rewards</li>
+                    </ul>
+                </div>
+
+                <!-- Bonus System -->
+                <div class="bg-gray-800 p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🎁</div>
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">Bonus System</h3>
+                    <p class="text-gray-300 mb-4">
+                        Gamification-System mit Boni, Challenges und 
+                        Belohnungen für aktive Nutzer.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Daily Rewards</li>
+                        <li>• Achievement System</li>
+                        <li>• Challenge Mode</li>
+                        <li>• Leaderboards</li>
+                    </ul>
+                </div>
+
+                <!-- Trading System -->
+                <div id="trading" class="bg-gray-800 p-6 rounded-xl">
+                    <div class="text-3xl mb-4">💰</div>
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">Trading System</h3>
+                    <p class="text-gray-300 mb-4">
+                        Vollständiges DeFi-Trading-System mit PixelDrop-Token 
+                        und tBNB-Integration.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• PixelDrop ↔ tBNB Trading</li>
+                        <li>• Smart Contract Integration</li>
+                        <li>• Gas Management</li>
+                        <li>• Trading Statistiken</li>
+                        <li>• Pool Wallet System</li>
+                    </ul>
+                </div>
+
+                <!-- Mining Machines -->
+                <div id="mining" class="bg-gray-800 p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🏭</div>
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">Mining Machines</h3>
+                    <p class="text-gray-300 mb-4">
+                        Erweiterte Mining-Maschinen mit verschiedenen 
+                        Boost-Levels und Automatisierung.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• 4 verschiedene Maschinentypen</li>
+                        <li>• Automatische Boost-Berechnung</li>
+                        <li>• Mining Statistiken</li>
+                        <li>• Maschinen-Management</li>
+                        <li>• Performance Tracking</li>
+                    </ul>
+                </div>
+
+                <!-- Dev Area -->
+                <div class="bg-gray-800 p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🔧</div>
+                    <h3 class="text-xl font-bold mb-3 text-purple-300">Dev Area</h3>
+                    <p class="text-gray-300 mb-4">
+                        Erweiterte Entwickler-Funktionen mit Drop-Erstellung 
+                        und Admin-Tools.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Dev Drop Erstellung</li>
+                        <li>• Drop Nummerierung</li>
+                        <li>• Konsistenz-Checks</li>
+                        <li>• Admin-Funktionen</li>
+                        <li>• Debug-Tools</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap -->
+    <section id="roadmap" class="py-16 bg-gray-800 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-purple-400">Entwicklungs-Roadmap</h2>
+            <div class="space-y-8">
+                <!-- Phase 1 -->
+                <div class="flex items-start space-x-6">
+                    <div class="bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                        1
+                    </div>
+                    <div class="bg-gray-700 p-6 rounded-xl flex-1">
+                        <h3 class="text-xl font-bold mb-2 text-green-300">Phase 1: Foundation (August 2025) ✅</h3>
+                        <p class="text-gray-300 mb-4">Grundlegende App-Struktur und Core-Features - ABGESCHLOSSEN</p>
+                        <ul class="text-gray-400 space-y-1">
+                            <li>✅ Geo-Location Integration</li>
+                            <li>✅ Firebase Backend Setup</li>
+                            <li>✅ Basic Drop System</li>
+                            <li>✅ User Authentication</li>
+                            <li>✅ Interactive Map</li>
+                            <li>✅ GeoChat System</li>
+                            <li>✅ QR-Code Integration</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Phase 2 -->
+                <div class="flex items-start space-x-6">
+                    <div class="bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                        2
+                    </div>
+                    <div class="bg-gray-700 p-6 rounded-xl flex-1">
+                        <h3 class="text-xl font-bold mb-2 text-green-300">Phase 2: Blockchain Integration (September 2025) ✅</h3>
+                        <p class="text-gray-300 mb-4">Vollständige Blockchain-Integration und DeFi-Features - ABGESCHLOSSEN</p>
+                        <ul class="text-gray-400 space-y-1">
+                            <li>✅ tBNB Integration</li>
+                            <li>✅ MetaMask Wallet</li>
+                            <li>✅ PixelDrop Token</li>
+                            <li>✅ Smart Contracts</li>
+                            <li>✅ Trading System</li>
+                            <li>✅ Mining Machines</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Phase 3 -->
+                <div class="flex items-start space-x-6">
+                    <div class="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                        3
+                    </div>
+                    <div class="bg-gray-700 p-6 rounded-xl flex-1">
+                        <h3 class="text-xl font-bold mb-2 text-blue-300">Phase 3: Advanced Features (September 2025) 🚧</h3>
+                        <p class="text-gray-300 mb-4">Erweiterte Features und Optimierungen - IN ENTWICKLUNG</p>
+                        <ul class="text-gray-400 space-y-1">
+                            <li>🔄 Dev Area Erweiterung</li>
+                            <li>🔄 Drop Nummerierung</li>
+                            <li>🔄 Konsistenz-Checks</li>
+                            <li>🔄 Admin-Tools</li>
+                            <li>🔄 Performance Optimierung</li>
+                            <li>🔄 Mobile Responsiveness</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Phase 4 -->
+                <div class="flex items-start space-x-6">
+                    <div class="bg-yellow-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                        4
+                    </div>
+                    <div class="bg-gray-700 p-6 rounded-xl flex-1">
+                        <h3 class="text-xl font-bold mb-2 text-yellow-300">Phase 4: Future Development (Q4 2025) ⏳</h3>
+                        <p class="text-gray-300 mb-4">Geplante Entwicklung und Verbesserungen</p>
+                        <ul class="text-gray-400 space-y-1">
+                            <li>⏳ Enhanced Security Features</li>
+                            <li>⏳ Advanced Trading Analytics</li>
+                            <li>⏳ Multi-Chain Support</li>
+                            <li>⏳ Improved UX/UI</li>
+                            <li>⏳ Performance Monitoring</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Phase 5 -->
+                <div class="flex items-start space-x-6">
+                    <div class="bg-purple-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                        5
+                    </div>
+                    <div class="bg-gray-700 p-6 rounded-xl flex-1">
+                        <h3 class="text-xl font-bold mb-2 text-purple-300">Phase 5: Future Vision (2026) 🔮</h3>
+                        <p class="text-gray-300 mb-4">Zukunftsweisende Features und Innovationen</p>
+                        <ul class="text-gray-400 space-y-1">
+                            <li>✅ AWS Rekognition KI-Integration</li>
+                            <li>✅ Gesichtserkennung & Objekterkennung</li>
+                            <li>✅ Colloseum Community-System</li>
+                            <li>⏳ Advanced Analytics</li>
+                            <li>⏳ Predictive Drops</li>
+                            <li>⏳ AR/VR Integration</li>
+                            <li>⏳ Cross-Platform Expansion</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Current Status 2025 -->
+    <section class="py-16 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-purple-400">Aktueller Status 2025</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-gray-800 p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-purple-300">Live Features (Stand: September 2025)</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-gray-300">Vollständige Blockchain-Integration (tBNB)</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-gray-300">PixelDrop Token Trading System</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-gray-300">4 Mining Machine Typen</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-300">Dev Area mit Admin-Tools (in Entwicklung)</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-gray-300">Progressive Web App (PWA)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-purple-300">Technische Highlights</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-300">Ethers.js v6 Integration</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-300">Smart Contract Interaktionen</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-300">Firebase Real-time Database</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-300">Mobile-First Design</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-300">Offline-Fähigkeit</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technical Architecture -->
+    <section class="py-16 bg-gray-800 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-purple-400">Technische Architektur</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-gray-800 p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-purple-300">System-Architektur</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-gray-300">Progressive Web App (PWA)</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-300">Firebase Backend Services</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                            <span class="text-gray-300">Blockchain Integration</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span class="text-gray-300">AWS Rekognition KI-Services</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-purple-300">Sicherheit & Datenschutz</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-gray-300">End-to-End Verschlüsselung</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-300">GDPR Compliance</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                            <span class="text-gray-300">Secure Authentication</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span class="text-gray-300">Privacy by Design</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 py-8">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex justify-center items-center space-x-4 mb-4">
+                <img src="images/logo.png" alt="GeoDrop Logo" class="h-8 w-8">
+                <span class="text-xl font-bold text-purple-400">GeoDrop</span>
+            </div>
+            <p class="text-gray-400 mb-4">
+                Revolutionäre Geo-Location App mit Blockchain-Integration
+            </p>
+            <div class="flex justify-center space-x-6 text-sm text-gray-500">
+                <a href="index.html" class="hover:text-white transition-colors">Zur App</a>
+                <a href="#executive-summary" class="hover:text-white transition-colors">Whitepaper</a>
+                <a href="mailto:GeoDrop@proton.me" class="hover:text-white transition-colors">Kontakt</a>
+            </div>
+            <p class="text-gray-600 text-xs mt-4">
+                © 2025 GeoDrop. Alle Rechte vorbehalten.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section-fade').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Add some interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🌍 GeoDrop Whitepaper loaded successfully!');
+            
+            // Add hover effects to feature cards
+            document.querySelectorAll('.bg-gray-800').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.transition = 'transform 0.3s ease';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    
+
+// SECURITY FIX: NO WALLET CODE IN WHITEPAPER!
+// Whitepaper should NOT contain any wallet connection code
+console.log('🔒 SECURITY: Whitepaper has no wallet connection code');
+// NO WALLET CODE IN WHITEPAPER - SECURITY FIXED!
+
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

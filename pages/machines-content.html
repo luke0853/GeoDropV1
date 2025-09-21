@@ -1,0 +1,91 @@
+<div class="max-w-6xl mx-auto p-6">
+    <h2 class="text-3xl font-bold text-white mb-8">⛏️ Mining Machines</h2>
+    
+    <!-- Wallet Verbindung Sektion -->
+    <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-6 mb-8">
+        <h4 class="text-xl font-semibold text-white mb-4">💳 Wallet Verbindung</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div class="bg-gray-800 bg-opacity-50 rounded-lg p-4">
+                <div class="text-sm text-gray-300 mb-2">Status:</div>
+                <div id="wallet-status" class="text-lg font-semibold text-yellow-400">Nicht verbunden</div>
+            </div>
+            <div class="bg-gray-800 bg-opacity-50 rounded-lg p-4">
+                <div class="text-sm text-gray-300 mb-2">Wallet Adresse:</div>
+                <div id="wallet-address" class="text-sm font-mono text-gray-300">Nicht verbunden</div>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-3 justify-center">
+            <button id="connect-wallet-btn" onclick="connectWallet()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold">
+                🔗 Wallet verbinden
+            </button>
+            <button id="connect-wallet-mobile-btn" onclick="connectWalletMobile()" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold hidden">
+                📱 MetaMask Mobile
+            </button>
+            <button id="disconnect-wallet-btn" onclick="disconnectWallet()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold hidden">
+                ❌ Wallet trennen
+            </button>
+            <button onclick="testWalletConnection()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                🧪 Wallet Test
+            </button>
+            <button onclick="updateTbnbDisplays()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold">
+                💰 Balance aktualisieren
+            </button>
+        </div>
+        
+        <!-- Mobile Wallet Instructions -->
+        <div id="mobile-wallet-instructions" class="mt-4 p-4 bg-yellow-600 bg-opacity-20 rounded-lg border border-yellow-500 hidden">
+            <h5 class="text-yellow-400 font-semibold mb-2">📱 Mobile Wallet Anleitung:</h5>
+            <ol class="text-sm text-yellow-200 space-y-1">
+                <li>1. Öffne die MetaMask App auf deinem Handy</li>
+                <li>2. Tippe auf "Browser" oder "DApp Browser"</li>
+                <li>3. Gehe zu dieser Website: <span class="font-mono text-xs break-all">${window.location.href}</span></li>
+                <li>4. Verbinde dein Wallet in der MetaMask App</li>
+            </ol>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="machines-container">
+        <!-- Mining machines will be loaded here -->
+    </div>
+    
+    <!-- Mining Stats -->
+    <div class="bg-gray-700 rounded-lg p-6 mt-8">
+        <h3 class="text-xl font-semibold text-white mb-4">📊 Mining Statistiken</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="text-center p-4 bg-gray-600 rounded-lg">
+                <div class="text-2xl font-bold text-purple-400" id="mining-bonus">0%</div>
+                <div class="text-sm text-gray-400">Boost in %</div>
+            </div>
+            <div class="text-center p-4 bg-gray-600 rounded-lg">
+                <div class="text-2xl font-bold text-yellow-400" id="mining-tbnb">0.00</div>
+                <div class="text-sm text-gray-400">Wallet tBNB</div>
+            </div>
+            <div class="text-center p-4 bg-gray-600 rounded-lg cursor-pointer hover:bg-gray-500 transition-colors" onclick="showMiningMachinesPopup()">
+                <div class="text-2xl font-bold text-blue-400" id="mining-machines-count">0</div>
+                <div class="text-sm text-gray-400">Gekaufte Pakete</div>
+                <div class="text-sm font-bold text-yellow-400 mt-2 p-2 bg-gray-700 rounded" id="mining-expiry-countdown">Verfällt nie</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mining Machines Popup -->
+<div id="mining-machines-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+    <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-white">⛏️ Mining Machines Übersicht</h3>
+            <button onclick="closeMiningMachinesPopup()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        
+        <div id="mining-machines-list" class="space-y-3">
+            <!-- Mining machines will be loaded here -->
+        </div>
+        
+        <div class="mt-6 text-center">
+            <button onclick="closeMiningMachinesPopup()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
+                Schließen
+            </button>
+        </div>
+    </div>
+</div>
+

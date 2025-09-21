@@ -1,0 +1,24 @@
+mutation SeedData @auth(level: USER) {
+  geoDrop_insertMany(data: [
+    {
+      name: "Example GeoDrop 1",
+      description: "This is an example GeoDrop.",
+      latitude: 37.7749,
+      longitude: -122.4194,
+      imageURL: "https://example.com/image1.jpg",
+      hint: "Look for a landmark.",
+      difficulty: 1,
+      createdAt: "2024-01-01T00:00:00Z"
+    },
+    {
+      name: "Example GeoDrop 2",
+      description: "Another example GeoDrop.",
+      latitude: 34.0522,
+      longitude: -118.2437,
+      imageURL: "https://example.com/image2.jpg",
+      hint: "Near the water.",
+      difficulty: 2,
+      createdAt: "2024-01-02T00:00:00Z"
+    }
+  ])
+}

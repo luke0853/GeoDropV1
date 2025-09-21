@@ -1,0 +1,12 @@
+specVersion: "v1"
+serviceId: "geodropv1"
+location: "europe-west2"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        instanceId: "geodropv1-fdc"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./example"]

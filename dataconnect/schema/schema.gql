@@ -1,0 +1,45 @@
+type User @table {
+  username: String!
+  email: String!
+  createdAt: Timestamp!
+  cryptocurrencyWalletAddress: String
+  profilePictureUrl: String
+}
+
+type GeoDrop @table {
+  name: String!
+  latitude: Float!
+  longitude: Float!
+  imageURL: String!
+  difficulty: Int!
+  createdAt: Timestamp!
+  description: String
+  hint: String
+}
+
+type Collection @table(key: ["user", "geoDrop"]) {
+  user: User!
+  geoDrop: GeoDrop!
+  collectedAt: Timestamp!
+}
+
+type ImageSet @table {
+  name: String!
+  rewardAmount: Float!
+  cryptocurrencyType: String!
+  createdAt: Timestamp!
+  description: String
+}
+
+type ImageSetItem @table(key: ["imageSet", "geoDrop"]) {
+  imageSet: ImageSet!
+  geoDrop: GeoDrop!
+  positionInSet: Int!
+}
+
+type RewardClaim @table(key: ["user", "imageSet"]) {
+  user: User!
+  imageSet: ImageSet!
+  claimedAt: Timestamp!
+  transactionId: String!
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mehr - GeoDrop</title>
+</head>
+<body>
+    <main class="container mx-auto px-4 py-8">
+        <h2 class="text-3xl font-bold text-white mb-8">
+            <span style="background: rgba(0, 0, 0, 0.7); padding: 8px 12px; border-radius: 8px; display: inline-block;">⚙️ Mehr</span>
+        </h2>
+        
+        <!-- Mehr Tabs -->
+        <div class="mb-8">
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button class="mehr-tab-btn active px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" data-tab="dashboard" onclick="showMehrTab('dashboard')">
+                    🏠 Dashboard
+                </button>
+                <button class="mehr-tab-btn px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors" data-tab="profile" onclick="showMehrTab('profile')">
+                    👤 Profil
+                </button>
+                <button class="mehr-tab-btn px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors" data-tab="settings" onclick="showMehrTab('settings')">
+                    ⚙️ Einstellungen
+                </button>
+                <button class="mehr-tab-btn px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors" data-tab="stats" onclick="showMehrTab('stats')">
+                    📊 Statistiken
+                </button>
+                <button class="mehr-tab-btn px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors" data-tab="leitfaden" onclick="showMehrTab('leitfaden')">
+                    📖 Leitfaden
+                </button>
+                <button class="mehr-tab-btn px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors" data-tab="impressum" onclick="showMehrTab('impressum')">
+                    ℹ️ Impressum
+                </button>
+            </div>
+            
+            <!-- Tab Content -->
+            <div id="mehr-tab-content">
+                <!-- Dashboard content will be loaded here -->
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
+

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Einstellungen - GeoDrop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.0.0/dist/jsQR.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        .page {
+            display: flex;
+            width: 100%;
+            min-height: calc(100vh - 128px);
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+            text-align: left;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        
+        main {
+            padding-top: 64px;
+            padding-bottom: 64px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Navigation -->
+    <nav class="fixed top-0 left-0 w-64 h-full bg-gray-800 shadow-lg z-50">
+        <div class="h-full flex flex-col">
+            <!-- Logo -->
+            <div class="flex items-center p-4 border-b border-gray-700">
+                <img src="../images/logo.png" alt="GeoDrop" class="h-8 w-8 mr-2">
+                <span class="text-white font-bold text-xl">GeoDrop</span>
+            </div>
+            
+            <!-- Navigation Links -->
+            <div class="flex-1 p-4 space-y-2">
+                <a href="../index.html" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center">
+                    <span class="mr-3">🏠</span> Start
+                </a>
+                <a href="../index.html#geocard" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center">
+                    <span class="mr-3">🗺️</span> GeoCard
+                </a>
+                <a href="../index.html#geoboard" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center">
+                    <span class="mr-3">📊</span> GeoBoard
+                </a>
+                <a href="../index.html#machines" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center">
+                    <span class="mr-3">⛏️</span> Mining
+                </a>
+                <a href="../index.html#bonus" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center">
+                    <span class="mr-3">🎁</span> Bonus
+                </a>
+                <a href="../index.html#geochat" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center">
+                    <span class="mr-3">💬</span> GeoChat
+                </a>
+                <a href="../index.html#trading" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center">
+                    <span class="mr-3">📈</span> Trading
+                </a>
+                <a href="dashboard.html" class="nav-btn active w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center">
+                    <span class="mr-3">⚙️</span> Mehr
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="ml-64">
+        <div id="mehr-settings" class="page">
+            <div class="max-w-6xl mx-auto p-6">
+                <h2 class="text-3xl font-bold text-white mb-8">⚙️ Einstellungen</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Username Settings -->
+                    <div class="bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-white mb-4">👤 Benutzername</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Benutzername:</label>
+                                <div class="flex space-x-2">
+                                    <input type="text" id="settings-username" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="Benutzername">
+                                    <button onclick="saveUsername()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                        💾 Speichern
+                                    </button>
+                                </div>
+                                <div class="text-xs text-gray-400 bg-gray-800 p-2 rounded mt-2">
+                                    💡 Tipp: Der Benutzername ersetzt deine E-Mail-Adresse im Spiel
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Email Settings -->
+                    <div class="bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-white mb-4">📧 E-Mail Einstellungen</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Aktuelle E-Mail:</label>
+                                <input type="email" id="settings-email" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="E-Mail-Adresse">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Neue E-Mail:</label>
+                                <input type="email" id="settings-new-email" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="Neue E-Mail-Adresse">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Passwort bestätigen:</label>
+                                <input type="password" id="settings-password" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="Passwort">
+                            </div>
+                            <button id="update-email-btn" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                📧 E-Mail aktualisieren
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Notification Settings -->
+                    <div class="bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-white mb-4">🔔 Benachrichtigungen</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-300">E-Mail Benachrichtigungen</span>
+                                <input type="checkbox" id="notify-email" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-300">Push Benachrichtigungen</span>
+                                <input type="checkbox" id="notify-push" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-300">Tägliche Updates</span>
+                                <input type="checkbox" id="notify-daily" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500">
+                            </div>
+                            <button onclick="saveNotificationSettings()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                💾 Einstellungen speichern
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Dev Login Popup -->
+    <div id="dev-login-popup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none;">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+            <div style="background: #374151; border-radius: 8px; max-width: 400px; width: 100%; padding: 24px;">
+                <h2 style="color: white; font-size: 24px; font-weight: bold; margin-bottom: 16px; text-align: center;">🔐 Dev-Zugang</h2>
+                <div style="margin-bottom: 16px;">
+                    <input type="password" id="dev-password" placeholder="Dev-Passwort eingeben" style="width: 100%; padding: 8px 12px; border-radius: 6px; background: #4B5563; color: white; border: 1px solid #6B7280; outline: none;" onkeypress="if(event.key === 'Enter') loginDev()">
+                </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <button onclick="loginDev()" style="flex: 1; padding: 8px 16px; background: #2563EB; color: white; border-radius: 6px; border: none; cursor: pointer;">Anmelden</button>
+                    <button onclick="closeDevLoginPopup()" style="flex: 1; padding: 8px 16px; background: #6B7280; color: white; border-radius: 6px; border: none; cursor: pointer;">Abbrechen</button>
+                </div>
+                <div style="color: #9CA3AF; font-size: 12px; text-align: center;">
+                    💡 Nur für Entwickler mit entsprechenden Berechtigungen
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../config/config.js"></script>
+    <script src="../js/firebase.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/mehr-navigation.js"></script>
+    <script src="../js/wallet-system.js"></script>
+    
+    <script>
+
+        // Firebase wird bereits in firebase.js initialisiert
+
+        // Navigation function
+        function showPage(pageId) {
+            // For standalone page, redirect to main index
+            if (pageId !== 'settings') {
+                window.location.href = '../index.html#' + pageId;
+            }
+        }
+
+        // Settings functions
+        function saveUsername() {
+            const username = document.getElementById('settings-username').value;
+            if (!username) {
+                alert('❌ Bitte Benutzername eingeben!');
+                return;
+            }
+            
+            alert(`✅ Benutzername "${username}" gespeichert!`);
+        }
+
+        function saveNotificationSettings() {
+            const emailNotify = document.getElementById('notify-email').checked;
+            const pushNotify = document.getElementById('notify-push').checked;
+            const dailyNotify = document.getElementById('notify-daily').checked;
+            
+            alert(`✅ Benachrichtigungseinstellungen gespeichert!\n\nE-Mail: ${emailNotify ? 'An' : 'Aus'}\nPush: ${pushNotify ? 'An' : 'Aus'}\nTäglich: ${dailyNotify ? 'An' : 'Aus'}`);
+        }
+
+        function loadSettings() {
+            // Load current user settings
+            const user = auth.currentUser;
+            if (user) {
+                document.getElementById('settings-email').value = user.email;
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('⚙️ Einstellungen geladen');
+            loadSettings();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+mutation CreateNewUser @auth(level: USER) {
+  user_insert(data: {
+    email: "newuser@example.com",
+    username: "NewUser"
+  })
+}
+
+query ListAllGeoDrops @auth(level: PUBLIC) {
+  geoDrops {
+    id
+    name
+    latitude
+    longitude
+  }
+}
+
+mutation CollectGeoDrop($geoDropId: UUID!) @auth(level: USER) {
+  collection_insert(data: {
+    userId_expr: "auth.uid",
+    geoDropId: $geoDropId,
+    collectedAt_expr: "request.time"
+  })
+}
+
+query ListMyCollections @auth(level: USER) {
+  collections(where: {userId: {eq_expr: "auth.uid"}}) {
+    geoDrop {
+      id
+      name
+      latitude
+      longitude
+    }
+    collectedAt
+  }
+}

@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoDrop - Gesundheitsförderung durch Gamification | Whitepaper für Krankenkassen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .health-bg {
+            background-image: url('images/ChatGPT Image 29. Aug. 2025, 08_34_24.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .health-overlay {
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .glass-effect:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        .section-fade {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        .section-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .health-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        .stats-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-gray-800 bg-opacity-90 backdrop-blur-md z-50 shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <img src="images/logo3.1.png" alt="GeoDrop Logo" class="h-16 w-24">
+                    <h1 class="text-xl font-bold text-green-400">GeoDrop - Jugendförderung</h1>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#executive-summary" class="text-gray-300 hover:text-white transition-colors">Zusammenfassung</a>
+                    <a href="#jugendfoerderung" class="text-gray-300 hover:text-white transition-colors">Jugend</a>
+                    <a href="#gesundheitsaspekte" class="text-gray-300 hover:text-white transition-colors">Gesundheit</a>
+                    <a href="#studien" class="text-gray-300 hover:text-white transition-colors">Studien</a>
+                    <a href="#foerderung" class="text-gray-300 hover:text-white transition-colors">Förderung</a>
+                    <a href="index.html" class="bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">Zur App</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="health-bg pt-24 pb-16 relative">
+        <div class="health-overlay absolute inset-0"></div>
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-white to-green-200 bg-clip-text text-transparent">
+                GeoDrop
+            </h1>
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-green-300">
+                Jugendförderung durch innovative Technologie-Bildung
+            </h2>
+            <p class="text-xl md:text-2xl text-gray-200 mb-8 max-w-4xl mx-auto">
+                Eine revolutionäre Bildungs-App, die Jugendliche für Blockchain-Technologie, Programmierung, 
+                KI-Technologie und gesunde Bewegung begeistert - entwickelt für nachhaltige Jugendförderung 
+                mit AWS Rekognition Bildvalidierung
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <div class="glass-effect px-6 py-4 rounded-xl">
+                    <div class="text-2xl mb-2">👨‍💻</div>
+                    <div class="font-bold">Programmierung</div>
+                </div>
+                <div class="glass-effect px-6 py-4 rounded-xl">
+                    <div class="text-2xl mb-2">🔗</div>
+                    <div class="font-bold">Blockchain</div>
+                </div>
+                <div class="glass-effect px-6 py-4 rounded-xl">
+                    <div class="text-2xl mb-2">🤖</div>
+                    <div class="font-bold">KI-Technologie</div>
+                </div>
+                <div class="glass-effect px-6 py-4 rounded-xl">
+                    <div class="text-2xl mb-2">🚶‍♂️</div>
+                    <div class="font-bold">Bewegung</div>
+                </div>
+                <div class="glass-effect px-6 py-4 rounded-xl">
+                    <div class="text-2xl mb-2">🎓</div>
+                    <div class="font-bold">Bildung</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Executive Summary -->
+    <section id="executive-summary" class="py-16 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-green-400">Executive Summary</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="health-card p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-green-300">Bildungsvision</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        GeoDrop revolutioniert die Jugendbildung durch innovative Technologie-Gamification. 
+                        Die App motiviert Jugendliche dazu, Programmierung zu lernen, Blockchain-Technologie 
+                        zu verstehen und sich dabei gesund zu bewegen - alles durch spielerische Elemente, 
+                        nachhaltige Lernsysteme und fortschrittliche KI-Technologie für Bildvalidierung.
+                    </p>
+                </div>
+                <div class="health-card p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-green-300">Gesellschaftlicher Nutzen</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        Durch die Kombination von GPS-Technologie, Blockchain-Bildung, 
+                        AWS Rekognition KI-Technologie und Bewegungsförderung schaffen wir eine 
+                        Plattform, die nicht nur die digitale Bildung fördert, sondern auch 
+                        körperliche Gesundheit und gesellschaftliche Teilhabe stärkt.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Jugendförderung & Bildung -->
+    <section id="jugendfoerderung" class="py-16 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-green-400">Jugendförderung & Digitale Bildung</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Blockchain-Bildung -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🔗</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">Blockchain-Bildung</h3>
+                    <p class="text-gray-300 mb-4">
+                        Jugendliche lernen spielerisch die Grundlagen der Blockchain-Technologie 
+                        und verstehen deren gesellschaftliche Bedeutung.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Smart Contracts verstehen</li>
+                        <li>• Dezentralisierung lernen</li>
+                        <li>• Kryptographie-Grundlagen</li>
+                        <li>• Nachhaltige Technologie</li>
+                    </ul>
+                </div>
+
+                <!-- Programmierförderung -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">👨‍💻</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">Programmierförderung</h3>
+                    <p class="text-gray-300 mb-4">
+                        Praktische Programmierkenntnisse durch interaktive Challenges 
+                        und real-world Anwendungen.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• JavaScript Grundlagen</li>
+                        <li>• Web3-Entwicklung</li>
+                        <li>• API-Integration</li>
+                        <li>• Open Source Beiträge</li>
+                    </ul>
+                </div>
+
+                <!-- KI-Technologie -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🤖</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">KI-Technologie</h3>
+                    <p class="text-gray-300 mb-4">
+                        Praktische Erfahrung mit AWS Rekognition für Bildvalidierung, 
+                        Gesichtserkennung und Objekterkennung in realen Anwendungen.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• AWS Rekognition Integration</li>
+                        <li>• Maschinelles Lernen</li>
+                        <li>• Bildvalidierung & -analyse</li>
+                        <li>• KI-Ethik & Verantwortung</li>
+                    </ul>
+                </div>
+
+                <!-- Digitale Kompetenzen -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">💻</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">Digitale Kompetenzen</h3>
+                    <p class="text-gray-300 mb-4">
+                        Förderung von Medienkompetenz, Datenschutzbewusstsein 
+                        und verantwortungsvollem Umgang mit Technologie.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Datenschutz & DSGVO</li>
+                        <li>• Digitale Ethik</li>
+                        <li>• Cybersecurity</li>
+                        <li>• Nachhaltige IT</li>
+                    </ul>
+                </div>
+
+                <!-- Berufsvorbereitung -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🎯</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">Berufsvorbereitung</h3>
+                    <p class="text-gray-300 mb-4">
+                        Vorbereitung auf zukunftssichere Berufe in der 
+                        Digitalwirtschaft und Blockchain-Branche.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• IT-Berufe erkunden</li>
+                        <li>• Praktische Projekte</li>
+                        <li>• Portfolio-Entwicklung</li>
+                        <li>• Mentoring-Programme</li>
+                    </ul>
+                </div>
+
+                <!-- Soziale Kompetenzen -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🤝</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">Soziale Kompetenzen</h3>
+                    <p class="text-gray-300 mb-4">
+                        Teamarbeit, Kommunikation und Führungsqualitäten 
+                        durch kollaborative Projekte entwickeln.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Team-Challenges</li>
+                        <li>• Peer-Learning</li>
+                        <li>• Community-Management</li>
+                        <li>• Konfliktlösung</li>
+                    </ul>
+                </div>
+
+                <!-- Nachhaltigkeit -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🌱</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">Nachhaltigkeit</h3>
+                    <p class="text-gray-300 mb-4">
+                        Bewusstsein für nachhaltige Technologie und 
+                        umweltfreundliche Digitalisierung schaffen.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Green IT Konzepte</li>
+                        <li>• Energieeffizienz</li>
+                        <li>• E-Waste Bewusstsein</li>
+                        <li>• Nachhaltige Apps</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gesundheitsaspekte -->
+    <section id="gesundheitsaspekte" class="py-16 bg-gray-800 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-green-400">Gesundheitsfördernde Aspekte</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Körperliche Aktivität -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🚶‍♂️</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">Körperliche Aktivität</h3>
+                    <p class="text-gray-300 mb-4">
+                        Nutzer werden motiviert, täglich 10.000+ Schritte zu gehen, um GeoDrops 
+                        zu sammeln und Belohnungen zu erhalten.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Tägliche Bewegungsziele</li>
+                        <li>• GPS-basierte Aktivitätsverfolgung</li>
+                        <li>• Belohnungen für erreichte Ziele</li>
+                        <li>• Fortschritts-Tracking</li>
+                    </ul>
+                </div>
+
+                <!-- Outdoor-Aktivitäten -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🌲</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">Outdoor-Aktivitäten</h3>
+                    <p class="text-gray-300 mb-4">
+                        Förderung von Aktivitäten im Freien, die Vitamin D-Produktion und 
+                        mentale Gesundheit verbessern.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Natur-Erkundung</li>
+                        <li>• Frischluft-Aktivitäten</li>
+                        <li>• Sonnenlicht-Exposition</li>
+                        <li>• Stress-Reduktion</li>
+                    </ul>
+                </div>
+
+                <!-- Soziale Interaktion -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">👥</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">Soziale Interaktion</h3>
+                    <p class="text-gray-300 mb-4">
+                        GeoChat und Community-Features fördern soziale Kontakte und 
+                        reduzieren Einsamkeit.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Standortbasierte Chats</li>
+                        <li>• Community-Events</li>
+                        <li>• Team-Challenges</li>
+                        <li>• Freundschafts-System</li>
+                    </ul>
+                </div>
+
+                <!-- Mentale Gesundheit -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🧠</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">Mentale Gesundheit</h3>
+                    <p class="text-gray-300 mb-4">
+                        Gamification-Elemente und Erfolgserlebnisse steigern das 
+                        Selbstwertgefühl und die Motivation.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Achievement-System</li>
+                        <li>• Fortschritts-Visualisierung</li>
+                        <li>• Positive Verstärkung</li>
+                        <li>• Zielsetzung und -erreichung</li>
+                    </ul>
+                </div>
+
+                <!-- Präventive Medizin -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🛡️</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">Präventive Medizin</h3>
+                    <p class="text-gray-300 mb-4">
+                        Regelmäßige Bewegung beugt Herz-Kreislauf-Erkrankungen, 
+                        Diabetes und Depressionen vor.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Herz-Kreislauf-Schutz</li>
+                        <li>• Diabetes-Prävention</li>
+                        <li>• Gewichtsmanagement</li>
+                        <li>• Immunsystem-Stärkung</li>
+                    </ul>
+                </div>
+
+                <!-- Nachhaltigkeit -->
+                <div class="health-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🌱</div>
+                    <h3 class="text-xl font-bold mb-3 text-green-300">Nachhaltigkeit</h3>
+                    <p class="text-gray-300 mb-4">
+                        Förderung umweltbewusster Mobilität und nachhaltiger 
+                        Lebensstile.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• CO2-Reduktion</li>
+                        <li>• Nachhaltige Mobilität</li>
+                        <li>• Umweltbewusstsein</li>
+                        <li>• Green Challenges</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wissenschaftliche Studien -->
+    <section id="studien" class="py-16 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-green-400">Wissenschaftliche Grundlagen</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="stats-card p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-blue-300">Gamification & Gesundheit</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-gray-300">WHO empfiehlt 150 Min. moderate Aktivität/Woche</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-300">Gamification steigert Compliance um 40%</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                            <span class="text-gray-300">Outdoor-Aktivitäten reduzieren Depression um 30%</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span class="text-gray-300">Soziale Interaktion verlängert Lebenserwartung</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-card p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-blue-300">Kosten-Nutzen-Analyse</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-gray-300">1€ Prävention = 4€ Behandlung gespart</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-300">Bewegung reduziert Krankenkassenkosten um 25%</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                            <span class="text-gray-300">Digitale Gesundheits-Apps: 15% Effizienzsteigerung</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span class="text-gray-300">ROI von Gesundheitsförderung: 300%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Förderungsmöglichkeiten -->
+    <section id="foerderung" class="py-16 bg-gray-800 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-green-400">Förderungsmöglichkeiten</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="health-card p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-green-300">Krankenkassen-Förderung</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-gray-700 rounded-lg">
+                            <h4 class="text-lg font-semibold text-green-400">§ 20 SGB V - Gesundheitsförderung</h4>
+                            <p class="text-gray-300 text-sm">Förderung von Maßnahmen zur Gesundheitsförderung und Prävention</p>
+                        </div>
+                        <div class="p-4 bg-gray-700 rounded-lg">
+                            <h4 class="text-lg font-semibold text-green-400">Bonusprogramme</h4>
+                            <p class="text-gray-300 text-sm">Integration in bestehende Bonusprogramme für gesundheitsbewusstes Verhalten</p>
+                        </div>
+                        <div class="p-4 bg-gray-700 rounded-lg">
+                            <h4 class="text-lg font-semibold text-green-400">Präventionskurse</h4>
+                            <p class="text-gray-300 text-sm">Anerkennung als zertifizierter Präventionskurs</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="health-card p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-green-300">Weitere Förderquellen</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-gray-700 rounded-lg">
+                            <h4 class="text-lg font-semibold text-blue-400">EU-Förderung</h4>
+                            <p class="text-gray-300 text-sm">Horizon Europe - Digital Health & Wellbeing</p>
+                        </div>
+                        <div class="p-4 bg-gray-700 rounded-lg">
+                            <h4 class="text-lg font-semibold text-purple-400">Österreichische Förderung</h4>
+                            <p class="text-gray-300 text-sm">FFG - Digitale Gesundheitsanwendungen, Jugendförderung</p>
+                        </div>
+                        <div class="p-4 bg-gray-700 rounded-lg">
+                            <h4 class="text-lg font-semibold text-yellow-400">Stiftungen</h4>
+                            <p class="text-gray-300 text-sm">Austrian Research Promotion Agency, Jugendstiftung</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technische Features -->
+    <section class="py-16 bg-gray-800 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-green-400">Technische Innovationen</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- AWS Rekognition -->
+                <div class="stats-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🤖</div>
+                    <h3 class="text-xl font-bold mb-3 text-blue-300">AWS Rekognition KI</h3>
+                    <p class="text-gray-300 mb-4">
+                        Fortschrittliche Bildvalidierung mit Gesichtserkennung, 
+                        Objekterkennung und Bildvergleich für zuverlässige GeoDrop-Validierung.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Gesichtserkennung (Hand-vor-Gesicht-Detection)</li>
+                        <li>• Objekterkennung (Autos, Gebäude, Landschaften)</li>
+                        <li>• Referenzbild-Vergleich (60% Similarity)</li>
+                        <li>• 5.000 kostenlose Validierungen/Monat</li>
+                    </ul>
+                </div>
+
+                <!-- Blockchain Integration -->
+                <div class="stats-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🔗</div>
+                    <h3 class="text-xl font-bold mb-3 text-blue-300">Blockchain-Technologie</h3>
+                    <p class="text-gray-300 mb-4">
+                        Dezentrale Belohnungssysteme mit PixelDrops-Token 
+                        für nachhaltige Motivation und Bildung.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Smart Contract Integration</li>
+                        <li>• Dezentrale Belohnungen</li>
+                        <li>• Transparente Transaktionen</li>
+                        <li>• Nachhaltige Tokenomics</li>
+                    </ul>
+                </div>
+
+                <!-- GPS & Geolocation -->
+                <div class="stats-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">📍</div>
+                    <h3 class="text-xl font-bold mb-3 text-blue-300">GPS-Technologie</h3>
+                    <p class="text-gray-300 mb-4">
+                        Präzise Standortbestimmung mit 500m Claim-Radius 
+                        für realistische Bewegungsanreize.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• 500m Claim-Radius</li>
+                        <li>• Real-time GPS-Tracking</li>
+                        <li>• Dev-Mode Test-Koordinaten</li>
+                        <li>• Vienna-Cache-Detection</li>
+                    </ul>
+                </div>
+
+                <!-- Colloseum System -->
+                <div class="stats-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🏛️</div>
+                    <h3 class="text-xl font-bold mb-3 text-blue-300">Colloseum-System</h3>
+                    <p class="text-gray-300 mb-4">
+                        Community-driven Bildbewertung mit wöchentlichen 
+                        Belohnungen für die besten Fotos.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• 3 Nominierungen/Tag (5 PixelDrops)</li>
+                        <li>• 3 Likes/Tag</li>
+                        <li>• Wöchentliche Belohnungen</li>
+                        <li>• Top 5: 50, 25, 12, 6, 3 PixelDrops</li>
+                    </ul>
+                </div>
+
+                <!-- Firebase Integration -->
+                <div class="stats-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">🔥</div>
+                    <h3 class="text-xl font-bold mb-3 text-blue-300">Firebase Backend</h3>
+                    <p class="text-gray-300 mb-4">
+                        Skalierbare Cloud-Infrastruktur mit Firestore, 
+                        Storage und Authentication.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Firestore NoSQL Database</li>
+                        <li>• Firebase Storage</li>
+                        <li>• Firebase Authentication</li>
+                        <li>• Real-time Synchronisation</li>
+                    </ul>
+                </div>
+
+                <!-- PWA Technology -->
+                <div class="stats-card p-6 rounded-xl">
+                    <div class="text-3xl mb-4">📱</div>
+                    <h3 class="text-xl font-bold mb-3 text-blue-300">PWA Technology</h3>
+                    <p class="text-gray-300 mb-4">
+                        Progressive Web App mit Offline-Funktionalität 
+                        und nativer App-Erfahrung.
+                    </p>
+                    <ul class="text-sm text-gray-400 space-y-1">
+                        <li>• Offline-Funktionalität</li>
+                        <li>• Push-Notifications</li>
+                        <li>• App-Installation</li>
+                        <li>• Cross-Platform</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Implementierungsplan -->
+    <section class="py-16 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-green-400">Implementierungsplan</h2>
+            <div class="space-y-8">
+                <!-- Phase 1 -->
+                <div class="flex items-start space-x-6">
+                    <div class="bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                        1
+                    </div>
+                    <div class="health-card p-6 rounded-xl flex-1">
+                        <h3 class="text-xl font-bold mb-2 text-green-300">Phase 1: Pilotprojekt (3 Monate)</h3>
+                        <p class="text-gray-300 mb-4">Kleinskalige Einführung mit 100-500 Teilnehmern</p>
+                        <ul class="text-gray-400 space-y-1">
+                            <li>• Kooperation mit lokalen Krankenkassen</li>
+                            <li>• AWS Rekognition KI-Integration</li>
+                            <li>• Gesundheitsdaten-Erfassung (anonymisiert)</li>
+                            <li>• Wirksamkeitsstudie</li>
+                            <li>• Feedback-Integration</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Phase 2 -->
+                <div class="flex items-start space-x-6">
+                    <div class="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                        2
+                    </div>
+                    <div class="health-card p-6 rounded-xl flex-1">
+                        <h3 class="text-xl font-bold mb-2 text-blue-300">Phase 2: Skalierung (6 Monate)</h3>
+                        <p class="text-gray-300 mb-4">Ausweitung auf 1.000-5.000 Teilnehmer</p>
+                        <ul class="text-gray-400 space-y-1">
+                            <li>• Multi-Krankenkassen-Integration</li>
+                            <li>• Erweiterte KI-Features (Colloseum-System)</li>
+                            <li>• Erweiterte Gesundheitsfeatures</li>
+                            <li>• Therapeuten-Dashboard</li>
+                            <li>• Zertifizierung als DiGA</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Phase 3 -->
+                <div class="flex items-start space-x-6">
+                    <div class="bg-purple-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                        3
+                    </div>
+                    <div class="health-card p-6 rounded-xl flex-1">
+                        <h3 class="text-xl font-bold mb-2 text-purple-300">Phase 3: Vollausbau (12 Monate)</h3>
+                        <p class="text-gray-300 mb-4">Bundesweite Verfügbarkeit</p>
+                        <ul class="text-gray-400 space-y-1">
+                            <li>• Integration in alle großen Krankenkassen</li>
+                            <li>• KI-basierte Personalisierung & Bildvalidierung</li>
+                            <li>• Telemedizin-Integration</li>
+                            <li>• Internationale Expansion</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ROI & Business Case -->
+    <section class="py-16 bg-gray-800 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-green-400">ROI & Business Case</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="stats-card p-6 rounded-xl text-center">
+                    <div class="text-4xl mb-4">💰</div>
+                    <h3 class="text-xl font-bold mb-3 text-blue-300">Kosteneinsparungen</h3>
+                    <p class="text-3xl font-bold text-green-400 mb-2">5-10%</p>
+                    <p class="text-gray-300 text-sm">Reduktion der Behandlungskosten durch Prävention</p>
+                </div>
+                <div class="stats-card p-6 rounded-xl text-center">
+                    <div class="text-4xl mb-4">📈</div>
+                    <h3 class="text-xl font-bold mb-3 text-blue-300">ROI</h3>
+                    <p class="text-3xl font-bold text-green-400 mb-2">75%</p>
+                    <p class="text-gray-300 text-sm">Return on Investment nach 2 Jahren</p>
+                </div>
+                <div class="stats-card p-6 rounded-xl text-center">
+                    <div class="text-4xl mb-4">🎯</div>
+                    <h3 class="text-xl font-bold mb-3 text-blue-300">Zielgruppe</h3>
+                    <p class="text-3xl font-bold text-green-400 mb-2">200K+</p>
+                    <p class="text-gray-300 text-sm">Jugendliche in Österreich (12-25 Jahre)</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Datenschutz & Compliance -->
+    <section class="py-16 section-fade">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-12 text-green-400">Datenschutz & Compliance</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="health-card p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-green-300">DSGVO-Konformität</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-gray-300">Anonymisierte Gesundheitsdaten</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-300">Opt-in Datensammlung</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                            <span class="text-gray-300">Löschung auf Anfrage</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span class="text-gray-300">Transparente Datennutzung</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="health-card p-8 rounded-xl">
+                    <h3 class="text-2xl font-bold mb-4 text-green-300">Geplante Zertifizierungen</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span class="text-gray-300">CE-Kennzeichnung (Medizinprodukt) - Geplant</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span class="text-gray-300">ISO 27001 (Informationssicherheit) - Geplant</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span class="text-gray-300">BfArM-Zulassung (DiGA) - Geplant</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span class="text-gray-300">Krankenkassen-Zertifizierung - Geplant</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="py-16 bg-gray-800 section-fade">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl font-bold mb-8 text-green-400">Gemeinsam für eine gesündere und digitalere Zukunft</h2>
+            <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                GeoDrop bietet eine einzigartige Möglichkeit, Jugendförderung, Gesundheitsförderung 
+                und digitale Bildung durch innovative Technologie zu revolutionieren. Lassen Sie uns 
+                gemeinsam die Gesundheit und Bildung der österreichischen Jugend verbessern.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="mailto:GeoDrop@proton.me" class="bg-green-600 px-8 py-4 rounded-lg hover:bg-green-700 transition-colors text-lg font-semibold">
+                    📧 Kontakt aufnehmen
+                </a>
+                <a href="index.html" class="bg-blue-600 px-8 py-4 rounded-lg hover:bg-blue-700 transition-colors text-lg font-semibold">
+                    🚀 App testen
+                </a>
+                <div class="text-center">
+                    <p class="text-sm text-gray-400 mb-2">
+                        <strong>⚠️ Vertraulich:</strong> Dieses Dokument ist ausschließlich für Evaluationszwecke bestimmt.
+                    </p>
+                    <button onclick="downloadPDF()" class="bg-purple-600 px-8 py-4 rounded-lg hover:bg-purple-700 transition-colors text-lg font-semibold">
+                        📄 PDF herunterladen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 py-8">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex justify-center items-center space-x-4 mb-4">
+                <img src="images/logo3.1.png" alt="GeoDrop Logo" class="h-20 w-28">
+                <span class="text-xl font-bold text-green-400">GeoDrop</span>
+            </div>
+            <p class="text-gray-400 mb-4">
+                Jugendförderung durch innovative Technologie-Bildung
+            </p>
+            <div class="flex justify-center space-x-6 text-sm text-gray-500">
+                <a href="index.html" class="hover:text-white transition-colors">Zur App</a>
+                <a href="#executive-summary" class="hover:text-white transition-colors">Whitepaper</a>
+                <a href="mailto:GeoDrop@proton.me" class="hover:text-white transition-colors">Kontakt</a>
+            </div>
+            <p class="text-gray-600 text-xs mt-4">
+                © 2025 GeoDrop. Alle Rechte vorbehalten. | Jugendförderung durch innovative Technologie-Bildung
+            </p>
+            <p class="text-gray-600 text-xs mt-2">
+                <strong>Urheberrecht:</strong> Inhalte und Konzepte dieses Whitepapers dürfen nur mit schriftlicher Zustimmung genutzt oder umgesetzt werden.
+            </p>
+            <p class="text-gray-600 text-xs mt-2">
+                <strong>Vertraulichkeit:</strong> Dieses Dokument ist vertraulich und ausschließlich für Evaluationszwecke bestimmt.
+            </p>
+            <p class="text-gray-600 text-xs mt-2">
+                <strong>Kooperation:</strong> Kooperationsanfragen bitte an <a href="mailto:GeoDrop@proton.me" class="text-green-400 hover:text-green-300">GeoDrop@proton.me</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section-fade').forEach(section => {
+            observer.observe(section);
+        });
+
+        // PDF Download Function
+        function downloadPDF() {
+            // In a real implementation, this would generate and download a PDF
+            alert('PDF-Download wird vorbereitet...\n\nFür eine vollständige PDF-Version kontaktieren Sie uns unter: GeoDrop@proton.me');
+        }
+
+        // Add some interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🌍 GeoDrop Gesundheits-Whitepaper loaded successfully!');
+            
+            // Add hover effects to health cards
+            document.querySelectorAll('.health-card, .stats-card').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.transition = 'transform 0.3s ease';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

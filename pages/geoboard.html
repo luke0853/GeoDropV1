@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoBoard - GeoDrop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="../config/config-secrets-public.js"></script>
+    <script src="../js/firebase.js"></script>
+    <script src="../js/colloseum.js"></script>
+    <script src="../js/colloseum-scheduler.js"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="max-w-6xl mx-auto p-6">
+        <h2 class="text-3xl font-bold text-white mb-8">
+            <span style="background: rgba(0, 0, 0, 0.7); padding: 8px 12px; border-radius: 8px; display: inline-block;">📊 GeoBoard</span>
+        </h2>
+        
+        <!-- Tab Navigation -->
+        <div class="mb-8">
+            <div class="flex space-x-2">
+                <button id="geoboard-tab" class="mehr-tab-btn active" data-tab="geoboard-content" onclick="switchToGeoBoard()">
+                    📊 GeoBoard
+                </button>
+                <button id="colloseum-tab" class="mehr-tab-btn" data-tab="colloseum-content" onclick="switchToColloseum()">
+                    🏛️ Colloseum
+                </button>
+                <button id="referrals-tab" class="mehr-tab-btn" data-tab="referrals-content" onclick="switchToReferrals()">
+                    👥 Referrals
+                </button>
+            </div>
+        </div>
+        
+        <!-- GeoBoard Content -->
+        <div id="geoboard-content" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Leaderboard -->
+            <div class="bg-gray-700 rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-white mb-4">🏆 Rangliste</h3>
+                <div id="leaderboard" class="space-y-3">
+                    <div class="text-center text-gray-400 p-4">Lade Rangliste...</div>
+                </div>
+            </div>
+            
+            <!-- Statistics -->
+            <div class="bg-gray-700 rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-white mb-4">📈 Statistiken</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                        <span class="text-gray-300">Gesamt-PixelDrop:</span>
+                        <span class="text-purple-400 font-bold" id="stats-coins">0</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                        <span class="text-gray-300">Gesamt-tBNB:</span>
+                        <span class="text-yellow-400 font-bold" id="stats-tbnb">0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                        <span class="text-gray-300">Gesamt-Drops:</span>
+                        <span class="text-blue-400 font-bold" id="stats-drops">0</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                        <span class="text-gray-300">Boost:</span>
+                        <span class="text-green-400 font-bold" id="stats-boost">1.0x</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                        <span class="text-gray-300">Gesamt-Pakete:</span>
+                        <span class="text-orange-400 font-bold" id="global-packages">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Colloseum Content -->
+        <div id="colloseum-content" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Nominierung -->
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">🎯 Nominierung</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300">Nominierungen heute:</span>
+                            <span class="text-blue-400 font-bold" id="nominations-today">0/3</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300">Belohnung pro Nominierung:</span>
+                            <span class="text-green-400 font-bold">5 PixelDrops</span>
+                        </div>
+                        <button id="nominate-btn" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" onclick="showNominationModal()">
+                            🎯 Bild nominieren
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Bewertung -->
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">⭐ Bewertung</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300">Bewertungen heute:</span>
+                            <span class="text-purple-400 font-bold" id="ratings-today">0/3</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300">Nächste Abrechnung:</span>
+                            <span class="text-yellow-400 font-bold" id="next-abrechnung">Sonntag 24:00</span>
+                        </div>
+                        <button id="rate-btn" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                            ⭐ Bilder bewerten
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Top 5 -->
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">🏆 Top 5</h3>
+                    <div id="top-5" class="space-y-3">
+                        <div class="text-center text-gray-400 p-4">Lade Top 5...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Nominierte Bilder -->
+            <div class="mt-8 bg-gray-700 rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-white mb-4">📸 Nominierte Bilder (diese Woche)</h3>
+                <div id="nominated-images" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div class="text-center text-gray-400 p-8">Lade nominierte Bilder...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Nomination Modal -->
+        <div id="nomination-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 overflow-y-auto">
+            <div class="flex items-start justify-center min-h-screen p-2">
+                <div class="bg-gray-800 rounded-lg p-4 max-w-4xl w-full max-h-[98vh] overflow-y-auto mt-2 mb-2">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-white">🎯 Bild nominieren</h3>
+                        <button onclick="closeNominationModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-gray-300 mb-2">Wähle ein Bild aus, das du für das Colloseum nominieren möchtest:</p>
+                        <p class="text-sm text-gray-400">Du erhältst 5 PixelDrops pro Nominierung (max. 3 pro Tag)</p>
+                    </div>
+                    
+                    <div id="available-images" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="text-center text-gray-400 p-8">Lade verfügbare Bilder...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Referrals Content -->
+        <div id="referrals-content" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Referral Statistics -->
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">📊 Referral Statistiken</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300">Direkte Referrals:</span>
+                            <span class="text-blue-400 font-bold" id="direct-referrals-count">0</span>
+                        </div>
+                       <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                           <span class="text-gray-300">Referral Einnahmen:</span>
+                           <span class="text-green-400 font-bold" id="referral-earnings">0 tBNB</span>
+                       </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300">Aktive Referrals:</span>
+                            <span class="text-purple-400 font-bold" id="active-referrals-count">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300">Dein Referral Code:</span>
+                            <span class="text-yellow-400 font-bold" id="user-referral-code">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Referral Link -->
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">🔗 Dein Referral Link</h3>
+                    <div class="space-y-4">
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <p class="text-gray-300 mb-2">Teile diesen Link mit Freunden:</p>
+                            <div class="flex space-x-2">
+                                <input type="text" id="referral-link-display" readonly class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg border border-gray-400 text-sm">
+                                <button onclick="copyReferralLinkFromGeoBoard()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                    📋 Kopieren
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-green-900 border border-green-600 rounded-lg p-4">
+                            <h4 class="text-green-400 font-semibold mb-2">💰 Belohnungen</h4>
+                           <ul class="text-gray-300 text-sm space-y-1">
+                               <li>• 5% von allen Käufen deiner Referrals (Maschinen, Coins)</li>
+                               <li>• 1% von Käufen der Referrals deiner Referrals</li>
+                               <li>• Automatische Gutschrift bei jedem Kauf</li>
+                           </ul>
+                        </div>
+                        
+                        <div class="bg-blue-900 border border-blue-600 rounded-lg p-4">
+                            <h4 class="text-blue-400 font-semibold mb-2">📋 Wie funktioniert das Referral-System?</h4>
+                            <div class="text-gray-300 text-sm space-y-2">
+                                <p><strong>🎯 Direkte Referrals (5%):</strong></p>
+                                <ul class="ml-4 space-y-1">
+                                    <li>• Jeder User, der sich über deinen Link registriert</li>
+                                    <li>• Du erhältst 5% von allen seinen Käufen</li>
+                                    <li>• Maschinen, Coins, Premium-Features</li>
+                                </ul>
+                                
+                                <p><strong>🔄 Indirekte Referrals (1%):</strong></p>
+                                <ul class="ml-4 space-y-1">
+                                    <li>• User, die von deinen Referrals geworben wurden</li>
+                                    <li>• Du erhältst 1% von deren Käufen</li>
+                                    <li>• Beispiel: A → B → C (du erhältst 1% von C's Käufen)</li>
+                                </ul>
+                                
+                                <p><strong>⚡ Automatisches System:</strong></p>
+                                <ul class="ml-4 space-y-1">
+                                    <li>• Keine manuelle Auszahlung nötig</li>
+                                    <li>• Sofortige Gutschrift bei jedem Kauf</li>
+                                    <li>• Alle Transaktionen werden geloggt</li>
+                                </ul>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Referrals List -->
+            <div class="mt-8 bg-gray-700 rounded-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-white">👥 Deine Referrals</h3>
+                    <button onclick="showIndirectReferralsModal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
+                        🔄 Indirekte Referrals
+                    </button>
+                </div>
+                <div id="referrals-list" class="space-y-3">
+                    <div class="text-center text-gray-400 p-8">Lade Referrals...</div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <!-- Admin Tools -->
+        <div class="bg-gray-700 rounded-lg p-6 mt-8">
+            <h3 class="text-xl font-semibold text-white mb-4">🔧 Admin Tools</h3>
+            <div class="flex space-x-4">
+                <button onclick="repairUserProfiles()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    🔧 Benutzerprofile reparieren
+                </button>
+                <button onclick="clearOldBackups()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                    🗑️ Alte Backups löschen
+                </button>
+                <button onclick="triggerWeeklyColloseum()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    🏆 Colloseum Abrechnung
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indirect Referrals Modal -->
+    <div id="indirect-referrals-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">🔄 Indirekte Referrals</h3>
+                <button onclick="closeIndirectReferralsModal()" class="text-gray-400 hover:text-white text-2xl">
+                    ×
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-gray-300 text-sm">
+                    Diese Liste zeigt alle User, die von deinen direkten Referrals geworben wurden. 
+                    Du erhältst 1% von deren Käufen.
+                </p>
+            </div>
+            
+            <div id="indirect-referrals-list" class="space-y-3">
+                <div class="text-center text-gray-400 p-8">Lade indirekte Referrals...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GeoBoard-spezifische Funktionen
+        function repairUserProfiles() {
+            console.log('🔧 Benutzerprofile reparieren...');
+            // Hier kommt die Logik für das Reparieren der Benutzerprofile
+        }
+
+        function clearOldBackups() {
+            console.log('🗑️ Alte Backups löschen...');
+            // Hier kommt die Logik für das Löschen alter Backups
+        }
+
+        // Trigger weekly Colloseum processing manually
+        async function triggerWeeklyColloseum() {
+            if (!confirm('Möchtest du die wöchentliche Colloseum-Abrechnung manuell auslösen?')) {
+                return;
+            }
+            
+            try {
+                console.log('🔧 Manually triggering weekly Colloseum processing...');
+                await window.colloseumScheduler.triggerWeeklyProcessing();
+                alert('✅ Wöchentliche Abrechnung erfolgreich ausgelöst!');
+            } catch (error) {
+                console.error('❌ Error triggering weekly processing:', error);
+                alert('❌ Fehler beim Auslösen der Abrechnung: ' + error.message);
+            }
+        }
+
+        // Leaderboard laden
+        function loadLeaderboard() {
+            console.log('🏆 Lade Rangliste...');
+            // Hier kommt die Logik für das Laden der Rangliste
+        }
+
+        // Statistiken aktualisieren
+        function updateStats() {
+            console.log('📈 Aktualisiere Statistiken...');
+            // Hier kommt die Logik für das Aktualisieren der Statistiken
+        }
+
+        // SIMPLE TAB SWITCHING FUNCTIONS - DIRECT ONCLICK
+        function switchToGeoBoard() {
+            console.log('📊 SWITCHING TO GEOBOARD');
+            const geoboardTab = document.getElementById('geoboard-tab');
+            const colloseumTab = document.getElementById('colloseum-tab');
+            const referralsTab = document.getElementById('referrals-tab');
+            const geoboardContent = document.getElementById('geoboard-content');
+            const colloseumContent = document.getElementById('colloseum-content');
+            const referralsContent = document.getElementById('referrals-content');
+            
+            if (geoboardTab && colloseumTab && referralsTab && geoboardContent && colloseumContent && referralsContent) {
+                geoboardTab.classList.add('text-white', 'border-blue-500', 'bg-gray-800');
+                geoboardTab.classList.remove('text-gray-400', 'border-transparent');
+                
+                colloseumTab.classList.remove('text-white', 'border-blue-500', 'bg-gray-800');
+                colloseumTab.classList.add('text-gray-400', 'border-transparent');
+                
+                referralsTab.classList.remove('text-white', 'border-blue-500', 'bg-gray-800');
+                referralsTab.classList.add('text-gray-400', 'border-transparent');
+                
+                geoboardContent.classList.remove('hidden');
+                colloseumContent.classList.add('hidden');
+                referralsContent.classList.add('hidden');
+                console.log('✅ Switched to GeoBoard');
+            } else {
+                console.error('❌ Elements not found for GeoBoard switch');
+            }
+        }
+        
+        function switchToColloseum() {
+            console.log('🏛️ SWITCHING TO COLLOSEUM');
+            const geoboardTab = document.getElementById('geoboard-tab');
+            const colloseumTab = document.getElementById('colloseum-tab');
+            const referralsTab = document.getElementById('referrals-tab');
+            const geoboardContent = document.getElementById('geoboard-content');
+            const colloseumContent = document.getElementById('colloseum-content');
+            const referralsContent = document.getElementById('referrals-content');
+            
+            if (geoboardTab && colloseumTab && referralsTab && geoboardContent && colloseumContent && referralsContent) {
+                colloseumTab.classList.add('text-white', 'border-blue-500', 'bg-gray-800');
+                colloseumTab.classList.remove('text-gray-400', 'border-transparent');
+                
+                geoboardTab.classList.remove('text-white', 'border-blue-500', 'bg-gray-800');
+                geoboardTab.classList.add('text-gray-400', 'border-transparent');
+                
+                referralsTab.classList.remove('text-white', 'border-blue-500', 'bg-gray-800');
+                referralsTab.classList.add('text-gray-400', 'border-transparent');
+                
+                colloseumContent.classList.remove('hidden');
+                geoboardContent.classList.add('hidden');
+                referralsContent.classList.add('hidden');
+                console.log('✅ Switched to Colloseum');
+            } else {
+                console.error('❌ Elements not found for Colloseum switch');
+            }
+        }
+        
+        function switchToReferrals() {
+            console.log('👥 SWITCHING TO REFERRALS');
+            const geoboardTab = document.getElementById('geoboard-tab');
+            const colloseumTab = document.getElementById('colloseum-tab');
+            const referralsTab = document.getElementById('referrals-tab');
+            const geoboardContent = document.getElementById('geoboard-content');
+            const colloseumContent = document.getElementById('colloseum-content');
+            const referralsContent = document.getElementById('referrals-content');
+            
+            if (geoboardTab && colloseumTab && referralsTab && geoboardContent && colloseumContent && referralsContent) {
+                referralsTab.classList.add('text-white', 'border-blue-500', 'bg-gray-800');
+                referralsTab.classList.remove('text-gray-400', 'border-transparent');
+                
+                geoboardTab.classList.remove('text-white', 'border-blue-500', 'bg-gray-800');
+                geoboardTab.classList.add('text-gray-400', 'border-transparent');
+                
+                colloseumTab.classList.remove('text-white', 'border-blue-500', 'bg-gray-800');
+                colloseumTab.classList.add('text-gray-400', 'border-transparent');
+                
+                referralsContent.classList.remove('hidden');
+                geoboardContent.classList.add('hidden');
+                colloseumContent.classList.add('hidden');
+                console.log('✅ Switched to Referrals');
+                
+                // Load referrals data when switching to this tab
+                if (window.firebase && window.db && window.currentUser) {
+                    console.log('🔥 Firebase ready, loading referrals data...');
+                    loadReferralsData();
+                } else {
+                    console.log('⏳ Firebase not ready yet, waiting...');
+                    const waitAndLoad = () => {
+                        if (window.firebase && window.db && window.currentUser) {
+                            console.log('🔥 Firebase ready now, loading referrals data...');
+                            loadReferralsData();
+                        } else {
+                            setTimeout(waitAndLoad, 500);
+                        }
+                    };
+                    waitAndLoad();
+                }
+            } else {
+                console.error('❌ Elements not found for Referrals switch');
+            }
+        }
+        
+        // Make functions globally available
+        window.switchToGeoBoard = switchToGeoBoard;
+        window.switchToColloseum = switchToColloseum;
+        window.switchToReferrals = switchToReferrals;
+
+        // Load Colloseum data
+        async function loadColloseumData() {
+            console.log('🏛️ Loading Colloseum data...');
+            try {
+                // Check if functions exist before calling
+                if (typeof window.loadNominationsToday === 'function') {
+                    await window.loadNominationsToday();
+                } else {
+                    console.log('❌ loadNominationsToday function not found');
+                }
+                
+                if (typeof window.loadRatingsToday === 'function') {
+                    await window.loadRatingsToday();
+                } else {
+                    console.log('❌ loadRatingsToday function not found');
+                }
+                
+                if (typeof window.loadTop5 === 'function') {
+                    await window.loadTop5();
+                } else {
+                    console.log('❌ loadTop5 function not found');
+                }
+                
+                if (typeof window.loadNominatedImages === 'function') {
+                    await window.loadNominatedImages();
+                } else {
+                    console.log('❌ loadNominatedImages function not found');
+                }
+            } catch (error) {
+                console.error('❌ Error loading Colloseum data:', error);
+            }
+        }
+
+        // Load nominations today
+        async function loadNominationsToday() {
+            try {
+                const db = window.firebase.firestore();
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const currentUser = window.currentUser || window.auth?.currentUser;
+                if (!currentUser) return;
+
+                const nominationsSnapshot = await db.collection('colloseumNominations')
+                    .where('nominatedBy', '==', currentUser.uid)
+                    .where('nominatedAt', '>=', today)
+                    .get();
+
+                const nominationsCount = nominationsSnapshot.size;
+                document.getElementById('nominations-today').textContent = `${nominationsCount}/3`;
+                
+                // Disable button if limit reached
+                const nominateBtn = document.getElementById('nominate-btn');
+                if (nominationsCount >= 3) {
+                    nominateBtn.disabled = true;
+                    nominateBtn.textContent = '🎯 Limit erreicht';
+                    nominateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    nominateBtn.disabled = false;
+                    nominateBtn.textContent = '🎯 Bild nominieren';
+                    nominateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            } catch (error) {
+                console.error('❌ Error loading nominations today:', error);
+            }
+        }
+
+        // Load ratings today
+        async function loadRatingsToday() {
+            try {
+                const db = window.firebase.firestore();
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const currentUser = window.currentUser || window.auth?.currentUser;
+                if (!currentUser) return;
+
+                const ratingsSnapshot = await db.collection('colloseumRatings')
+                    .where('ratedBy', '==', currentUser.uid)
+                    .where('ratedAt', '>=', today)
+                    .get();
+
+                const ratingsCount = ratingsSnapshot.size;
+                document.getElementById('ratings-today').textContent = `${ratingsCount}/3`;
+                
+                // Disable button if limit reached
+                const rateBtn = document.getElementById('rate-btn');
+                if (ratingsCount >= 3) {
+                    rateBtn.disabled = true;
+                    rateBtn.textContent = '⭐ Limit erreicht';
+                    rateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    rateBtn.disabled = false;
+                    rateBtn.textContent = '⭐ Bilder bewerten';
+                    rateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            } catch (error) {
+                console.error('❌ Error loading ratings today:', error);
+            }
+        }
+
+        // Load Top 5
+        async function loadTop5() {
+            try {
+                const db = window.firebase.firestore();
+                const thisWeek = getThisWeek();
+                
+                const top5Snapshot = await db.collection('colloseumImages')
+                    .where('week', '==', thisWeek)
+                    .orderBy('likes', 'desc')
+                    .limit(5)
+                    .get();
+
+                const top5Container = document.getElementById('top-5');
+                if (top5Snapshot.empty) {
+                    top5Container.innerHTML = '<div class="text-center text-gray-400 p-4">Noch keine Bewertungen</div>';
+                    return;
+                }
+
+                let top5HTML = '';
+                const rewards = [50, 25, 12, 6, 3];
+                
+                top5Snapshot.forEach((doc, index) => {
+                    const data = doc.data();
+                    const reward = rewards[index] || 0;
+                    top5HTML += `
+                        <div class="flex items-center justify-between p-3 bg-gray-600 rounded-lg">
+                            <div class="flex items-center">
+                                <span class="text-2xl mr-3">${getRankEmoji(index + 1)}</span>
+                                <div>
+                                    <div class="text-white font-semibold">${data.uploadedBy || 'Unbekannt'}</div>
+                                    <div class="text-gray-400 text-sm">${data.likes || 0} Likes</div>
+                                </div>
+                            </div>
+                            <div class="text-green-400 font-bold">${reward} PD</div>
+                        </div>
+                    `;
+                });
+                
+                top5Container.innerHTML = top5HTML;
+            } catch (error) {
+                console.error('❌ Error loading Top 5:', error);
+            }
+        }
+
+        // Load nominated images
+        async function loadNominatedImages() {
+            try {
+                const db = window.firebase.firestore();
+                const thisWeek = getThisWeek();
+                
+                const imagesSnapshot = await db.collection('colloseumImages')
+                    .where('week', '==', thisWeek)
+                    .orderBy('nominatedAt', 'desc')
+                    .get();
+
+                const imagesContainer = document.getElementById('nominated-images');
+                if (imagesSnapshot.empty) {
+                    imagesContainer.innerHTML = '<div class="text-center text-gray-400 p-8">Noch keine nominierte Bilder diese Woche</div>';
+                    return;
+                }
+
+                let imagesHTML = '';
+                imagesSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    imagesHTML += `
+                        <div class="bg-gray-600 rounded-lg overflow-hidden">
+                            <img src="${data.imageUrl}" alt="Nominierte Bild" class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-white font-semibold">${data.uploadedBy || 'Unbekannt'}</span>
+                                    <span class="text-blue-400 text-sm">${data.likes || 0} Likes</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400 text-sm">${formatDate(data.nominatedAt)}</span>
+                                    <button onclick="likeImage('${doc.id}')" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors">
+                                        ❤️ Like
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                imagesContainer.innerHTML = imagesHTML;
+            } catch (error) {
+                console.error('❌ Error loading nominated images:', error);
+            }
+        }
+
+        // Helper functions
+        function getThisWeek() {
+            const now = new Date();
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+            startOfWeek.setHours(0, 0, 0, 0);
+            return startOfWeek.toISOString().split('T')[0];
+        }
+
+        function getRankEmoji(rank) {
+            const emojis = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+            return emojis[rank - 1] || '🏆';
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Unbekannt';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toLocaleDateString('de-DE');
+        }
+
+        // Like image function
+        async function likeImage(imageId) {
+            try {
+                const db = window.firebase.firestore();
+                const currentUser = window.currentUser || window.auth?.currentUser;
+                if (!currentUser) {
+                    alert('Bitte zuerst anmelden!');
+                    return;
+                }
+
+                // Check if user already liked this image
+                const existingLike = await db.collection('colloseumRatings')
+                    .where('imageId', '==', imageId)
+                    .where('ratedBy', '==', currentUser.uid)
+                    .get();
+
+                if (!existingLike.empty) {
+                    alert('Du hast dieses Bild bereits geliked!');
+                    return;
+                }
+
+                // Check daily rating limit
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const todayRatings = await db.collection('colloseumRatings')
+                    .where('ratedBy', '==', currentUser.uid)
+                    .where('ratedAt', '>=', today)
+                    .get();
+
+                if (todayRatings.size >= 3) {
+                    alert('Du hast heute bereits 3 Bilder bewertet!');
+                    return;
+                }
+
+                // Add like
+                await db.collection('colloseumRatings').add({
+                    imageId: imageId,
+                    ratedBy: currentUser.uid,
+                    ratedAt: new Date(),
+                    type: 'like'
+                });
+
+                // Update image likes count
+                const imageRef = db.collection('colloseumImages').doc(imageId);
+                await imageRef.update({
+                    likes: window.firebase.firestore.FieldValue.increment(1)
+                });
+
+                alert('✅ Bild geliked!');
+                loadColloseumData(); // Reload data
+            } catch (error) {
+                console.error('❌ Error liking image:', error);
+                alert('❌ Fehler beim Liken des Bildes');
+            }
+        }
+
+        // Show nomination modal
+        async function showNominationModal() {
+            const modal = document.getElementById('nomination-modal');
+            const availableImagesContainer = document.getElementById('available-images');
+            
+            modal.classList.remove('hidden');
+            
+            // Load available images
+            availableImagesContainer.innerHTML = '<div class="text-center text-gray-400 p-8">Lade verfügbare Bilder...</div>';
+            
+            try {
+                const availableImages = await window.colloseumService.getAvailableImagesForNomination();
+                
+                if (availableImages.length === 0) {
+                    availableImagesContainer.innerHTML = '<div class="text-center text-gray-400 p-8">Keine verfügbaren Bilder zum Nominieren</div>';
+                    return;
+                }
+                
+                let imagesHTML = '';
+                availableImages.forEach(image => {
+                    imagesHTML += `
+                        <div class="bg-gray-600 rounded-lg overflow-hidden">
+                            <img src="${image.imageUrl}" alt="Verfügbares Bild" class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-white font-semibold">${image.uploadedBy || 'Unbekannt'}</span>
+                                    <span class="text-blue-400 text-sm">${image.dropType === 'dev' ? '🎯 Dev' : '👤 User'}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-400 text-sm">${formatDate(image.uploadedAt)}</span>
+                                    <button onclick="nominateImage('${image.id}', '${image.collection}')" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-colors">
+                                        🎯 Nominieren
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                availableImagesContainer.innerHTML = imagesHTML;
+            } catch (error) {
+                console.error('❌ Error loading available images:', error);
+                availableImagesContainer.innerHTML = '<div class="text-center text-red-400 p-8">Fehler beim Laden der Bilder</div>';
+            }
+        }
+
+        // Close nomination modal
+        function closeNominationModal() {
+            const modal = document.getElementById('nomination-modal');
+            modal.classList.add('hidden');
+        }
+
+        // Nominate an image
+        async function nominateImage(imageId, collection) {
+            try {
+                // Get image data
+                const db = window.firebase.firestore();
+                const imageDoc = await db.collection(collection).doc(imageId).get();
+                
+                if (!imageDoc.exists) {
+                    alert('❌ Bild nicht gefunden');
+                    return;
+                }
+                
+                const imageData = { id: imageId, ...imageDoc.data() };
+                
+                // Nominate the image
+                const result = await window.colloseumService.nominateImage(imageData);
+                
+                if (result.success) {
+                    alert('✅ Bild erfolgreich nominiert! Du erhältst 5 PixelDrops.');
+                    closeNominationModal();
+                    loadColloseumData(); // Reload data
+                } else {
+                    alert('❌ ' + result.error);
+                }
+            } catch (error) {
+                console.error('❌ Error nominating image:', error);
+                alert('❌ Fehler beim Nominieren des Bildes');
+            }
+        }
+
+        // Referrals Functions - use the one from navigation.js
+        
+        // Load referrals data function
+        window.loadReferralsData = async function() {
+            console.log('👥 Loading referrals data...');
+            try {
+                const currentUser = window.currentUser || window.auth?.currentUser;
+                if (!currentUser) {
+                    console.log('❌ No user logged in');
+                    return;
+                }
+
+                console.log('👤 Current user:', currentUser);
+                console.log('🔥 Firebase available:', !!window.firebase);
+                console.log('🔥 Firestore available:', !!window.firebase?.firestore);
+
+                const db = window.firebase.firestore();
+                
+                // Load direct referrals - check both UID and email/username
+                const userProfile = window.userProfile || {};
+                const userEmail = currentUser.email;
+                const username = userProfile.username;
+                
+                console.log('🔍 User profile:', userProfile);
+                console.log('📧 User email:', userEmail);
+                console.log('👤 Username:', username);
+                console.log('🆔 User UID:', currentUser.uid);
+                
+                // Try to find referrals by different methods
+                let referralsSnapshot;
+                
+                // First try by UID
+                console.log('🔍 Searching referrals by UID:', currentUser.uid);
+                referralsSnapshot = await db.collection('users')
+                    .where('referredBy', '==', currentUser.uid)
+                    .get();
+                
+                console.log('📊 Referrals found by UID:', referralsSnapshot.size);
+                    
+                // If no results, try by email
+                if (referralsSnapshot.empty && userEmail) {
+                    console.log('🔍 Searching referrals by email:', userEmail);
+                    referralsSnapshot = await db.collection('users')
+                        .where('referredBy', '==', userEmail)
+                        .get();
+                    console.log('📊 Referrals found by email:', referralsSnapshot.size);
+                }
+                
+                // If still no results, try by username
+                if (referralsSnapshot.empty && username) {
+                    console.log('🔍 Searching referrals by username:', username);
+                    referralsSnapshot = await db.collection('users')
+                        .where('referredBy', '==', username)
+                        .get();
+                    console.log('📊 Referrals found by username:', referralsSnapshot.size);
+                }
+
+                const referrals = [];
+                referralsSnapshot.forEach(doc => {
+                    referrals.push({ id: doc.id, ...doc.data() });
+                });
+
+                console.log('👥 Total referrals found:', referrals.length);
+                console.log('👥 Referrals data:', referrals);
+
+                // Update statistics
+                const directReferralsCount = document.getElementById('direct-referrals-count');
+                if (directReferralsCount) {
+                    directReferralsCount.textContent = referrals.length;
+                    console.log('✅ Updated direct referrals count:', referrals.length);
+                } else {
+                    console.log('❌ direct-referrals-count element not found');
+                }
+                
+                // Count active referrals (users who have made at least one drop)
+                let activeCount = 0;
+                let totalEarnings = 0;
+                
+                for (const referral of referrals) {
+                    // Check if user has made any drops
+                    const userDropsSnapshot = await db.collection('userDrops')
+                        .where('userId', '==', referral.id)
+                        .get();
+                    
+                    if (!userDropsSnapshot.empty) {
+                        activeCount++;
+                    }
+                    
+                       // Calculate earnings from this referral (in tBNB, not PixelDrop)
+                       const referralEarnings = referral.referralEarnings || 0;
+                       totalEarnings += referralEarnings;
+                }
+                
+                const activeReferralsCount = document.getElementById('active-referrals-count');
+                if (activeReferralsCount) {
+                    activeReferralsCount.textContent = activeCount;
+                }
+                
+                       const referralEarnings = document.getElementById('referral-earnings');
+                       if (referralEarnings) {
+                           referralEarnings.textContent = `${totalEarnings.toFixed(4)} tBNB`;
+                       }
+                
+                // Update referral code - use only the User ID
+                const referralCode = currentUser.uid;
+                const userReferralCode = document.getElementById('user-referral-code');
+                if (userReferralCode) {
+                    userReferralCode.textContent = referralCode;
+                }
+                
+                // Update referral link
+                const referralLink = `https://geodrop-cryptogame.netlify.app/#/ref/${referralCode}`;
+                const referralLinkDisplay = document.getElementById('referral-link-display');
+                if (referralLinkDisplay) {
+                    referralLinkDisplay.value = referralLink;
+                }
+                
+                // Update referrals list
+                console.log('🔄 Calling updateReferralsList with:', referrals.length, 'referrals');
+                updateReferralsList(referrals);
+                
+            } catch (error) {
+                console.error('❌ Error loading referrals data:', error);
+                console.error('❌ Error details:', error.message, error.stack);
+            }
+        }
+
+        // Update referrals list function
+        window.updateReferralsList = function(referrals) {
+            console.log('🔄 updateReferralsList called with:', referrals.length, 'referrals');
+            const referralsList = document.getElementById('referrals-list');
+            console.log('🔍 referrals-list element found:', !!referralsList);
+            if (!referralsList) {
+                console.log('❌ referrals-list element not found');
+                return;
+            }
+            
+            if (referrals.length === 0) {
+                console.log('📝 No referrals found, showing empty state');
+                referralsList.innerHTML = `
+                    <div class="text-center text-gray-400 p-8">
+                        <div class="text-4xl mb-4">👥</div>
+                        <p>Noch keine Referrals</p>
+                        <p class="text-sm mt-2">Teile deinen Referral-Link mit Freunden!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            console.log('📝 Building referrals list HTML for', referrals.length, 'referrals');
+            let referralsHTML = '';
+            referrals.forEach((referral, index) => {
+                console.log(`📝 Processing referral ${index + 1}:`, referral);
+                const joinDate = referral.createdAt ? 
+                    (referral.createdAt.toDate ? referral.createdAt.toDate() : new Date(referral.createdAt)) : 
+                    new Date();
+                
+                const isActive = referral.lastActivity ? 
+                    (new Date() - new Date(referral.lastActivity)) < (7 * 24 * 60 * 60 * 1000) : false;
+                
+                referralsHTML += `
+                    <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold">${(referral.username || referral.email || 'User').charAt(0).toUpperCase()}</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-white font-medium">${referral.username || referral.email || 'Unbekannter User'}</h3>
+                                    <p class="text-gray-400 text-sm">Beigetreten: ${joinDate.toLocaleDateString('de-DE')}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs px-2 py-1 rounded ${isActive ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400'}">
+                                        ${isActive ? 'Aktiv' : 'Inaktiv'}
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-400 mt-1">
+                                    Verdient: <span class="text-green-400 font-bold">${(referral.referralEarnings || 0).toFixed(4)} tBNB</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            console.log('📝 Final referrals HTML length:', referralsHTML.length);
+            referralsList.innerHTML = referralsHTML;
+            console.log('✅ Referrals list updated successfully');
+        }
+
+        // Test function to debug referrals
+        window.testReferrals = function() {
+            console.log('🧪 Testing referrals system...');
+            console.log('👤 Current user:', window.currentUser);
+            console.log('👤 Auth user:', window.auth?.currentUser);
+            console.log('👤 User profile:', window.userProfile);
+            console.log('🔥 Firebase:', !!window.firebase);
+            console.log('🔥 Firestore:', !!window.firebase?.firestore);
+            
+            // Test if we can access the referrals tab
+            const referralsTab = document.getElementById('referrals-tab');
+            const referralsContent = document.getElementById('referrals-content');
+            const referralsList = document.getElementById('referrals-list');
+            
+            console.log('🔍 referrals-tab found:', !!referralsTab);
+            console.log('🔍 referrals-content found:', !!referralsContent);
+            console.log('🔍 referrals-list found:', !!referralsList);
+            
+            // Test tab switching
+            console.log('🔄 Testing tab switching...');
+            if (typeof switchToReferrals === 'function') {
+                console.log('🔄 Calling switchToReferrals...');
+                switchToReferrals();
+            } else {
+                console.log('❌ switchToReferrals function not found');
+            }
+            
+            // Try to load referrals data
+            if (typeof loadReferralsData === 'function') {
+                console.log('🔄 Calling loadReferralsData...');
+                loadReferralsData();
+            } else {
+                console.log('❌ loadReferralsData function not found');
+            }
+        };
+        
+        // Test function to manually show referrals tab
+        window.showReferralsTab = function() {
+            console.log('🔄 Manually showing referrals tab...');
+            const referralsContent = document.getElementById('referrals-content');
+            const geoboardContent = document.getElementById('geoboard-content');
+            const colloseumContent = document.getElementById('colloseum-content');
+            
+            if (referralsContent) {
+                referralsContent.classList.remove('hidden');
+                console.log('✅ Referrals content shown');
+            }
+            if (geoboardContent) {
+                geoboardContent.classList.add('hidden');
+                console.log('✅ GeoBoard content hidden');
+            }
+            if (colloseumContent) {
+                colloseumContent.classList.add('hidden');
+                console.log('✅ Colloseum content hidden');
+            }
+            
+            // Load referrals data
+            if (typeof loadReferralsData === 'function') {
+                loadReferralsData();
+            }
+        };
+
+
+        function copyReferralLinkFromGeoBoard() {
+            const referralInput = document.getElementById('referral-link-display');
+            if (referralInput) {
+                referralInput.select();
+                referralInput.setSelectionRange(0, 99999);
+                
+                try {
+                    document.execCommand('copy');
+                    alert('✅ Referral-Link kopiert!');
+                } catch (err) {
+                    navigator.clipboard.writeText(referralInput.value).then(() => {
+                        alert('✅ Referral-Link kopiert!');
+                    }).catch(() => {
+                        alert('❌ Fehler beim Kopieren des Links');
+                    });
+                }
+            }
+        }
+
+        // Show indirect referrals modal
+        window.showIndirectReferralsModal = async function() {
+            console.log('🔄 Opening indirect referrals modal...');
+            const modal = document.getElementById('indirect-referrals-modal');
+            const listContainer = document.getElementById('indirect-referrals-list');
+            
+            modal.classList.remove('hidden');
+            listContainer.innerHTML = '<div class="text-center text-gray-400 p-8">Lade indirekte Referrals...</div>';
+            
+            try {
+                await loadIndirectReferrals();
+            } catch (error) {
+                console.error('❌ Error loading indirect referrals:', error);
+                listContainer.innerHTML = '<div class="text-center text-red-400 p-8">Fehler beim Laden der indirekten Referrals</div>';
+            }
+        }
+
+        // Close indirect referrals modal
+        window.closeIndirectReferralsModal = function() {
+            const modal = document.getElementById('indirect-referrals-modal');
+            modal.classList.add('hidden');
+        }
+
+        // Load indirect referrals
+        window.loadIndirectReferrals = async function() {
+            console.log('🔄 Loading indirect referrals...');
+            try {
+                const currentUser = window.currentUser || window.auth?.currentUser;
+                if (!currentUser) {
+                    console.log('❌ No user logged in');
+                    return;
+                }
+
+                const db = window.firebase.firestore();
+                const listContainer = document.getElementById('indirect-referrals-list');
+                
+                // First get all direct referrals
+                const directReferralsSnapshot = await db.collection('users')
+                    .where('referredBy', '==', currentUser.uid)
+                    .get();
+
+                if (directReferralsSnapshot.empty) {
+                    listContainer.innerHTML = `
+                        <div class="text-center text-gray-400 p-8">
+                            <div class="text-4xl mb-4">👥</div>
+                            <p>Noch keine direkten Referrals</p>
+                            <p class="text-sm mt-2">Indirekte Referrals entstehen, wenn deine Referrals selbst User werben.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Get indirect referrals for each direct referral
+                let allIndirectReferrals = [];
+                let totalIndirectEarnings = 0;
+
+                for (const directRef of directReferralsSnapshot.docs) {
+                    const indirectReferralsSnapshot = await db.collection('users')
+                        .where('referredBy', '==', directRef.id)
+                        .get();
+
+                    indirectReferralsSnapshot.forEach(doc => {
+                        const indirectRef = { id: doc.id, ...doc.data(), directReferrer: directRef.data().username || directRef.data().email || 'Unbekannt' };
+                        allIndirectReferrals.push(indirectRef);
+                        totalIndirectEarnings += indirectRef.referralEarnings || 0;
+                    });
+                }
+
+                console.log('🔄 Found', allIndirectReferrals.length, 'indirect referrals');
+
+                if (allIndirectReferrals.length === 0) {
+                    listContainer.innerHTML = `
+                        <div class="text-center text-gray-400 p-8">
+                            <div class="text-4xl mb-4">🔄</div>
+                            <p>Noch keine indirekten Referrals</p>
+                            <p class="text-sm mt-2">Deine direkten Referrals haben noch niemanden geworben.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Display indirect referrals
+                let indirectHTML = `
+                    <div class="bg-gray-700 rounded-lg p-4 mb-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-300">Gesamt indirekte Referrals:</span>
+                            <span class="text-blue-400 font-bold">${allIndirectReferrals.length}</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-gray-300">Gesamt Einnahmen (1%):</span>
+                            <span class="text-green-400 font-bold">${totalIndirectEarnings.toFixed(4)} tBNB</span>
+                        </div>
+                    </div>
+                `;
+
+                allIndirectReferrals.forEach((referral, index) => {
+                    const joinDate = referral.createdAt ? 
+                        (referral.createdAt.toDate ? referral.createdAt.toDate() : new Date(referral.createdAt)) : 
+                        new Date();
+                    
+                    const isActive = referral.lastActivity ? 
+                        (new Date() - new Date(referral.lastActivity)) < (7 * 24 * 60 * 60 * 1000) : false;
+                    
+                    indirectHTML += `
+                        <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+                                        <span class="text-white font-bold">${(referral.username || referral.email || 'User').charAt(0).toUpperCase()}</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-medium">${referral.username || referral.email || 'Unbekannter User'}</h3>
+                                        <p class="text-gray-400 text-sm">Beigetreten: ${joinDate.toLocaleDateString('de-DE')}</p>
+                                        <p class="text-purple-400 text-xs">Geworben von: ${referral.directReferrer}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="text-xs px-2 py-1 rounded ${isActive ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400'}">
+                                            ${isActive ? 'Aktiv' : 'Inaktiv'}
+                                        </span>
+                                    </div>
+                                    <div class="text-sm text-gray-400 mt-1">
+                                        Verdient: <span class="text-green-400 font-bold">${(referral.referralEarnings || 0).toFixed(4)} tBNB</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                listContainer.innerHTML = indirectHTML;
+
+            } catch (error) {
+                console.error('❌ Error loading indirect referrals:', error);
+                const listContainer = document.getElementById('indirect-referrals-list');
+                listContainer.innerHTML = '<div class="text-center text-red-400 p-8">Fehler beim Laden der indirekten Referrals</div>';
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏛️ GeoBoard page loaded - tabs should work with onclick');
+            loadLeaderboard();
+            updateStats();
+            
+            // Wait for Firebase to be ready before loading referrals
+            const waitForFirebase = () => {
+                if (window.firebase && window.db && window.currentUser) {
+                    console.log('🔥 Firebase ready, can load referrals data');
+                } else {
+                    console.log('⏳ Waiting for Firebase to be ready...');
+                    setTimeout(waitForFirebase, 500);
+                }
+            };
+            waitForFirebase();
+        });
+    </script>
+</body>
+</html>

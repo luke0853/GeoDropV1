@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev-Bereich - GeoDrop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.0.0/dist/jsQR.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        .page {
+            display: flex;
+            width: 100%;
+            min-height: calc(100vh - 128px);
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+            text-align: left;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        
+        main {
+            padding-top: 100px; /* More space for navigation */
+            padding-bottom: 64px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-gray-800 bg-opacity-90 backdrop-blur-md border-b border-gray-700 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="../index.html" class="text-white hover:text-blue-400 transition-colors">
+                        🏠 Zurück zur Hauptseite
+                    </a>
+                    <span class="text-gray-400">|</span>
+                    <a href="../index.html#startseite" class="text-white hover:text-blue-400 transition-colors">
+                        📊 Startseite
+                    </a>
+                    <a href="../index.html#geocard" class="text-white hover:text-blue-400 transition-colors">
+                        🗺️ GeoCard
+                    </a>
+                    <a href="../index.html#geoboard" class="text-white hover:text-blue-400 transition-colors">
+                        📈 GeoBoard
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="dev-status-nav" class="text-sm text-red-400">🔒 Dev-Berechtigung inaktiv</span>
+                    <button onclick="logoutDev()" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors">
+                        🚪 Dev-Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div id="mehr-dev" class="page">
+            <div class="max-w-6xl mx-auto p-6">
+                <h2 class="text-3xl font-bold text-white mb-8">🔧 Dev-Bereich</h2>
+                
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">🔧 Entwickler-Bereich</h3>
+                    <div class="space-y-4 text-gray-300">
+                        <p class="text-yellow-400 font-bold">⚠️ Nur für Entwickler zugänglich!</p>
+                        
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-blue-400 mb-2">🔐 Dev-Zugang</h4>
+                            <div class="space-y-2">
+                                <input type="password" id="dev-password" placeholder="Dev-Passwort" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none">
+                                <button onclick="testDevLogin()" class="w-full px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                                    🔐 Dev-Zugang testen
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-green-400 mb-2">🛠️ Dev-Tools</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <button onclick="clearAllData()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                    🗑️ Alle Daten löschen
+                                </button>
+                                <button onclick="resetUserProgress()" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">
+                                    🔄 Fortschritt zurücksetzen
+                                </button>
+                                <button onclick="addTestCoins()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                                    💰 Test-Coins hinzufügen
+                                </button>
+                                <button onclick="exportUserData()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                    📤 Daten exportieren
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-cyan-400 mb-2">📊 Debug-Informationen</h4>
+                            <div class="space-y-2">
+                                <p><strong>User ID:</strong> <span id="debug-user-id">-</span></p>
+                                <p><strong>Session:</strong> <span id="debug-session">-</span></p>
+                                <p><strong>Version:</strong> <span id="debug-version">1.0.0</span></p>
+                                <p><strong>Last Update:</strong> <span id="debug-last-update">-</span></p>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-red-400 mb-2">🚪 Dev-Session beenden</h4>
+                            <div class="space-y-2">
+                                <p class="text-yellow-400 text-sm">⚠️ Nur Dev-Zugang beenden, normaler Login bleibt aktiv!</p>
+                                <button onclick="logoutDev()" class="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                    🔒 Dev-Session beenden
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../config/config.js"></script>
+    <script src="../js/firebase.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/dev-functions.js"></script>
+    <script src="../js/wallet-system.js"></script>
+    
+    <script>
+                // Firebase wird bereits in firebase.js initialisiert
+
+        // Navigation function
+        function showPage(pageId) {
+            // For standalone page, redirect to main index
+            if (pageId !== 'dev') {
+                window.location.href = '../index.html#' + pageId;
+            }
+        }
+
+        // Dev functions are now loaded from dev-functions.js
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Dev-Bereich geladen');
+            
+            // Update dev status in navigation
+            updateDevStatusNav();
+        });
+        
+        // Update dev status in navigation
+        function updateDevStatusNav() {
+            const devStatusNav = document.getElementById('dev-status-nav');
+            if (devStatusNav) {
+                if (window.isDevLoggedIn) {
+                    devStatusNav.textContent = '✅ Dev-Berechtigung aktiv';
+                    devStatusNav.className = 'text-sm text-green-400';
+                } else {
+                    devStatusNav.textContent = '🔒 Dev-Berechtigung inaktiv';
+                    devStatusNav.className = 'text-sm text-red-400';
+                }
+            }
+        }
+        
+        // Override dev status update to also update navigation
+        const originalUpdateDevStatus = window.updateDevStatus;
+        if (originalUpdateDevStatus) {
+            window.updateDevStatus = function() {
+                originalUpdateDevStatus();
+                updateDevStatusNav();
+            };
+        }
+    </script>
+</body>
+</html>

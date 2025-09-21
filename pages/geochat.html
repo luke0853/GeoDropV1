@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoChat - GeoDrop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.0.0/dist/jsQR.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        .page {
+            display: flex;
+            width: 100%;
+            min-height: calc(100vh - 128px);
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+            text-align: left;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        
+        main {
+            padding-top: 64px;
+            padding-bottom: 64px;
+        }
+        
+        .chat-message {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div id="geochat" class="page">
+            <div class="max-w-4xl mx-auto p-6">
+                <h2 class="text-3xl font-bold text-white mb-8">
+                    <span style="background: rgba(0, 0, 0, 0.7); padding: 8px 12px; border-radius: 8px; display: inline-block;">💬 GeoChat</span>
+                </h2>
+                
+                <!-- Chat Container -->
+                <div class="bg-gray-700 rounded-lg p-4 h-96 flex flex-col">
+                    <!-- Messages Area -->
+                    <div id="chat-messages" class="flex-1 overflow-y-auto mb-4 space-y-3">
+                        <!-- Messages will be loaded here -->
+                        <div class="text-center text-gray-400 py-8">
+                            <p>💬 Willkommen im GeoChat!</p>
+                            <p class="text-sm mt-2">Chatte mit anderen GeoDrop-Spielern</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Input Area -->
+                    <div class="flex space-x-2">
+                        <input type="text" id="chat-input" placeholder="Nachricht eingeben..." 
+                               class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                               onkeypress="if(event.key === 'Enter') sendMessage()">
+                        <button onclick="sendMessage()" 
+                                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            📤 Senden
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Chat Info -->
+                <div class="mt-4 text-center text-gray-400 text-sm">
+                    <p>💡 Tippe Enter um eine Nachricht zu senden</p>
+                    <p>🌍 Chat mit anderen GeoDrop-Spielern</p>
+                </div>
+                
+                <!-- Chat Statistics -->
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gray-700 rounded-lg p-4 text-center">
+                        <h3 class="text-lg font-semibold text-blue-400 mb-2">💬 Nachrichten</h3>
+                        <p class="text-2xl font-bold text-white" id="total-messages">0</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-4 text-center">
+                        <h3 class="text-lg font-semibold text-green-400 mb-2">👥 Aktive User</h3>
+                        <p class="text-2xl font-bold text-white" id="active-users">0</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-4 text-center">
+                        <h3 class="text-lg font-semibold text-purple-400 mb-2">🔥 Heute</h3>
+                        <p class="text-2xl font-bold text-white" id="today-messages">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../js/firebase.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/telegram.js"></script>
+    
+    <script>
+        // Firebase Config from global CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbaHV1OY9C_MUt4o3WTkHCGlRVt7ll9UA",
+            authDomain: "geodrop-f3ee1.firebaseapp.com",
+            projectId: "geodrop-f3ee1",
+            storageBucket: "geodrop-f3ee1.firebasestorage.app",
+            messagingSenderId: "1054615552034",
+            appId: "1:1054615552034:web:8d61c64b5296f4e0cc4a7b",
+            measurementId: "G-RBEJES6HX1"
+        };
+
+        // Initialize Firebase
+        let app, db, storage, auth;
+        
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            storage = firebase.storage();
+            auth = firebase.auth();
+            console.log("✅ Firebase initialized successfully");
+        } catch (error) {
+            console.error("❌ Firebase initialization failed:", error);
+        }
+        
+        // Make Firebase services globally available
+        window.auth = auth;
+        window.db = db;
+        window.storage = storage;
+
+        // Navigation function
+        function showPage(pageId) {
+            // For standalone page, redirect to main index
+            if (pageId !== 'geochat') {
+                window.location.href = '../index.html#' + pageId;
+            }
+        }
+
+        // Chat functions
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const user = auth.currentUser;
+            if (!user) {
+                alert('❌ Bitte melde dich an um zu chatten!');
+                return;
+            }
+            
+            // Add message to Firebase
+            db.collection('chatMessages').add({
+                text: message,
+                userId: user.uid,
+                username: window.userProfile?.username || user.displayName || user.email,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                userEmail: user.email
+            }).then(() => {
+                input.value = '';
+                console.log('✅ Message sent');
+            }).catch(error => {
+                console.error('❌ Error sending message:', error);
+                alert('❌ Fehler beim Senden der Nachricht!');
+            });
+        }
+
+        function loadChatMessages() {
+            const messagesRef = db.collection('chatMessages')
+                .orderBy('timestamp', 'desc')
+                .limit(50);
+            
+            messagesRef.onSnapshot((snapshot) => {
+                const chatMessages = document.getElementById('chat-messages');
+                if (!chatMessages) return;
+                
+                let html = '';
+                snapshot.docs.reverse().forEach(doc => {
+                    const data = doc.data();
+                    const timestamp = data.timestamp ? data.timestamp.toDate() : new Date();
+                    const timeStr = timestamp.toLocaleTimeString('de-DE', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                    
+                    const isCurrentUser = auth.currentUser && data.userId === auth.currentUser.uid;
+                    const messageClass = isCurrentUser ? 'bg-blue-600' : 'bg-gray-600';
+                    const alignClass = isCurrentUser ? 'ml-auto' : 'mr-auto';
+                    
+                    html += `
+                        <div class="chat-message ${alignClass} max-w-xs lg:max-w-md">
+                            <div class="${messageClass} rounded-lg p-3">
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-xs font-semibold text-gray-300">${data.username || 'Anonym'}</span>
+                                    <span class="text-xs text-gray-400">${timeStr}</span>
+                                </div>
+                                <p class="text-white">${data.text}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                if (html === '') {
+                    html = `
+                        <div class="text-center text-gray-400 py-8">
+                            <p>💬 Willkommen im GeoChat!</p>
+                            <p class="text-sm mt-2">Chatte mit anderen GeoDrop-Spielern</p>
+                        </div>
+                    `;
+                }
+                
+                chatMessages.innerHTML = html;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, (error) => {
+                console.error('❌ Error loading chat messages:', error);
+            });
+        }
+
+        function updateChatStats() {
+            // Update total messages
+            db.collection('chatMessages').get().then(snapshot => {
+                document.getElementById('total-messages').textContent = snapshot.size;
+            });
+            
+            // Update today's messages
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            db.collection('chatMessages')
+                .where('timestamp', '>=', today)
+                .get()
+                .then(snapshot => {
+                    document.getElementById('today-messages').textContent = snapshot.size;
+                });
+            
+            // Update active users (simplified)
+            document.getElementById('active-users').textContent = '1+';
+        }
+
+        // Initialize chat
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('💬 GeoChat geladen');
+            
+            // Check if user is logged in
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    loadChatMessages();
+                    updateChatStats();
+                } else {
+                    document.getElementById('chat-messages').innerHTML = `
+                        <div class="text-center text-gray-400 py-8">
+                            <p>🔐 Bitte melde dich an um zu chatten!</p>
+                            <p class="text-sm mt-2">Klicke auf "Start" um dich anzumelden</p>
+                        </div>
+                    `;
+                }
+            });
+        });
+
+        // Chat functions - from backup
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            const user = auth.currentUser;
+            if (!user) {
+                alert('❌ Bitte melde dich an um zu chatten!');
+                return;
+            }
+            
+            // Add message to Firebase
+            db.collection('chatMessages').add({
+                text: message,
+                userId: user.uid,
+                username: window.userProfile?.username || user.displayName || user.email,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                userEmail: user.email
+            }).then(() => {
+                input.value = '';
+                console.log('✅ Message sent');
+            }).catch(error => {
+                console.error('❌ Error sending message:', error);
+                alert('❌ Fehler beim Senden der Nachricht!');
+            });
+        }
+
+        function loadChatMessages() {
+            const messagesRef = db.collection('chatMessages')
+                .orderBy('timestamp', 'desc')
+                .limit(50);
+            
+            messagesRef.onSnapshot((snapshot) => {
+                const chatMessages = document.getElementById('chat-messages');
+                if (!chatMessages) return;
+                
+                let html = '';
+                snapshot.docs.reverse().forEach(doc => {
+                    const data = doc.data();
+                    const timestamp = data.timestamp ? data.timestamp.toDate() : new Date();
+                    const timeStr = timestamp.toLocaleTimeString('de-DE', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                    
+                    const isCurrentUser = auth.currentUser && data.userId === auth.currentUser.uid;
+                    const messageClass = isCurrentUser ? 'bg-blue-600' : 'bg-gray-600';
+                    const alignClass = isCurrentUser ? 'ml-auto' : 'mr-auto';
+                    
+                    html += `
+                        <div class="flex ${alignClass} mb-3">
+                            <div class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${messageClass} text-white">
+                                <div class="text-xs text-gray-300 mb-1">
+                                    ${data.username || 'Unbekannt'} • ${timeStr}
+                                </div>
+                                <div>${data.text}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                chatMessages.innerHTML = html;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+
+        function updateChatStats() {
+            // Update active users (simplified)
+            const activeEl = document.getElementById('active-users');
+            if (activeEl) activeEl.textContent = '1+';
+        }
+
+        // Make functions globally available
+        window.sendMessage = sendMessage;
+        window.loadChatMessages = loadChatMessages;
+        window.updateChatStats = updateChatStats;
+    </script>
+</body>
+</html>

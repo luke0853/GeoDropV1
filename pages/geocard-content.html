@@ -1,0 +1,143 @@
+<div class="max-w-6xl mx-auto p-6">
+    <h2 class="text-3xl font-bold text-white mb-8">🗺️ GeoCard</h2>
+    
+    <!-- Map Container -->
+    <div class="bg-gray-700 rounded-lg p-6 mb-6">
+        <h3 class="text-xl font-semibold text-white mb-4">🌍 Interaktive Karte</h3>
+        <div id="mapid"></div>
+        
+        <!-- Map Legend Button -->
+        <div class="mt-4 text-center">
+            <button onclick="showMapLegendPopup()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                🗺️ Karten-Legende anzeigen
+            </button>
+        </div>
+    </div>
+    
+    <!-- Location & Photo Section -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-gray-700 rounded-lg p-6">
+            <h3 class="text-xl font-semibold text-white mb-4">📍 Standort</h3>
+            <button onclick="getUserLocation()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mb-4">
+                📍 Meinen Standort verwenden
+            </button>
+            <div id="location-info" class="text-sm text-gray-300">
+                <p>Klicke auf den Button um deine aktuelle Position zu laden</p>
+            </div>
+        </div>
+        
+        <div class="bg-gray-700 rounded-lg p-6">
+            <h3 class="text-xl font-semibold text-white mb-4">📸 Foto-Upload</h3>
+            
+            <!-- Drop Selection -->
+            <div class="mb-4">
+                <label for="geocard-drop-select" class="block text-sm font-medium text-gray-300 mb-2">
+                    GeoDrop auswählen:
+                </label>
+                <select id="geocard-drop-select" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white" onchange="updateClaimButton()">
+                    <option value="">Lade GeoDrops...</option>
+                </select>
+                <!-- Hidden input for drop ID -->
+                <input type="hidden" id="selected-drop-id" value="">
+            </div>
+            
+            <!-- Dev Coordinates Input (nur für Dev-User) -->
+            <div id="dev-drop-selection" class="mb-4 p-3 bg-yellow-900 border border-yellow-600 rounded" style="display: none;">
+                <label class="block text-sm font-medium text-yellow-300 mb-2 font-bold">
+                    🔧 DEV: Test-Koordinaten eingeben:
+                </label>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <div>
+                        <label for="dev-test-lat" class="block text-xs text-yellow-300 mb-1">Breitengrad:</label>
+                        <input type="number" id="dev-test-lat" step="0.000001" placeholder="52.123456" class="w-full p-2 bg-gray-600 border border-yellow-500 rounded text-white text-sm" onkeypress="if(event.key === 'Enter') setDevTestCoordinates()">
+                    </div>
+                    <div>
+                        <label for="dev-test-lng" class="block text-xs text-yellow-300 mb-1">Längengrad:</label>
+                        <input type="number" id="dev-test-lng" step="0.000001" placeholder="13.123456" class="w-full p-2 bg-gray-600 border border-yellow-500 rounded text-white text-sm" onkeypress="if(event.key === 'Enter') setDevTestCoordinates()">
+                    </div>
+                </div>
+                <button onclick="setDevTestCoordinates()" class="w-full px-3 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm">
+                    📍 Test-Koordinaten setzen
+                </button>
+                <p class="text-yellow-300 text-sm mt-1">⚠️ Nur für Dev-Tests - normale User sehen dies nicht!</p>
+            </div>
+            
+            <input type="file" id="photo-input" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoFileSelect()">
+            <button onclick="handlePhotoCapture()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4">
+                📸 Foto aufnehmen
+            </button>
+            
+            <!-- Claim Button -->
+            <button id="claim-btn" onclick="claimGeoDropFromGeoCard()" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors mb-4" disabled>
+                🎯 GeoDrop sammeln
+            </button>
+            
+            <div id="photo-preview" class="mt-4"></div>
+        </div>
+    </div>
+    
+    <!-- Dev Coordinate Adjustment Section (Only visible for Dev users) -->
+    <div id="dev-coordinates-section" class="bg-gray-700 rounded-lg p-6 mt-6" style="display: none;">
+        <h3 class="text-xl font-semibold text-white mb-4">🎯 Dev Koordinaten-Anpassung</h3>
+        <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Breitengrad (Lat)</label>
+                    <input type="number" id="dev-lat-input" step="0.000001" class="w-full px-3 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="z.B. 52.520008" onkeypress="if(event.key === 'Enter') setDevCoordinates()">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Längengrad (Lng)</label>
+                    <input type="number" id="dev-lng-input" step="0.000001" class="w-full px-3 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="z.B. 13.404954">
+                </div>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="adjustDevCoordinates()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    📍 Koordinaten anpassen
+                </button>
+                <button onclick="resetDevCoordinates()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                    🔄 Zurücksetzen
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- GeoDrops List Section -->
+    <div class="bg-gray-700 rounded-lg p-6 mt-6">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-white">🎯 GeoDrops Übersicht</h3>
+            <button onclick="loadGeoDrops()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                🔄 Drops neu laden
+            </button>
+        </div>
+        
+        <!-- List Type Toggle -->
+        <div class="mb-6">
+            <div class="flex bg-gray-600 rounded-lg p-1">
+                <button id="dev-drops-btn" onclick="switchToListType('dev')" class="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white">
+                    🎯 Dev GeoDrops
+                </button>
+                <button id="user-drops-btn" onclick="switchToListType('user')" class="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-300 hover:text-white">
+                    👤 User GeoDrops
+                </button>
+            </div>
+        </div>
+        
+        <!-- Dev GeoDrops Table -->
+        <div id="dev-drops-section">
+            <div id="geodrops-table" class="mt-4">
+                <div class="text-center text-gray-400 py-4">
+                    <p>Lade Dev GeoDrops-Tabelle...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User GeoDrops Table -->
+        <div id="user-drops-section" style="display: none;">
+            <div id="user-drops-table" class="mt-4">
+                <div class="text-center text-gray-400 py-4">
+                    <p>Lade User GeoDrops-Tabelle...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

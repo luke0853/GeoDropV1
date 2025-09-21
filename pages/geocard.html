@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoCard - GeoDrop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="../config/config-secure.js"></script>
+    <script src="../config/config-secrets-public.js"></script>
+    <script src="../js/firebase.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/dev-functions.js"></script>
+    <script src="../js/upload-functions.js"></script>
+    <script src="../js/geocard.js"></script>
+    <script src="../js/user-drop-functions.js"></script>
+    
+    <!-- Test Austria Drop Function -->
+    <script>
+        // Test function - Create Test Drop for Stift Melk
+        window.createTestMelkDrop = async function() {
+            console.log('🏛️ Creating TEST Stift Melk Drop...');
+            
+            if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+                showMessage('❌ Dev-Zugang erforderlich!', true);
+                return;
+            }
+            
+            try {
+                const db = window.firebase.firestore();
+                
+                // Download and upload reference image to Firebase Storage
+                console.log('📥 Downloading reference image for Stift Melk...');
+                
+                let imageBlob;
+                
+                // Try to get Stift Melk image from Google Places API directly
+                console.log('📥 Getting Stift Melk image from Google Places API...');
+                try {
+                    // First, find the correct Place ID for Stift Melk
+                    const searchResponse = await fetch('/api/places/search?query=Stift Melk');
+                    if (searchResponse.ok) {
+                        const searchData = await searchResponse.json();
+                        if (searchData.results && searchData.results.length > 0) {
+                            const placeId = searchData.results[0].place_id;
+                            console.log('📍 Found Stift Melk Place ID:', placeId);
+                            
+                            // Now get the details and photos
+                            const placeResponse = await fetch(`/api/places/details/${placeId}`);
+                            if (placeResponse.ok) {
+                                const placeData = await placeResponse.json();
+                                if (placeData.result.photos && placeData.result.photos.length > 0) {
+                                    const photoRef = placeData.result.photos[0].photo_reference;
+                                    const photoResponse = await fetch(`/api/places/photo/?photo_reference=${photoRef}&maxwidth=800`);
+                                    if (photoResponse.ok) {
+                                        imageBlob = await photoResponse.blob();
+                                        console.log('✅ Got real Stift Melk image from Google Places API');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.log('❌ Could not get Google Places image:', error);
+                }
+                
+        // Fallback to a good Stift Melk image if Google Places fails
+        if (!imageBlob) {
+            console.log('📥 Using fallback Stift Melk image...');
+            try {
+                // Try multiple reliable image sources for Stift Melk
+                const imageUrls = [
+                    'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&auto=format',
+                    'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop',
+                    'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'
+                ];
+                
+                let imageLoaded = false;
+                for (const url of imageUrls) {
+                    try {
+                        console.log(`📥 Trying image URL: ${url}`);
+                        const imageResponse = await fetch(url, {
+                            mode: 'cors',
+                            headers: {
+                                'Accept': 'image/*'
+                            }
+                        });
+                        
+                        if (imageResponse.ok) {
+                            imageBlob = await imageResponse.blob();
+                            console.log('✅ Using fallback Stift Melk image from:', url);
+                            imageLoaded = true;
+                            break;
+                        }
+                    } catch (urlError) {
+                        console.log(`❌ Failed to load image from ${url}:`, urlError);
+                        continue;
+                    }
+                }
+                
+                if (!imageLoaded) {
+                    throw new Error('All image sources failed');
+                }
+            } catch (error) {
+                console.error('❌ Could not load any image:', error);
+                showMessage('❌ Fehler beim Laden des Bildes - alle Quellen fehlgeschlagen', true);
+                return;
+            }
+        }
+                
+                // Upload to Firebase Storage
+                const storage = window.firebase.storage();
+                const storageRef = storage.ref();
+                const imageRef = storageRef.child(`referenzbilder_userdrop/UserDrop1_StiftMelk.jpg`);
+                
+                console.log('📤 Uploading reference image to Firebase Storage...');
+                const uploadTask = await imageRef.put(imageBlob);
+                const downloadURL = await uploadTask.ref.getDownloadURL();
+                
+                // Calculate hash for image comparison
+                const arrayBuffer = await imageBlob.arrayBuffer();
+                const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const imageHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                
+                console.log('🔐 Reference image hash calculated:', imageHash);
+                console.log('✅ Reference image uploaded:', downloadURL);
+                
+                // Test drop - Stift Melk
+                const testDrop = {
+                    name: 'UserDrop1_StiftMelk',
+                    description: '🏛️ Stift Melk - Melk (TEST)',
+                    photoDescription: 'Fotografiere das Stift Melk mit seiner barocken Architektur und dem prächtigen Kloster. Das Stift sollte vollständig sichtbar sein.',
+                    reward: 10,
+                    lat: 48.22802251267518,
+                    lng: 15.328281989202512,
+                    createdBy: 'austria-tourist-system',
+                    createdByName: 'Austria Tourist System',
+                    createdAt: new Date(),
+                    isActive: true,
+                    isAvailable: true,
+                    geodropNumber: '1',
+                    collection: 'userDrops',
+                    referenceImage: 'UserDrop1_StiftMelk.jpg',
+                    referenceImageUrl: downloadURL,
+                    referenceImageHash: imageHash,
+                    isAustriaTouristDrop: true,
+                    federalState: 'Niederösterreich',
+                    placeName: 'Stift Melk',
+                    placeAddress: 'Abt-Berthold-Dietmayr-Straße 1, 3390 Melk, Österreich'
+                };
+                
+                await db.collection('userDrops').add(testDrop);
+                
+                console.log('✅ Test Melk Drop created:', testDrop.name);
+                showMessage('✅ Test Melk Drop erfolgreich erstellt! (Stift Melk)', false);
+                
+                // Reload all drop lists
+                console.log('🔄 Reloading drop lists...');
+                
+                // Reload User Drops for Upload
+                if (typeof loadUserDropsForUpload === 'function') {
+                    await loadUserDropsForUpload();
+                }
+                
+                // Reload User GeoDrops table
+                if (typeof loadUserGeoDrops === 'function') {
+                    await loadUserGeoDrops();
+                }
+                
+                // Reload all GeoDrops for map
+                if (typeof loadGeoDrops === 'function') {
+                    await loadGeoDrops();
+                }
+                
+                console.log('✅ All drop lists reloaded');
+                
+            } catch (error) {
+                console.error('❌ Error creating test Melk Drop:', error);
+                showMessage('❌ Fehler beim Erstellen des Test Melk Drops: ' + error.message, true);
+            }
+        };
+
+        // Test function - Create only ONE Austria Tourist Drop (directly in GeoCard)
+        window.createTestAustriaDrop = async function() {
+            console.log('🧪 Creating TEST Austria Tourist Drop...');
+            
+            if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+                showMessage('❌ Dev-Zugang erforderlich!', true);
+                return;
+            }
+            
+            try {
+                const db = window.firebase.firestore();
+                
+                // Download and upload reference image to Firebase Storage
+                console.log('📥 Downloading reference image...');
+                const imageResponse = await fetch('https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop');
+                const imageBlob = await imageResponse.blob();
+                
+                // Upload to Firebase Storage
+                const storage = window.firebase.storage();
+                const storageRef = storage.ref();
+                const imageRef = storageRef.child(`referenzbilder_userdrop/Schloss_Schönbrunn.jpg`);
+                
+                console.log('📤 Uploading reference image to Firebase Storage...');
+                const uploadTask = await imageRef.put(imageBlob);
+                const downloadURL = await uploadTask.ref.getDownloadURL();
+                
+                // Calculate hash for image comparison
+                const arrayBuffer = await imageBlob.arrayBuffer();
+                const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const imageHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                
+                console.log('🔐 Reference image hash calculated:', imageHash);
+                console.log('✅ Reference image uploaded:', downloadURL);
+                
+                // Test drop - Schloss Schönbrunn in Wien
+                const testDrop = {
+                    name: 'Austria-Wien-Test-1',
+                    description: '🇦🇹 Schloss Schönbrunn - Wien (TEST)',
+                    photoDescription: 'Fotografiere das Schloss Schönbrunn mit seiner barocken Fassade und den prächtigen Gärten. Das Schloss sollte vollständig sichtbar sein.',
+                    reward: 10,
+                    lat: 48.1833,
+                    lng: 16.3167,
+                    createdBy: 'austria-tourist-system',
+                    createdByName: 'Austria Tourist System',
+                    createdAt: new Date(),
+                    isActive: true,
+                    isAvailable: true,
+                    geodropNumber: '1',
+                    collection: 'userDrops',
+                    referenceImage: 'Schloss_Schönbrunn.jpg',
+                    referenceImageUrl: downloadURL, // Firebase Storage URL
+                    referenceImageHash: imageHash, // SHA-256 hash for comparison
+                    isAustriaTouristDrop: true,
+                    federalState: 'Wien'
+                };
+                
+                await db.collection('userDrops').add(testDrop);
+                
+                console.log('✅ Test Austria Drop created:', testDrop.name);
+                showMessage('✅ Test Austria Drop erfolgreich erstellt! (Schloss Schönbrunn)', false);
+                
+                // Reload drops if function exists
+                if (typeof loadAllUserDrops === 'function') {
+                    loadAllUserDrops();
+                }
+                
+            } catch (error) {
+                console.error('❌ Error creating test Austria Drop:', error);
+                showMessage('❌ Fehler beim Erstellen des Test Austria Drops: ' + error.message, true);
+            }
+        };
+    </script>
+    
+    <!-- Firebase SDK wird bereits in firebase.js geladen -->
+    <style>
+        #mapid {
+            height: 400px;
+            width: 100%;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-marker {
+            font-size: 24px;
+            text-align: center;
+            line-height: 30px;
+        }
+        
+        .drop-marker {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .drop-marker:hover {
+            transform: scale(1.2);
+        }
+        
+        .dev-drop-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .dev-drop-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        .dev-drop-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="max-w-6xl mx-auto p-6">
+        <h2 class="text-3xl font-bold text-white mb-8">
+            <span style="background: rgba(0, 0, 0, 0.7); padding: 8px 12px; border-radius: 8px; display: inline-block;">🗺️ GeoCard</span>
+        </h2>
+        
+        <!-- Map Container -->
+        <div class="bg-gray-700 rounded-lg p-6 mb-6">
+            <h3 class="text-xl font-semibold text-white mb-4">🌍 Interaktive Karte</h3>
+            <div id="mapid"></div>
+            
+            <!-- Map Legend and User Drop Creation Buttons -->
+            <div class="mt-4 text-center space-x-3">
+                <button onclick="showMapLegendPopup()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                    🗺️ Karten-Legende anzeigen
+                </button>
+                <button onclick="showCreateUserDropModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    ➕ User Drop erstellen
+                </button>
+            </div>
+        </div>
+        
+        <!-- Location & Photo Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-700 rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-white mb-4">📍 Standort</h3>
+                <button onclick="getUserLocation()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mb-4">
+                    📍 Meinen Standort verwenden
+                </button>
+                <div id="location-info" class="text-sm text-gray-300">
+                    <p>Klicke auf den Button um deine aktuelle Position zu laden</p>
+                </div>
+            </div>
+            
+            <div class="bg-gray-700 rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-white mb-4">📸 Foto-Upload</h3>
+                
+                <!-- Drop Selection -->
+                <div class="mb-4">
+                    <label for="geocard-drop-select" class="block text-sm font-medium text-gray-300 mb-2">
+                        GeoDrop auswählen:
+                    </label>
+                
+                <!-- Upload List Type Toggle -->
+                <div class="mb-3">
+                    <div class="flex bg-gray-600 rounded-lg p-1">
+                        <button id="upload-dev-drops-btn" onclick="switchToUploadListType('dev')" class="flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-blue-600 text-white">
+                            🎯 Dev Drops
+                        </button>
+                        <button id="upload-user-drops-btn" onclick="switchToUploadListType('user')" class="flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white">
+                            👤 User Drops
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Dev Drops Select -->
+                <div id="upload-dev-drops-section">
+                    <select id="geocard-drop-select" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white" onchange="updateClaimButton()">
+                        <option value="">Dev GeoDrop auswählen...</option>
+                        <option value="devDrops:dev1">🎯 Dev GeoDrop1 - 100 PixelDrops</option>
+                        <option value="devDrops:dev2">🎯 Dev GeoDrop2 - 100 PixelDrops</option>
+                        <option value="devDrops:dev3">🎯 Dev GeoDrop3 - 100 PixelDrops</option>
+                        <option value="devDrops:dev4">🎯 Dev GeoDrop4 - 100 PixelDrops</option>
+                        <option value="devDrops:dev5">🎯 Dev GeoDrop5 - 100 PixelDrops</option>
+                        <option value="devDrops:dev6">🎯 Dev GeoDrop6 - 100 PixelDrops</option>
+                        <option value="devDrops:dev7">🎯 Dev GeoDrop7 - 100 PixelDrops</option>
+                        <option value="devDrops:dev8">🎯 Dev GeoDrop8 - 100 PixelDrops</option>
+                    </select>
+                </div>
+                
+                <!-- User Drops Select -->
+                <div id="upload-user-drops-section" style="display: none;">
+                    <select id="geocard-user-drop-select" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white" onchange="updateClaimButton()">
+                        <option value="">Lade User GeoDrops...</option>
+                    </select>
+                </div>
+                
+                    <!-- Hidden input for drop ID -->
+                    <input type="hidden" id="selected-drop-id" value="">
+                </div>
+                
+                <!-- Dev Coordinates Input (nur für Dev-User) -->
+                <div id="dev-drop-selection" class="mb-4 p-3 bg-yellow-900 border border-yellow-600 rounded" style="display: none;">
+                    <label class="block text-sm font-medium text-yellow-300 mb-2 font-bold">
+                        🔧 DEV: Test-Koordinaten eingeben:
+                    </label>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <div>
+                            <label for="dev-test-lat" class="block text-xs text-yellow-300 mb-1">Breitengrad:</label>
+                            <input type="number" id="dev-test-lat" step="0.000001" placeholder="52.123456" class="w-full p-2 bg-gray-600 border border-yellow-500 rounded text-white text-sm" onkeypress="if(event.key === 'Enter') setDevTestCoordinates()">
+                        </div>
+                        <div>
+                            <label for="dev-test-lng" class="block text-xs text-yellow-300 mb-1">Längengrad:</label>
+                            <input type="number" id="dev-test-lng" step="0.000001" placeholder="13.123456" class="w-full p-2 bg-gray-600 border border-yellow-500 rounded text-white text-sm" onkeypress="if(event.key === 'Enter') setDevTestCoordinates()">
+                        </div>
+                    </div>
+                    <button onclick="setDevTestCoordinates()" class="w-full px-3 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm">
+                        📍 Test-Koordinaten setzen
+                    </button>
+                    <p class="text-yellow-300 text-sm mt-1">⚠️ Nur für Dev-Tests - normale User sehen dies nicht!</p>
+                    
+                    <!-- Test Drop Buttons -->
+                    <div class="mt-3 space-y-2">
+                        <button onclick="createTestMelkDrop()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
+                            🏛️ Test-Drop: Stift Melk erstellen
+                        </button>
+                        <button onclick="createTestAustriaDrop()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+                            🏰 Test-Drop: Schloss Schönbrunn erstellen
+                        </button>
+                        <button onclick="createAllAustrianStateDrops()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
+                            🇦🇹 Alle 9 Bundesländer-Drops erstellen
+                        </button>
+                        <button onclick="createRemainingAustrianDrops()" class="w-full px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm">
+                            🚀 Restliche 8 Bundesländer-Drops erstellen
+                        </button>
+                        <button onclick="reloadAllDropLists()" class="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
+                            🔄 Alle Listen neu laden
+                        </button>
+                        <button onclick="clearUserDropLists()" class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
+                            🧹 User Drop Listen leeren
+                        </button>
+                        <button onclick="restoreUserDropLists()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+                            🔄 User Drop Listen wiederherstellen
+                        </button>
+                        <button onclick="checkUserDropCount()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
+                            📊 User Drop Anzahl prüfen
+                        </button>
+                        <button onclick="cleanupDuplicateUserDrops()" class="w-full px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm">
+                            🧹 Duplikate bereinigen
+                        </button>
+                        <button onclick="createMissingDrop1()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+                            🏛️ Drop Nr. 1 (Stift Melk) erstellen
+                        </button>
+                    </div>
+                </div>
+                
+                <input type="file" id="photo-input" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoFileSelect()">
+                <button onclick="handlePhotoCapture()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4">
+                    📸 Foto aufnehmen
+                </button>
+                
+                <!-- Debug Button -->
+                <button onclick="debugUploadProcess()" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors mb-4">
+                    🔍 Upload Debug
+                </button>
+                
+                <div id="photo-preview" class="mt-4"></div>
+            </div>
+        </div>
+        
+        <!-- Dev Coordinate Adjustment Section -->
+        <div class="bg-gray-700 rounded-lg p-6 mt-6">
+            <h3 class="text-xl font-semibold text-white mb-4">🎯 Dev Koordinaten-Anpassung</h3>
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Breitengrad (Lat)</label>
+                        <input type="number" id="dev-lat-input" step="0.000001" class="w-full px-3 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="z.B. 52.520008">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Längengrad (Lng)</label>
+                        <input type="number" id="dev-lng-input" step="0.000001" class="w-full px-3 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="z.B. 13.404954">
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <button id="dev-coords-btn" class="dev-drop-btn flex-1" onclick="setDevCoordinates()" disabled>
+                    🔒 Admin-Modus erforderlich
+                </button>
+                    <button onclick="resetToCurrentLocation()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors">
+                        📍 Aktuelle Position
+                </button>
+        </div>
+            <div class="text-sm text-gray-400">
+                <p>Admin-Status: <span id="admin-status">Inaktiv (nur mit Admin-Passwort)</span></p>
+                    <p>Dev-Koordinaten: <span id="dev-coords-status">Nicht gesetzt</span></p>
+                </div>
+                <div class="mt-4" id="dev-session-section" style="display: none;">
+                    <button onclick="endDevSession()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
+                        🔒 Dev-Session beenden
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- GeoDrops Table -->
+        <div class="bg-gray-700 rounded-lg p-6 mt-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-white">📋 GeoDrops Übersicht</h3>
+                <button onclick="loadGeoDrops()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    🔄 Drops neu laden
+                </button>
+            </div>
+            
+            <!-- List Type Toggle -->
+            <div class="mb-6">
+                <div class="flex bg-gray-600 rounded-lg p-1">
+                    <button id="dev-drops-btn" onclick="switchToListType('dev')" class="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white">
+                        🎯 Dev GeoDrops
+                    </button>
+                    <button id="user-drops-btn" onclick="switchToListType('user')" class="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-300 hover:text-white">
+                        👤 User GeoDrops
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Dev GeoDrops Table -->
+            <div id="dev-drops-section" style="display: block;">
+                <div id="geodrops-table" class="mt-4">
+                    <div class="text-center text-gray-400 py-4">
+                        <p>Lade Dev GeoDrops-Tabelle...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+                // Load dev drops table immediately when page loads
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Force show dev drops section immediately
+                    const devSection = document.getElementById('dev-drops-section');
+                    const userSection = document.getElementById('user-drops-section');
+                    if (devSection && userSection) {
+                        devSection.style.display = 'block';
+                        userSection.style.display = 'none';
+                        console.log('✅ HTML: Forced dev drops section to be visible');
+                    }
+                    
+                    // Load immediately
+                    if (typeof window.loadDevGeoDrops === 'function') {
+                        console.log('🔄 Auto-loading Dev GeoDrops table...');
+                        window.loadDevGeoDrops();
+                    }
+                    
+                    // KOPIERTE LÖSUNG: Auch Upload-Liste sofort laden
+                    if (typeof window.loadDevDropsForUpload === 'function') {
+                        console.log('🔄 Auto-loading Dev Drops for Upload...');
+                        window.loadDevDropsForUpload();
+                    }
+                    
+                    // Upload-Sektion sofort anzeigen
+                    const uploadDevSection = document.getElementById('upload-dev-drops-section');
+                    const uploadUserSection = document.getElementById('upload-user-drops-section');
+                    if (uploadDevSection && uploadUserSection) {
+                        uploadDevSection.style.display = 'block';
+                        uploadUserSection.style.display = 'none';
+                        console.log('✅ Upload dev section shown immediately');
+                    }
+                    
+                    // Firebase is already ready, no delay needed
+                });
+            </script>
+            
+            <!-- User GeoDrops Table -->
+            <div id="user-drops-section" style="display: none;">
+                <div id="user-drops-table" class="mt-4">
+                    <div class="text-center text-gray-400 py-4">
+                        <p>Lade User GeoDrops-Tabelle...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create User Drop Modal -->
+    <div id="create-user-drop-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; overflow-y: auto;">
+        <div style="display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 2px;">
+            <div style="background: #374151; border-radius: 8px; max-width: 600px; width: 100%; padding: 12px; max-height: 99vh; overflow-y: auto; margin-top: 5px; margin-bottom: 5px;">
+                <h2 style="color: white; font-size: 20px; font-weight: bold; margin-bottom: 12px; text-align: center;">➕ User GeoDrop erstellen</h2>
+                
+                <div style="space-y: 16px;">
+                    <!-- Drop Name -->
+                    <div>
+                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">🎯 Drop Name:</label>
+                        <input type="text" id="user-drop-name" placeholder="z.B. Historisches Gebäude" style="width: 100%; padding: 10px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 14px;">
+                    </div>
+                    
+                    <!-- Photo Description -->
+                    <div>
+                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">📸 Was soll fotografiert werden:</label>
+                        <textarea id="user-drop-description" placeholder="Beschreibe genau, was an diesem Standort fotografiert werden soll..." style="width: 100%; padding: 10px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 14px; height: 70px; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <!-- Reference Image Upload -->
+                    <div>
+                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">🖼️ Referenzbild hochladen:</label>
+                        <input type="file" id="user-drop-reference-image" accept="image/*" style="width: 100%; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
+                        <p style="color: #9CA3AF; font-size: 12px; margin-top: 4px;">Lade ein Referenzbild hoch, das zeigt was fotografiert werden soll</p>
+                        <div id="user-drop-image-preview" style="margin-top: 8px; display: none;">
+                            <img id="user-drop-preview-img" style="max-width: 200px; max-height: 150px; border-radius: 6px; border: 1px solid #6B7280;">
+                        </div>
+                    </div>
+                    
+                    <!-- Reward -->
+                    <div>
+                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">💰 Belohnung (PixelDrops):</label>
+                        <input type="number" id="user-drop-reward" value="10" min="10" max="10" readonly style="width: 100%; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
+                        <p style="color: #9CA3AF; font-size: 12px; margin-top: 4px;">User Drops sind auf 10 PixelDrops fixiert</p>
+                    </div>
+                    
+                    <!-- Current Location -->
+                    <div>
+                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">📍 Standort:</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="number" id="user-drop-lat" step="0.000001" placeholder="Breitengrad" readonly style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
+                            <input type="number" id="user-drop-lng" step="0.000001" placeholder="Längengrad" readonly style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
+                        </div>
+                        <button onclick="useCurrentLocationForUserDrop()" style="margin-top: 8px; padding: 8px 16px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            📍 Aktuelle Position verwenden
+                        </button>
+                        <p style="color: #9CA3AF; font-size: 12px; margin-top: 4px;">Standort wird automatisch von deiner aktuellen Position übernommen</p>
+                    </div>
+                    
+                    <!-- Dev Coordinates (only for Dev users) -->
+                    <div id="dev-coordinates-section" style="display: none;">
+                        <label style="color: #FBBF24; font-weight: bold; margin-bottom: 8px; display: block;">🔧 DEV: Test-Koordinaten:</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="number" id="dev-user-drop-lat" step="0.000001" placeholder="Dev Breitengrad" style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #FBBF24; border-radius: 6px; color: white; font-size: 16px;">
+                            <input type="number" id="dev-user-drop-lng" step="0.000001" placeholder="Dev Längengrad" style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #FBBF24; border-radius: 6px; color: white; font-size: 16px;">
+                        </div>
+                        <p style="color: #FBBF24; font-size: 12px; margin-top: 4px;">⚠️ Nur für Dev-Tests - normale User sehen dies nicht!</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 8px; margin-top: 16px; margin-bottom: 20px; padding-bottom: 10px;">
+                    <button onclick="createUserDrop()" style="flex: 1; padding: 12px; background: #10B981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; min-height: 48px;">
+                        ✅ User Drop erstellen
+                    </button>
+                    <button onclick="closeCreateUserDropModal()" style="flex: 1; padding: 12px; background: #6B7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; min-height: 48px;">
+                        ❌ Abbrechen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Map Legend Popup -->
+    <div id="map-legend-popup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; overflow-y: auto;">
+        <div style="display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 5px;">
+            <div style="background: #374151; border-radius: 8px; max-width: 500px; width: 100%; padding: 16px; max-height: 98vh; overflow-y: auto; margin-top: 10px; margin-bottom: 10px;">
+                <h2 style="color: white; font-size: 20px; font-weight: bold; margin-bottom: 12px; text-align: center;">🗺️ Karten-Legende</h2>
+                <div style="space-y: 12px;">
+                    <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: #4B5563; border-radius: 6px;">
+                        <span style="font-size: 24px; margin-right: 12px;">📍</span>
+                        <div>
+                            <div style="color: white; font-weight: bold;">Dein Standort</div>
+                            <div style="color: #9CA3AF; font-size: 14px;">Deine aktuelle GPS-Position</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: #4B5563; border-radius: 6px;">
+                        <span style="font-size: 20px; margin-right: 12px;">🎯</span>
+                        <div>
+                            <div style="color: white; font-weight: bold;">Normale GeoDrops</div>
+                            <div style="color: #9CA3AF; font-size: 14px;">Kleine Dart-Scheibe - Offizielle GeoDrops</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: #4B5563; border-radius: 6px;">
+                        <span style="font-size: 24px; margin-right: 12px;">👤</span>
+                        <div>
+                            <div style="color: white; font-weight: bold;">User GeoDrops</div>
+                            <div style="color: #9CA3AF; font-size: 14px;">Mittlere Größe - Von Spielern erstellte GeoDrops</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: #4B5563; border-radius: 6px;">
+                        <span style="font-size: 28px; margin-right: 12px;">🎯</span>
+                        <div>
+                            <div style="color: white; font-weight: bold;">Dev GeoDrop</div>
+                            <div style="color: #9CA3AF; font-size: 14px;">Größere Dart-Scheibe (2.5x größer) - Entwickler-Test-Drops</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: #4B5563; border-radius: 6px;">
+                        <span style="font-size: 24px; margin-right: 12px; filter: grayscale(100%) opacity(0.5);">🎯</span>
+                        <div>
+                            <div style="color: white; font-weight: bold;">Heute gesammelt</div>
+                            <div style="color: #9CA3AF; font-size: 14px;">Graue Dart-Scheibe - Heute bereits gesammelt</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="closeMapLegendPopup()" style="background: #6B7280; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold;">Schließen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Firebase Config from global CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbaHV1OY9C_MUt4o3WTkHCGlRVt7ll9UA",
+            authDomain: "geodrop-f3ee1.firebaseapp.com",
+            projectId: "geodrop-f3ee1",
+            storageBucket: "geodrop-f3ee1.firebasestorage.app",
+            messagingSenderId: "1054615552034",
+            appId: "1:1054615552034:web:8d61c64b5296f4e0cc4a7b",
+            measurementId: "G-RBEJES6HX1"
+        };
+
+        // Initialize Firebase - NUR wenn noch nicht initialisiert
+        let app, db, storage, auth;
+        
+        try {
+            // Prüfen ob Firebase bereits initialisiert ist
+            if (firebase.apps.length === 0) {
+                app = firebase.initializeApp(firebaseConfig);
+                console.log("✅ Firebase initialized successfully in GeoCard");
+            } else {
+                app = firebase.app();
+                console.log("✅ Firebase already initialized, using existing app");
+            }
+            
+            db = firebase.firestore();
+            storage = firebase.storage();
+            auth = firebase.auth();
+        } catch (error) {
+            console.error("❌ Firebase initialization failed in GeoCard:", error);
+        }
+        
+        // Make Firebase services globally available - NUR wenn noch nicht gesetzt
+        if (!window.auth) window.auth = auth;
+        if (!window.db) window.db = db;
+        if (!window.storage) window.storage = storage;
+        if (!window.firebase) window.firebase = firebase;
+
+        // Global variables for GeoCard
+        let map;
+        let userMarker;
+        let dropMarkers = [];
+        let currentUser = null;
+        let userProfile = null;
+        let username = 'KryptoGuru'; // Default username
+        
+        // Initialize GeoCard when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🗺️ GeoCard page loaded, initializing...');
+            
+            // Check Dev status from localStorage first
+            const savedDevStatus = localStorage.getItem('devLoggedIn');
+            const savedDevTimestamp = localStorage.getItem('devLoginTimestamp');
+            const currentTime = Date.now();
+            const sessionTimeout = 2 * 60 * 60 * 1000; // 2 hours
+            
+            if (savedDevStatus === 'true' && savedDevTimestamp) {
+                const timeDiff = currentTime - parseInt(savedDevTimestamp);
+                if (timeDiff < sessionTimeout) {
+                    console.log('🔓 Valid dev session found - restoring');
+                    window.isDevLoggedIn = true;
+                    window.isAdmin = true;
+                    window.isDevLoggedIn = true;
+                    console.log('🔓 Dev status: restored from session');
+                } else {
+                    console.log('⏰ Dev session expired - removing');
+                    localStorage.removeItem('devLoggedIn');
+                    localStorage.removeItem('devLoginTimestamp');
+                    window.isDevLoggedIn = false;
+                    window.isAdmin = false;
+                }
+            } else {
+                window.isDevLoggedIn = false;
+                window.isAdmin = false;
+            }
+            
+            // Initialize Dev status
+            if (typeof window.initializeDevStatus === 'function') {
+                await window.initializeDevStatus();
+            }
+            
+            initializeGeoCard();
+            
+            // Initialize upload list type
+            window.currentUploadListType = 'dev';
+            
+            // KOPIERTE LÖSUNG: Genau wie die funktionierende Liste unten
+            console.log('🔄 Auto-loading Dev Drops for Upload...');
+            
+            // Load immediately - GENAU WIE DIE FUNKTIONIERENDE LISTE
+            if (typeof window.loadDevDropsForUpload === 'function') {
+                console.log('🔄 Auto-loading Dev Drops for Upload...');
+                window.loadDevDropsForUpload();
+            } else {
+                console.log('❌ loadDevDropsForUpload function not available yet');
+            }
+            
+            // Zusätzliche Sicherheit: Direkter Aufruf nach kurzer Verzögerung
+            setTimeout(() => {
+                console.log('🔄 Retry: Loading Dev Drops for Upload...');
+                if (typeof window.loadDevDropsForUpload === 'function') {
+                    window.loadDevDropsForUpload();
+                } else {
+                    console.log('❌ loadDevDropsForUpload function still not available');
+                }
+            }, 1000);
+            // Load dev drops table by default
+            if (typeof window.loadDevGeoDrops === 'function') {
+                window.loadDevGeoDrops();
+            }
+            
+            // Load all user drops
+            if (typeof window.loadAllUserDrops === 'function') {
+                console.log('🔄 Loading all user drops...');
+                window.loadAllUserDrops();
+            }
+            
+            // Ensure current list type is set
+            window.currentListType = 'dev';
+            
+            // Show dev drops section and table immediately
+            const devSection = document.getElementById('dev-drops-section');
+            const userSection = document.getElementById('user-drops-section');
+            const devDropsTable = document.getElementById('dev-drops-table');
+            const userDropsTable = document.getElementById('user-drops-table');
+            
+            if (devSection && userSection) {
+                devSection.style.display = 'block';
+                userSection.style.display = 'none';
+                console.log('✅ Dev drops section shown immediately');
+            }
+            
+            if (devDropsTable && userDropsTable) {
+                devDropsTable.style.display = 'block';
+                userDropsTable.style.display = 'none';
+                console.log('✅ Dev drops table shown immediately');
+            }
+            
+            // Load upload dropdown immediately
+            if (typeof window.loadDevDropsForUpload === 'function') {
+                console.log('🔄 Calling loadDevDropsForUpload immediately...');
+                window.loadDevDropsForUpload();
+            } else {
+                console.log('❌ loadDevDropsForUpload function not available');
+            }
+            
+            // Upload-Sektion anzeigen - GENAU WIE DIE FUNKTIONIERENDE LISTE
+            const uploadDevSection = document.getElementById('upload-dev-drops-section');
+            const uploadUserSection = document.getElementById('upload-user-drops-section');
+            if (uploadDevSection && uploadUserSection) {
+                uploadDevSection.style.display = 'block';
+                uploadUserSection.style.display = 'none';
+                console.log('✅ Upload dev section shown immediately');
+            }
+            
+            // Force load upload dropdown after Firebase is ready
+            setTimeout(() => {
+                if (typeof window.loadDevDropsForUpload === 'function') {
+                    console.log('🔄 Force loading upload dropdown after Firebase ready...');
+                    window.loadDevDropsForUpload();
+                } else {
+                    console.log('❌ loadDevDropsForUpload function not available in timeout');
+                }
+            }, 2000);
+            
+            // Show dev drops section immediately
+            const devSectionFinal = document.getElementById('dev-drops-section');
+            const userSectionFinal = document.getElementById('user-drops-section');
+            if (devSectionFinal && userSectionFinal) {
+                devSectionFinal.style.display = 'block';
+                userSectionFinal.style.display = 'none';
+                console.log('✅ Dev drops section shown immediately');
+            }
+        });
+        
+        // Initialize GeoCard
+        function initializeGeoCard() {
+            console.log('🗺️ Initializing GeoCard...');
+            
+            // Initialize map
+            initializeMap();
+            
+            // Get user location immediately
+            console.log('🗺️ Getting user location...');
+            getUserLocation();
+            
+            // Update dev drop button immediately
+            console.log('🗺️ Updating dev drop button...');
+            updateDevDropButton();
+        }
+        
+        // Map functions
+        function initializeMap() {
+            if (map) return;
+            
+            console.log('🗺️ Creating map...');
+            // Initialize map with a neutral view (world view)
+            map = L.map('mapid').setView([20, 0], 2);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            console.log('🗺️ Map initialized');
+        }
+        
+        // Last known location storage
+        function saveLastKnownLocation(lat, lng, accuracy) {
+            const locationData = {
+                lat: lat,
+                lng: lng,
+                accuracy: accuracy,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('geodrop_last_location', JSON.stringify(locationData));
+            console.log('💾 Last known location saved:', locationData);
+        }
+        
+        function getLastKnownLocation() {
+            try {
+                const saved = localStorage.getItem('geodrop_last_location');
+                if (saved) {
+                    const locationData = JSON.parse(saved);
+                    const savedTime = new Date(locationData.timestamp);
+                    const now = new Date();
+                    const hoursDiff = (now - savedTime) / (1000 * 60 * 60);
+                    
+                    // Use saved location if it's less than 24 hours old
+                    if (hoursDiff < 24) {
+                        console.log('📍 Using last known location:', locationData);
+                        return locationData;
+                    } else {
+                        console.log('⏰ Last known location too old, ignoring');
+                        localStorage.removeItem('geodrop_last_location');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error reading last known location:', error);
+                localStorage.removeItem('geodrop_last_location');
+            }
+            return null;
+        }
+        
+        function useLastKnownLocation() {
+            const lastLocation = getLastKnownLocation();
+            if (lastLocation) {
+                console.log('📍 Using last known location as fallback');
+                
+                // Update map view to last known location
+                map.setView([lastLocation.lat, lastLocation.lng], 16);
+                console.log(`🗺️ Map view updated to last known: ${lastLocation.lat}, ${lastLocation.lng}`);
+                
+                // Add or update user marker
+                if (userMarker) {
+                    userMarker.setLatLng([lastLocation.lat, lastLocation.lng]);
+                    console.log('📍 User marker updated to last known location');
+                } else {
+                    userMarker = L.marker([lastLocation.lat, lastLocation.lng], {
+                        icon: L.divIcon({
+                            className: 'user-marker',
+                            html: '📍',
+                            iconSize: [30, 30]
+                        })
+                    }).addTo(map);
+                    console.log('📍 New user marker created for last known location');
+                }
+                
+                // Update location info
+                const locationInfo = document.getElementById('location-info');
+                if (locationInfo) {
+                    const savedTime = new Date(lastLocation.timestamp);
+                    locationInfo.innerHTML = `
+                        <p><strong>Breitengrad:</strong> ${lastLocation.lat.toFixed(6)}</p>
+                        <p><strong>Längengrad:</strong> ${lastLocation.lng.toFixed(6)}</p>
+                        <p><strong>Genauigkeit:</strong> ±${Math.round(lastLocation.accuracy)}m</p>
+                        <p class="text-yellow-400"><strong>⚠️ Letzter bekannter Standort</strong></p>
+                        <p class="text-sm text-gray-400">Gespeichert: ${savedTime.toLocaleString()}</p>
+                    `;
+                    console.log('📍 Location info updated with last known location');
+                }
+                
+                showMessage('📍 Letzter bekannter Standort verwendet');
+                return true;
+            }
+            return false;
+        }
+
+        function getUserLocation() {
+            console.log('📍 getUserLocation() called');
+            
+            if (!map) {
+                console.log('❌ Map not available, showing message');
+                showMessage('Karte wird initialisiert...', true);
+                return;
+            }
+            
+            console.log('✅ Map available, checking geolocation support');
+            
+            if (navigator.geolocation) {
+                console.log('✅ Geolocation supported, requesting position...');
+                
+                // Try to get high accuracy position with timeout
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000 // Use cached position if less than 1 minute old
+                };
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        console.log(`📍 User location received: ${lat}, ${lng}`);
+                        console.log(`📍 Accuracy: ${position.coords.accuracy}m`);
+                        
+                        // Save this location as last known
+                        saveLastKnownLocation(lat, lng, position.coords.accuracy);
+                        
+                        // Update map view to user location
+                        map.setView([lat, lng], 16);
+                        console.log(`🗺️ Map view updated to: ${lat}, ${lng}`);
+                        
+                        // Add or update user marker
+                        if (userMarker) {
+                            userMarker.setLatLng([lat, lng]);
+                            console.log('📍 User marker updated');
+                        } else {
+                            userMarker = L.marker([lat, lng], {
+                                icon: L.divIcon({
+                                    className: 'user-marker',
+                                    html: '📍',
+                                    iconSize: [30, 30]
+                                })
+                            }).addTo(map);
+                            console.log('📍 New user marker created and added to map');
+                        }
+                        
+                        // Update location info
+                        const locationInfo = document.getElementById('location-info');
+                        if (locationInfo) {
+                            locationInfo.innerHTML = `
+                                <p><strong>Breitengrad:</strong> ${lat.toFixed(6)}</p>
+                                <p><strong>Längengrad:</strong> ${lng.toFixed(6)}</p>
+                                <p><strong>Genauigkeit:</strong> ±${Math.round(position.coords.accuracy)}m</p>
+                            `;
+                            console.log('📍 Location info updated');
+                        }
+                        
+                        console.log('✅ User location successfully set!');
+                        showMessage('Standort erfolgreich ermittelt!');
+                    },
+                    function(error) {
+                        console.error('❌ Geolocation error:', error);
+                        
+                        // Try to use last known location first
+                        if (useLastKnownLocation()) {
+                            return; // Successfully used last known location
+                        }
+                        
+                        // Show specific error message
+                        let errorMessage = 'Fehler beim Ermitteln des Standorts: ';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage += 'Standort-Zugriff verweigert. Bitte erlaube den Standort-Zugriff in deinem Browser.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage += 'Standort-Information nicht verfügbar.';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage += 'Zeitüberschreitung beim Ermitteln des Standorts.';
+                                break;
+                            default:
+                                errorMessage += error.message;
+                        }
+                        
+                        showMessage(errorMessage, true);
+                        
+                        // Update location info with error
+                        const locationInfo = document.getElementById('location-info');
+                        if (locationInfo) {
+                            locationInfo.innerHTML = `
+                                <p class="text-red-400">❌ Standort konnte nicht ermittelt werden</p>
+                                <p class="text-sm text-gray-400">Fehler: ${errorMessage}</p>
+                                <p class="text-sm text-gray-400">Versuche es erneut oder prüfe deine Browser-Einstellungen</p>
+                            `;
+                        }
+                    },
+                    options
+                );
+            } else {
+                console.log('❌ Geolocation not supported');
+                
+                // Try to use last known location
+                if (useLastKnownLocation()) {
+                    return; // Successfully used last known location
+                }
+                
+                showMessage('Geolocation wird nicht unterstützt.', true);
+            }
+        }
+        
+        // Real functions implementation
+        function showMessage(message, isError = false) {
+            console.log(isError ? '❌' : '✅', message);
+            // Use the global showMessage function if available
+            if (typeof window.showMessage === 'function') {
+                window.showMessage(message, isError);
+            }
+        }
+        
+        async function loadGeoDrops() {
+            console.log('🗺️ Loading GeoDrops...');
+            try {
+                if (!window.firebase || !window.firebase.firestore()) {
+                    console.log('❌ Firebase not available');
+                    return;
+                }
+                
+                const db = window.firebase.firestore();
+                
+                // Load only devDrops and userDrops (no more "geodrops" collection)
+                const devDropsSnapshot = await db.collection('devDrops').where('isAvailable', '==', true).get();
+                const userDropsSnapshot = await db.collection('userDrops').where('isActive', '==', true).get();
+                
+                const allDrops = [];
+                devDropsSnapshot.forEach(doc => {
+                    allDrops.push({ id: doc.id, ...doc.data(), collection: 'devDrops', isDevDrop: true });
+                });
+                userDropsSnapshot.forEach(doc => {
+                    allDrops.push({ id: doc.id, ...doc.data(), collection: 'userDrops', isDevDrop: false });
+                });
+                
+                // NOTE: Dropdown update removed - it was overwriting the upload dropdown
+                // The upload dropdown is managed by loadDevDropsForUpload() and loadUserDropsForUpload()
+                
+                // Add drop markers to map
+                addDropMarkersToMap(allDrops);
+                
+                console.log(`✅ Loaded ${allDrops.length} GeoDrops for map and dropdown`);
+            } catch (error) {
+                console.error('❌ Error loading GeoDrops:', error);
+                showMessage('Fehler beim Laden der GeoDrops', true);
+            }
+        }
+        
+        // Add drop markers to map
+        function addDropMarkersToMap(drops) {
+            console.log(`🗺️ Adding ${drops.length} drop markers to map`);
+            
+            // Clear existing drop markers
+            dropMarkers.forEach(marker => {
+                if (map && marker) {
+                    map.removeLayer(marker);
+                }
+            });
+            dropMarkers = [];
+            
+            // Add new markers
+            drops.forEach(drop => {
+                if (drop.lat && drop.lng && map) {
+                    const isDevDrop = drop.isDevDrop || drop.collection === 'devDrops';
+                    const markerIcon = L.divIcon({
+                        className: 'drop-marker',
+                        html: isDevDrop ? '🎯' : '🎯',
+                        iconSize: [25, 25],
+                        iconAnchor: [12, 12]
+                    });
+                    
+                    const marker = L.marker([drop.lat, drop.lng], { icon: markerIcon })
+                        .addTo(map)
+                        .bindPopup(`
+                            <div class="text-sm">
+                                <strong>${isDevDrop ? '🎯 Dev' : '🌍'} GeoDrop${drop.geodropNumber || drop.id}</strong><br>
+                                Reward: ${drop.reward || 100} PixelDrops<br>
+                                Status: ${drop.isClaimed ? '❌ Gesammelt' : '✅ Verfügbar'}<br>
+                                Koordinaten: ${drop.lat.toFixed(6)}, ${drop.lng.toFixed(6)}
+                            </div>
+                        `);
+                    
+                    dropMarkers.push(marker);
+                }
+            });
+            
+            console.log(`✅ Added ${dropMarkers.length} markers to map`);
+        }
+        
+        function updateDevDropButton() {
+            console.log('🔧 Updating dev drop button...');
+            const devBtn = document.getElementById('dev-drop-btn');
+            const adminBtn = document.getElementById('admin-toggle-btn');
+            const adminStatus = document.getElementById('admin-status');
+            const devSection = document.getElementById('dev-drop-selection');
+            
+            if (typeof window.isDevLoggedIn !== 'undefined' && window.isDevLoggedIn) {
+                if (devBtn) {
+                    devBtn.disabled = false;
+                    devBtn.textContent = '🎯 Dev Drop erstellen';
+                }
+                if (adminBtn) {
+                    adminBtn.textContent = '🔓 Admin-Modus deaktivieren';
+                    adminBtn.onclick = () => window.deauthorizeDev();
+                }
+                if (adminStatus) {
+                    adminStatus.textContent = 'Aktiv';
+                    adminStatus.className = 'text-green-400';
+                }
+                if (devSection) {
+                    devSection.style.display = 'block';
+                }
+            } else {
+                if (devBtn) {
+                    devBtn.disabled = true;
+                    devBtn.textContent = '🔒 Admin-Modus erforderlich';
+                }
+                if (adminBtn) {
+                    adminBtn.textContent = '🔓 Admin-Modus aktivieren';
+                    adminBtn.onclick = () => window.authorizeDev();
+                }
+                if (adminStatus) {
+                    adminStatus.textContent = 'Inaktiv';
+                    adminStatus.className = 'text-red-400';
+                }
+                if (devSection) {
+                    devSection.style.display = 'none';
+                }
+            }
+        }
+        
+        
+        function setDevTestCoordinates() {
+            console.log('🔧 Setting dev test coordinates');
+            const latInput = document.getElementById('dev-test-lat');
+            const lngInput = document.getElementById('dev-test-lng');
+            
+            if (latInput && lngInput && latInput.value && lngInput.value) {
+                const lat = parseFloat(latInput.value);
+                const lng = parseFloat(lngInput.value);
+                
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    // Set global coordinates for testing
+                    window.lastKnownLat = lat;
+                    window.lastKnownLng = lng;
+                    
+                    // Update map view
+                    if (map) {
+                        map.setView([lat, lng], 16);
+                    }
+                    
+                    showMessage(`📍 Test-Koordinaten gesetzt: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+                    console.log(`📍 Dev test coordinates set: ${lat}, ${lng}`);
+                } else {
+                    showMessage('❌ Ungültige Koordinaten!', true);
+                }
+            } else {
+                showMessage('❌ Bitte beide Koordinaten eingeben!', true);
+            }
+        }
+        
+        function createDevDrop() {
+            console.log('🎯 Creating dev drop');
+            if (typeof window.createDevDrop === 'function') {
+                window.createDevDrop();
+            } else {
+                showMessage('❌ Dev-Funktionen nicht verfügbar', true);
+            }
+        }
+        
+        
+        
+        // Map Legend Popup Functions
+        function showMapLegendPopup() {
+            const popup = document.getElementById('map-legend-popup');
+            if (popup) {
+                popup.style.display = 'block';
+            }
+        }
+        
+        function closeMapLegendPopup() {
+            const popup = document.getElementById('map-legend-popup');
+            if (popup) {
+                popup.style.display = 'none';
+            }
+        }
+        
+        // Close popup when clicking outside
+        document.addEventListener('click', function(event) {
+            const popup = document.getElementById('map-legend-popup');
+            if (popup && event.target === popup) {
+                closeMapLegendPopup();
+            }
+        });
+        
+        // List Type Switching Functions
+        window.currentListType = 'dev'; // Track current list type
+        window.currentUploadListType = 'dev'; // Track current upload list type
+
+        window.switchToListType = function(type) {
+            console.log(`🔄 Switching to ${type} drops list`);
+            
+            const devBtn = document.getElementById('dev-drops-btn');
+            const userBtn = document.getElementById('user-drops-btn');
+            const devSection = document.getElementById('dev-drops-section');
+            const userSection = document.getElementById('user-drops-section');
+            
+            if (type === 'dev') {
+                // Switch to dev drops
+                devBtn.className = 'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white';
+                devBtn.innerHTML = '🎯 Dev GeoDrops';
+                
+                userBtn.className = 'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-300 hover:text-white';
+                userBtn.innerHTML = '👤 User GeoDrops';
+                
+                devSection.style.display = 'block';
+                userSection.style.display = 'none';
+                window.currentListType = 'dev';
+                
+                // Load dev drops
+                loadDevGeoDrops();
+                
+                showMessage('🎯 Dev GeoDrops angezeigt', false);
+            } else if (type === 'user') {
+                // Switch to user drops
+                devBtn.className = 'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-300 hover:text-white';
+                devBtn.innerHTML = '🎯 Dev GeoDrops';
+                
+                userBtn.className = 'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors bg-green-600 text-white';
+                userBtn.innerHTML = '👤 User GeoDrops';
+                
+                devSection.style.display = 'none';
+                userSection.style.display = 'block';
+                window.currentListType = 'user';
+                
+                // Load user drops
+                loadUserGeoDrops();
+                
+                showMessage('👤 User GeoDrops angezeigt', false);
+            }
+        };
+        
+        // Upload List Type Switching Functions - Override to ensure they work
+        
+        // Load Dev Drops for Upload - KOPIERTE LÖSUNG
+        window.loadDevDropsForUpload = async function() {
+            console.log('🎯 Loading Dev Drops for Upload (KOPIERTE LÖSUNG)...');
+            console.log('🔍 Firebase available:', !!window.firebase);
+            console.log('🔍 Firestore available:', !!(window.firebase && window.firebase.firestore));
+            console.log('🔍 Select element:', document.getElementById('geocard-drop-select'));
+            
+            try {
+                if (!window.firebase || !window.firebase.firestore()) {
+                    console.log('❌ Firebase not available');
+                    return;
+                }
+                
+                const db = window.firebase.firestore();
+                console.log('🔍 DB object:', db);
+                
+                const devDropsSnapshot = await db.collection('devDrops').where('isAvailable', '==', true).get();
+                console.log('📊 Dev drops snapshot:', devDropsSnapshot.size, 'drops found');
+                
+                const devDrops = [];
+                devDropsSnapshot.forEach(doc => {
+                    devDrops.push({ id: doc.id, ...doc.data(), collection: 'devDrops' });
+                });
+                
+                console.log('📊 Dev drops array:', devDrops.length, 'drops');
+                
+                // Sort drops by geodropNumber
+                devDrops.sort((a, b) => {
+                    const numA = parseInt(a.geodropNumber) || parseInt(a.id) || 0;
+                    const numB = parseInt(b.geodropNumber) || parseInt(b.id) || 0;
+                    return numA - numB;
+                });
+                
+                // Update dev drops select - GENAU WIE DIE FUNKTIONIERENDE LISTE
+                const select = document.getElementById('geocard-drop-select');
+                console.log('🔍 Select element found:', !!select);
+                
+                if (select && devDrops.length > 0) {
+                    select.innerHTML = '<option value="">Dev GeoDrop auswählen...</option>';
+                    devDrops.forEach(drop => {
+                        const option = document.createElement('option');
+                        option.value = `${drop.collection}:${drop.id}`;
+                        option.textContent = `🎯 Dev GeoDrop${drop.geodropNumber || drop.id} - ${drop.reward || 100} PixelDrops`;
+                        select.appendChild(option);
+                    });
+                    console.log(`✅ Loaded ${devDrops.length} Dev Drops for Upload (KOPIERTE LÖSUNG)`);
+                } else if (select) {
+                    select.innerHTML = '<option value="">Keine Dev Drops verfügbar</option>';
+                    console.log('❌ No dev drops found for upload');
+                } else {
+                    console.log('❌ Select element not found!');
+                }
+            } catch (error) {
+                console.error('❌ Error loading Dev Drops for Upload (KOPIERTE LÖSUNG):', error);
+                showMessage('Fehler beim Laden der Dev Drops für Upload', true);
+                
+                const select = document.getElementById('geocard-drop-select');
+                if (select) {
+                    select.innerHTML = '<option value="">Fehler beim Laden</option>';
+                }
+            }
+        };
+        
+        // Load User Drops for Upload
+        window.loadUserDropsForUpload = async function() {
+            console.log('👤 Loading User Drops for Upload...');
+            try {
+                if (!window.firebase || !window.firebase.firestore()) {
+                    console.log('❌ Firebase not available');
+                    return;
+                }
+                
+                const db = window.firebase.firestore();
+                const userDropsSnapshot = await db.collection('userDrops').where('isActive', '==', true).get();
+                
+                const userDrops = [];
+                userDropsSnapshot.forEach(doc => {
+                    userDrops.push({ id: doc.id, ...doc.data(), collection: 'userDrops' });
+                });
+                
+                // Sort drops by geodropNumber
+                userDrops.sort((a, b) => {
+                    const numA = parseInt(a.geodropNumber) || parseInt(a.id) || 0;
+                    const numB = parseInt(b.geodropNumber) || parseInt(b.id) || 0;
+                    return numA - numB;
+                });
+                
+                // Update user drops select
+                const select = document.getElementById('geocard-user-drop-select');
+                if (select) {
+                    select.innerHTML = '<option value="">User GeoDrop auswählen...</option>';
+                    userDrops.forEach(drop => {
+                        const option = document.createElement('option');
+                        option.value = `${drop.collection}:${drop.id}`;
+                        option.textContent = `👤 User GeoDrop${drop.geodropNumber || drop.id} - ${drop.reward || 100} PixelDrops`;
+                        select.appendChild(option);
+                    });
+                }
+                
+                console.log(`✅ Loaded ${userDrops.length} User Drops for Upload`);
+            } catch (error) {
+                console.error('❌ Error loading User Drops for Upload:', error);
+                showMessage('Fehler beim Laden der User Drops für Upload', true);
+            }
+        };
+        
+        // Load Dev GeoDrops (only dev drops)
+        window.loadDevGeoDrops = async function() {
+            console.log('🎯 Loading Dev GeoDrops...');
+            try {
+                if (!window.firebase || !window.firebase.firestore()) {
+                    console.log('❌ Firebase not available');
+                    return;
+                }
+                
+                const db = window.firebase.firestore();
+                const devDropsSnapshot = await db.collection('devDrops').where('isAvailable', '==', true).get();
+                
+                const devDrops = [];
+                devDropsSnapshot.forEach(doc => {
+                    devDrops.push({ id: doc.id, ...doc.data(), collection: 'devDrops' });
+                });
+                
+                // Sort drops by geodropNumber
+                devDrops.sort((a, b) => {
+                    const numA = parseInt(a.geodropNumber) || parseInt(a.id) || 0;
+                    const numB = parseInt(b.geodropNumber) || parseInt(b.id) || 0;
+                    return numA - numB;
+                });
+                
+                // Update dev drops table
+                const table = document.getElementById('geodrops-table');
+                if (table && devDrops.length > 0) {
+                    // Get current user for status check
+                    let currentUser = window.currentUser;
+                    if (!currentUser && window.auth && window.auth.currentUser) {
+                        currentUser = window.auth.currentUser;
+                    }
+                    if (!currentUser && window.firebase && window.firebase.auth && window.firebase.auth().currentUser) {
+                        currentUser = window.firebase.auth().currentUser;
+                    }
+                    
+                    let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-600"><th class="text-left p-2">Nr.</th><th class="text-left p-2">Reward</th><th class="text-left p-2">Status</th><th class="text-left p-2">Typ</th><th class="text-center p-2">Icon</th><th class="text-left p-2">Koordinaten</th></tr></thead><tbody>';
+                    devDrops.forEach(drop => {
+                        const coords = drop.lat && drop.lng ? `${drop.lat.toFixed(4)}, ${drop.lng.toFixed(4)}` : 'N/A';
+                        // Check if claimed today with proper date comparison
+                        const today = new Date().toDateString();
+                        const lastClaimDate = drop.lastClaimDate ? drop.lastClaimDate.toDate().toDateString() : null;
+                        const isClaimedToday = lastClaimDate === today && drop.claimedBy === currentUser?.uid;
+                        const statusText = isClaimedToday ? '⏰ Heute gesammelt' : '✅ Verfügbar';
+                        const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-600' : 'border-b border-gray-700';
+                        const textClass = isClaimedToday ? 'text-gray-400' : 'text-white';
+                        tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${drop.geodropNumber || drop.id}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;
+                    });
+                    tableHTML += '</tbody></table></div>';
+                    table.innerHTML = tableHTML;
+                } else if (table) {
+                    table.innerHTML = '<div class="text-center text-gray-400 p-4">Keine Dev GeoDrops gefunden</div>';
+                }
+                
+                console.log(`✅ Loaded ${devDrops.length} Dev GeoDrops`);
+            } catch (error) {
+                console.error('❌ Error loading Dev GeoDrops:', error);
+                showMessage('Fehler beim Laden der Dev GeoDrops', true);
+                
+                const table = document.getElementById('geodrops-table');
+                if (table) {
+                    table.innerHTML = '<div class="text-center text-red-400 p-4">Fehler beim Laden der Dev GeoDrops</div>';
+                }
+            }
+        };
+        
+        // Load User GeoDrops (only user drops)
+        window.loadUserGeoDrops = async function() {
+            console.log('👤 Loading User GeoDrops...');
+            try {
+                if (!window.firebase || !window.firebase.firestore()) {
+                    console.log('❌ Firebase not available');
+                    return;
+                }
+                
+                const db = window.firebase.firestore();
+                
+                // Get current user
+                let currentUser = window.currentUser;
+                if (!currentUser && window.auth && window.auth.currentUser) {
+                    currentUser = window.auth.currentUser;
+                }
+                if (!currentUser && window.firebase && window.firebase.auth && window.firebase.auth().currentUser) {
+                    currentUser = window.firebase.auth().currentUser;
+                }
+                
+                if (!currentUser) {
+                    console.log('❌ User not logged in, cannot load user drops');
+                    const userDropsTable = document.getElementById('user-drops-table');
+                    if (userDropsTable) {
+                        userDropsTable.innerHTML = '<div class="text-center text-red-400 p-4">Bitte zuerst anmelden</div>';
+                    }
+                    return;
+                }
+                
+                // Load user's own drops (created by this user)
+                const userDropsSnapshot = await db.collection('userDrops')
+                    .where('createdBy', '==', currentUser.uid)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                const userDrops = [];
+                userDropsSnapshot.forEach(doc => {
+                    userDrops.push({ id: doc.id, ...doc.data(), collection: 'userDrops' });
+                });
+                
+                // Update user drops table
+                const userDropsTable = document.getElementById('user-drops-table');
+                if (userDropsTable && userDrops.length > 0) {
+                    let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-600"><th class="text-left p-2">Nr.</th><th class="text-left p-2">Reward</th><th class="text-left p-2">Status</th><th class="text-left p-2">Koordinaten</th><th class="text-left p-2">Erstellt</th><th class="text-center p-2">Icon</th><th class="text-left p-2">Aktionen</th></tr></thead><tbody>';
+                    userDrops.forEach(drop => {
+                        const coords = drop.lat && drop.lng ? `${drop.lat.toFixed(4)}, ${drop.lng.toFixed(4)}` : 'N/A';
+                        const createdDate = drop.createdAt ? drop.createdAt.toDate().toLocaleDateString() : 'N/A';
+                        const statusText = drop.isActive ? '✅ Aktiv' : '❌ Inaktiv';
+                        const statusClass = drop.isActive ? 'text-green-400' : 'text-red-400';
+                        tableHTML += `
+                            <tr class="border-b border-gray-700">
+                                <td class="p-2 text-white">${drop.geodropNumber || drop.id}</td>
+                                <td class="p-2 text-white">${drop.reward || 100}</td>
+                                <td class="p-2 ${statusClass}">${statusText}</td>
+                                <td class="p-2 text-xs text-white">${coords}</td>
+                                <td class="p-2 text-xs text-white">${createdDate}</td>
+                                <td class="p-2 text-center">
+                                    <span class="text-2xl">🎯</span>
+                                </td>
+                                <td class="p-2">
+                                    <button onclick="editUserDrop('${drop.id}')" class="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 mr-1">
+                                        ✏️
+                                    </button>
+                                    <button onclick="toggleUserDrop('${drop.id}', ${drop.isActive})" class="px-2 py-1 ${drop.isActive ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} text-white rounded text-xs">
+                                        ${drop.isActive ? '⏸️' : '▶️'}
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    tableHTML += '</tbody></table></div>';
+                    userDropsTable.innerHTML = tableHTML;
+                } else if (userDropsTable) {
+                    userDropsTable.innerHTML = '<div class="text-center text-gray-400 p-4">Keine User GeoDrops gefunden</div>';
+                }
+                
+                console.log(`✅ Loaded ${userDrops.length} User GeoDrops`);
+            } catch (error) {
+                console.error('❌ Error loading User GeoDrops:', error);
+                showMessage('Fehler beim Laden der User GeoDrops', true);
+                
+                const userDropsTable = document.getElementById('user-drops-table');
+                if (userDropsTable) {
+                    userDropsTable.innerHTML = '<div class="text-center text-red-400 p-4">Fehler beim Laden der User GeoDrops</div>';
+                }
+            }
+        };
+        
+        // User Drop Creation Modal Functions
+        
+        window.closeCreateUserDropModal = function() {
+            console.log('❌ Closing create user drop modal');
+            const modal = document.getElementById('create-user-drop-modal');
+            if (modal) {
+                modal.style.display = 'none';
+                console.log('✅ Modal closed successfully');
+            } else {
+                console.error('❌ Modal not found');
+            }
+        };
+        
+        window.useCurrentLocationForUserDrop = function() {
+            console.log('📍 Using current location for user drop');
+            if (window.currentLocation) {
+                document.getElementById('user-drop-lat').value = window.currentLocation.lat.toFixed(6);
+                document.getElementById('user-drop-lng').value = window.currentLocation.lng.toFixed(6);
+                showMessage('📍 Aktuelle Position verwendet', false);
+            } else {
+                showMessage('❌ Keine aktuelle Position verfügbar. Bitte zuerst Standort laden!', true);
+            }
+        };
+        
+        // Handle reference image upload and preview
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageInput = document.getElementById('user-drop-reference-image');
+            if (imageInput) {
+                imageInput.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        // Show preview
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const preview = document.getElementById('user-drop-image-preview');
+                            const previewImg = document.getElementById('user-drop-preview-img');
+                            if (preview && previewImg) {
+                                previewImg.src = e.target.result;
+                                preview.style.display = 'block';
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        });
+        
+        // Use the createUserDrop function from geocard.js
+        // This function is defined in geocard.js and will be used
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('create-user-drop-modal');
+            if (modal && event.target === modal) {
+                closeCreateUserDropModal();
+            }
+        });
+        
+        // Override functions to ensure they work
+        
+        window.switchToUploadListType = function(type) {
+            console.log(`🔄 Switching upload to ${type} drops list`);
+            
+            const devBtn = document.getElementById('upload-dev-drops-btn');
+            const userBtn = document.getElementById('upload-user-drops-btn');
+            const devSection = document.getElementById('upload-dev-drops-section');
+            const userSection = document.getElementById('upload-user-drops-section');
+            
+            if (type === 'dev') {
+                // Switch to dev drops for upload
+                devBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-blue-600 text-white';
+                devBtn.innerHTML = '🎯 Dev Drops';
+                
+                userBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white';
+                userBtn.innerHTML = '👤 User Drops';
+                
+                devSection.style.display = 'block';
+                userSection.style.display = 'none';
+                window.currentUploadListType = 'dev';
+                
+                // Load dev drops for upload
+                if (typeof window.loadDevDropsForUpload === 'function') {
+                    console.log('🔄 Calling loadDevDropsForUpload from switch...');
+                    window.loadDevDropsForUpload();
+                } else {
+                    console.log('❌ loadDevDropsForUpload function not available in switch');
+                }
+                
+                showMessage('🎯 Dev Drops für Upload ausgewählt', false);
+            } else if (type === 'user') {
+                // Switch to user drops for upload
+                devBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white';
+                devBtn.innerHTML = '🎯 Dev Drops';
+                
+                userBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-green-600 text-white';
+                userBtn.innerHTML = '👤 User Drops';
+                
+                devSection.style.display = 'none';
+                userSection.style.display = 'block';
+                window.currentUploadListType = 'user';
+                
+                // Load user drops for upload
+                if (typeof window.loadUserDropsForUpload === 'function') {
+                    window.loadUserDropsForUpload();
+                }
+                
+                showMessage('👤 User Drops für Upload ausgewählt', false);
+            }
+        };
+        
+        // Edit User Drop function
+        window.editUserDrop = function(dropId) {
+            console.log('✏️ Editing User Drop:', dropId);
+            
+            // Get current user
+            let currentUser = window.currentUser;
+            if (!currentUser && window.auth && window.auth.currentUser) {
+                currentUser = window.auth.currentUser;
+            }
+            if (!currentUser && window.firebase && window.firebase.auth && window.firebase.auth().currentUser) {
+                currentUser = window.firebase.auth().currentUser;
+            }
+            
+            if (!currentUser) {
+                showMessage('❌ Bitte zuerst anmelden!', true);
+                return;
+            }
+            
+            // Show edit modal with current drop data
+            showEditUserDropModal(dropId);
+        };
+        
+        // Show Edit User Drop Modal
+        window.showEditUserDropModal = async function(dropId) {
+            console.log('✏️ Showing edit user drop modal for:', dropId);
+            
+            try {
+                const db = window.firebase.firestore();
+                const dropDoc = await db.collection('userDrops').doc(dropId).get();
+                
+                if (!dropDoc.exists) {
+                    showMessage('❌ User Drop nicht gefunden!', true);
+                    return;
+                }
+                
+                const dropData = dropDoc.data();
+                
+                // Create edit modal
+                const editModal = document.createElement('div');
+                editModal.id = 'edit-user-drop-modal';
+                editModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: block;';
+                editModal.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+                        <div style="background: #374151; border-radius: 8px; max-width: 600px; width: 100%; padding: 24px;">
+                            <h2 style="color: white; font-size: 24px; font-weight: bold; margin-bottom: 16px; text-align: center;">✏️ User GeoDrop bearbeiten</h2>
+                            
+                            <div style="space-y: 16px;">
+                                <!-- Drop Name -->
+                                <div>
+                                    <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">🎯 Drop Name:</label>
+                                    <input type="text" id="edit-user-drop-name" value="${dropData.name || ''}" style="width: 100%; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
+                                </div>
+                                
+                                <!-- Photo Description -->
+                                <div>
+                                    <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">📸 Was soll fotografiert werden:</label>
+                                    <textarea id="edit-user-drop-description" style="width: 100%; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px; height: 80px; resize: vertical;">${dropData.description || ''}</textarea>
+                                </div>
+                                
+                                <!-- Reward -->
+                                <div>
+                                    <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">💰 Belohnung (PixelDrops):</label>
+                                    <input type="number" id="edit-user-drop-reward" value="${dropData.reward || 100}" min="10" max="1000" style="width: 100%; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
+                                </div>
+                                
+                                <!-- Coordinates -->
+                                <div>
+                                    <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">📍 Koordinaten:</label>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="number" id="edit-user-drop-lat" step="0.000001" value="${dropData.lat || ''}" style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
+                                        <input type="number" id="edit-user-drop-lng" step="0.000001" value="${dropData.lng || ''}" style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
+                                    </div>
+                                </div>
+                                
+                                <!-- Status -->
+                                <div>
+                                    <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">📊 Status:</label>
+                                    <select id="edit-user-drop-status" style="width: 100%; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
+                                        <option value="true" ${dropData.isActive ? 'selected' : ''}>✅ Aktiv</option>
+                                        <option value="false" ${!dropData.isActive ? 'selected' : ''}>❌ Inaktiv</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                                <button onclick="saveUserDropEdit('${dropId}')" style="flex: 1; padding: 12px; background: #10B981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold;">
+                                    ✅ Änderungen speichern
+                                </button>
+                                <button onclick="closeEditUserDropModal()" style="flex: 1; padding: 12px; background: #6B7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold;">
+                                    ❌ Abbrechen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(editModal);
+                
+            } catch (error) {
+                console.error('❌ Error loading user drop for edit:', error);
+                showMessage('❌ Fehler beim Laden des User Drops', true);
+            }
+        };
+        
+        // Close Edit User Drop Modal
+        window.closeEditUserDropModal = function() {
+            const modal = document.getElementById('edit-user-drop-modal');
+            if (modal) {
+                modal.remove();
+            }
+        };
+        
+        // Save User Drop Edit
+        window.saveUserDropEdit = async function(dropId) {
+            console.log('💾 Saving user drop edit:', dropId);
+            
+            // Get form data
+            const name = document.getElementById('edit-user-drop-name').value.trim();
+            const description = document.getElementById('edit-user-drop-description').value.trim();
+            const reward = parseInt(document.getElementById('edit-user-drop-reward').value) || 100;
+            const lat = parseFloat(document.getElementById('edit-user-drop-lat').value);
+            const lng = parseFloat(document.getElementById('edit-user-drop-lng').value);
+            const isActive = document.getElementById('edit-user-drop-status').value === 'true';
+            
+            // Validation
+            if (!name) {
+                showMessage('❌ Bitte gib einen Drop-Namen ein!', true);
+                return;
+            }
+            if (!description) {
+                showMessage('❌ Bitte gib eine Beschreibung ein!', true);
+                return;
+            }
+            if (isNaN(lat) || isNaN(lng)) {
+                showMessage('❌ Bitte gib gültige Koordinaten ein!', true);
+                return;
+            }
+            if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                showMessage('❌ Ungültige Koordinaten!', true);
+                return;
+            }
+            
+            try {
+                const db = window.firebase.firestore();
+                
+                // Update user drop document
+                await db.collection('userDrops').doc(dropId).update({
+                    name: name,
+                    description: description,
+                    photoDescription: description,
+                    reward: reward,
+                    lat: lat,
+                    lng: lng,
+                    isActive: isActive,
+                    lastModified: new Date()
+                });
+                
+                console.log('✅ User drop updated:', dropId);
+                showMessage(`✅ User Drop "${name}" erfolgreich aktualisiert!`, false);
+                
+                // Close modal
+                closeEditUserDropModal();
+                
+                // Reload user drops
+                if (window.currentListType === 'user') {
+                    loadUserGeoDrops();
+                }
+                if (window.currentUploadListType === 'user') {
+                    loadUserDropsForUpload();
+                }
+                
+                // Reload all drops for map only (not dropdown to avoid overwriting upload selection)
+                // loadGeoDrops(); // REMOVED - was overwriting upload dropdown
+                
+            } catch (error) {
+                console.error('❌ Error updating user drop:', error);
+                showMessage('❌ Fehler beim Aktualisieren des User Drops: ' + error.message, true);
+            }
+        };
+        
+        // Toggle User Drop active status
+        window.toggleUserDrop = async function(dropId, currentStatus) {
+            console.log(`🔄 Toggling User Drop ${dropId} from ${currentStatus ? 'active' : 'inactive'} to ${!currentStatus ? 'active' : 'inactive'}`);
+            
+            try {
+                if (!window.firebase || !window.firebase.firestore()) {
+                    showMessage('❌ Firebase nicht verfügbar', true);
+                    return;
+                }
+                
+                const db = window.firebase.firestore();
+                await db.collection('userDrops').doc(dropId).update({
+                    isActive: !currentStatus,
+                    lastModified: new Date()
+                });
+                
+                showMessage(`✅ User GeoDrop ${!currentStatus ? 'aktiviert' : 'deaktiviert'}`, false);
+                
+                // Reload user drops
+                if (window.currentListType === 'user') {
+                    loadUserGeoDrops();
+                }
+                if (window.currentUploadListType === 'user') {
+                    loadUserDropsForUpload();
+                }
+                
+                // Reload all drops for map only (not dropdown to avoid overwriting upload selection)
+                // loadGeoDrops(); // REMOVED - was overwriting upload dropdown
+                
+            } catch (error) {
+                console.error('❌ Error toggling User Drop:', error);
+                showMessage('❌ Fehler beim Ändern des Status', true);
+            }
+        };
+        
+        // Close edit modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const editModal = document.getElementById('edit-user-drop-modal');
+            if (editModal && event.target === editModal) {
+                closeEditUserDropModal();
+            }
+        });
+        
+        // CRITICAL: Define functions immediately to prevent undefined errors
+        window.showCreateUserDropModal = function() {
+            console.log('➕ Showing create user drop modal');
+            const modal = document.getElementById('create-user-drop-modal');
+            if (modal) {
+                modal.style.display = 'block';
+                
+                // Check if user is Dev and show dev coordinates section
+                const isDevLoggedIn = window.isDevLoggedIn || localStorage.getItem('devLoggedIn') === 'true';
+                const devSection = document.getElementById('dev-coordinates-section');
+                if (devSection) {
+                    devSection.style.display = isDevLoggedIn ? 'block' : 'none';
+                }
+                
+                // Set coordinate fields based on Dev status
+                const latInput = document.getElementById('user-drop-lat');
+                const lngInput = document.getElementById('user-drop-lng');
+                
+                if (isDevLoggedIn) {
+                    // Dev users can edit coordinates
+                    latInput.readOnly = false;
+                    lngInput.readOnly = false;
+                    latInput.style.background = '#4B5563';
+                    lngInput.style.background = '#4B5563';
+                    console.log('🔧 Dev mode: Coordinates editable');
+                } else {
+                    // Normal users can only use current location
+                    latInput.readOnly = true;
+                    lngInput.readOnly = true;
+                    latInput.style.background = '#374151';
+                    lngInput.style.background = '#374151';
+                    console.log('👤 Normal user: Coordinates fixed to current location');
+                }
+                
+                // Auto-fill current location if available
+                if (window.currentLocation) {
+                    document.getElementById('user-drop-lat').value = window.currentLocation.lat.toFixed(6);
+                    document.getElementById('user-drop-lng').value = window.currentLocation.lng.toFixed(6);
+                }
+            } else {
+                console.error('❌ Create user drop modal not found');
+                showMessage('❌ Modal nicht gefunden', true);
+            }
+        };
+        
+        // Duplicate function removed - using the main one above
+        
+        // Override after page load to ensure they work
+        window.addEventListener('load', function() {
+            console.log('🔄 Ensuring functions are available...');
+            
+            // Re-define functions to ensure they work
+            window.showCreateUserDropModal = function() {
+                console.log('➕ Showing create user drop modal (LOAD OVERRIDE)');
+                const modal = document.getElementById('create-user-drop-modal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    
+                    // Check if user is Dev and show dev coordinates section
+                    const isDevLoggedIn = window.isDevLoggedIn || localStorage.getItem('devLoggedIn') === 'true';
+                    const devSection = document.getElementById('dev-coordinates-section');
+                    if (devSection) {
+                        devSection.style.display = isDevLoggedIn ? 'block' : 'none';
+                    }
+                    
+                    // Auto-fill current location if available
+                    if (window.currentLocation) {
+                        document.getElementById('user-drop-lat').value = window.currentLocation.lat.toFixed(6);
+                        document.getElementById('user-drop-lng').value = window.currentLocation.lng.toFixed(6);
+                    }
+                } else {
+                    console.error('❌ Create user drop modal not found');
+                    showMessage('❌ Modal nicht gefunden', true);
+                }
+            };
+            
+            // Duplicate function removed - using the main one above
+            
+            console.log('✅ Functions ensured to be available');
+        });
+    </script>
+</body>
+</html>

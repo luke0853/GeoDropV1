@@ -1,0 +1,124 @@
+<h3 class="text-2xl font-bold text-white mb-8 bg-black px-4 py-2 rounded-lg">📊 Statistiken</h3>
+
+<div class="bg-gray-700 rounded-lg p-6">
+    <h3 class="text-xl font-semibold text-white mb-4">📊 Statistiken</h3>
+    <div class="space-y-4 text-gray-300">
+        
+        <!-- Hauptstatistiken -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-gray-600 rounded-lg p-4">
+                <h4 class="text-lg font-semibold text-blue-400 mb-2">🎯 GeoDrops</h4>
+                <p class="text-2xl font-bold text-white" id="total-drops">0</p>
+                <p class="text-sm text-gray-400">Gesamt erstellt</p>
+            </div>
+            <div class="bg-gray-600 rounded-lg p-4">
+                <h4 class="text-lg font-semibold text-green-400 mb-2">💰 PixelDrops</h4>
+                <p class="text-2xl font-bold text-white" id="total-earnings">0</p>
+                <p class="text-sm text-gray-400">Gesamt verdient</p>
+            </div>
+        </div>
+
+        <!-- Erweiterte Statistiken -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-gray-600 rounded-lg p-4">
+                <h4 class="text-lg font-semibold text-purple-400 mb-2">🏆 Level</h4>
+                <p class="text-2xl font-bold text-white" id="user-level">1</p>
+                <p class="text-sm text-gray-400">Aktuelles Level</p>
+            </div>
+            <div class="bg-gray-600 rounded-lg p-4">
+                <h4 class="text-lg font-semibold text-yellow-400 mb-2">⛏️ Mining</h4>
+                <p class="text-2xl font-bold text-white" id="mining-machines">0</p>
+                <p class="text-sm text-gray-400">Maschinen im Besitz</p>
+            </div>
+            <div class="bg-gray-600 rounded-lg p-4">
+                <h4 class="text-lg font-semibold text-red-400 mb-2">🎁 Bonus</h4>
+                <p class="text-2xl font-bold text-white" id="bonus-claimed">0</p>
+                <p class="text-sm text-gray-400">Boni erhalten</p>
+            </div>
+            <div class="bg-gray-600 rounded-lg p-4">
+                <h4 class="text-lg font-semibold text-orange-400 mb-2">💎 Guthaben</h4>
+                <p class="text-2xl font-bold text-white" id="current-balance">0</p>
+                <p class="text-sm text-gray-400">Aktuelles Guthaben</p>
+            </div>
+        </div>
+
+        <!-- Aktivitätsstatistiken -->
+        <div class="bg-gray-600 rounded-lg p-4">
+            <h4 class="text-lg font-semibold text-cyan-400 mb-2">📈 Aktivitätsstatistiken</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <p><strong>Erste Anmeldung:</strong> <span id="first-login">-</span></p>
+                    <p><strong>Letzte Aktivität:</strong> <span id="last-activity">-</span></p>
+                    <p><strong>Tage aktiv:</strong> <span id="active-days">0</span></p>
+                </div>
+                <div class="space-y-2">
+                    <p><strong>Drops heute:</strong> <span id="drops-today">0</span></p>
+                    <p><strong>Drops diese Woche:</strong> <span id="drops-week">0</span></p>
+                    <p><strong>Drops diesen Monat:</strong> <span id="drops-month">0</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auszahlungsstatistiken -->
+        <div class="bg-gray-600 rounded-lg p-4">
+            <h4 class="text-lg font-semibold text-green-400 mb-2">💸 Auszahlungsstatistiken</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-white" id="total-withdrawals">0</p>
+                    <p class="text-sm text-gray-400">Gesamtauszahlungen</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-white" id="total-withdrawn-amount">0</p>
+                    <p class="text-sm text-gray-400">Gesamt ausgezahlt (PixelDrop)</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-white" id="last-withdrawal">-</p>
+                    <p class="text-sm text-gray-400">Letzte Auszahlung</p>
+                </div>
+            </div>
+            
+            <!-- Auszahlungsliste -->
+            <div class="mt-4">
+                <h5 class="text-md font-semibold text-white mb-3">📋 Auszahlungshistorie</h5>
+                <div class="bg-gray-700 rounded-lg p-3 max-h-64 overflow-y-auto">
+                    <div id="withdrawal-list" class="space-y-2">
+                        <p class="text-gray-400 text-center">Keine Auszahlungen vorhanden</p>
+                    </div>
+                </div>
+                
+                <!-- Auszahlung beantragen -->
+                <div class="mt-4 p-4 bg-gray-700 rounded-lg">
+                    <h5 class="text-md font-semibold text-white mb-3">💸 Auszahlung beantragen</h5>
+                    <div class="flex gap-2">
+                        <input type="number" id="withdrawal-amount" placeholder="Betrag (PixelDrops)" class="flex-1 px-3 py-2 bg-gray-600 text-white rounded border border-gray-500">
+                        <button onclick="requestWithdrawal()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                            💸 Auszahlen
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">Mindestbetrag: 100 PixelDrops</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiken aktualisieren -->
+        <div class="bg-gray-600 rounded-lg p-4">
+            <h4 class="text-lg font-semibold text-blue-400 mb-2">🔄 Statistiken aktualisieren</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                <button onclick="updateAllStatistics()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    📊 Alle Statistiken aktualisieren
+                </button>
+                <button onclick="updateWithdrawalStatistics()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                    💸 Auszahlungen aktualisieren
+                </button>
+                <button onclick="repairWithdrawalStatistics()" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">
+                    🔧 Auszahlungen reparieren
+                </button>
+                <button onclick="repairBonusStatistics()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                    🔧 Bonus-Statistiken reparieren
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+

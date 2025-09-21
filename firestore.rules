@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users können nur ihre eigenen Daten lesen/schreiben
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Globale Statistiken - nur lesen für alle, schreiben nur für authentifizierte User
+    match /globalStats/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // GeoDrops - nur lesen für alle, schreiben nur für authentifizierte User
+    match /geodrops/{document} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // GeoChat - nur lesen/schreiben für authentifizierte User
+    match /geochat/{document} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Alle anderen Dokumente - nur für authentifizierte User
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

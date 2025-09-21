@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoDrop - Dev Bereich</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    
+    <!-- Load shared scripts -->
+    <script src="../config/config-secure.js"></script>
+    <script src="../config/config-secrets.js"></script>
+    <script src="../js/firebase.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/dev-functions.js"></script>
+    <script src="../js/pool-wallet.js"></script>
+    <script src="../js/upload-functions.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exif-js@2.3.0/exif.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        .dev-drop-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .dev-drop-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        .dev-drop-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .dev-tab {
+            display: none;
+        }
+        .dev-tab.active {
+            display: block;
+        }
+        
+        .mehr-tab-btn {
+            background-color: #374151;
+            color: #d1d5db;
+            border: 1px solid #4b5563;
+            min-width: 120px;
+            text-align: center;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .mehr-tab-btn:hover {
+            background-color: #4b5563;
+            border-color: #6b7280;
+        }
+        
+        .mehr-tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Simple Header -->
+    <header class="bg-gray-800 shadow-lg z-50">
+        <div class="p-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl font-bold text-white">🌍 GeoDrop - Dev Bereich</h1>
+                <div class="flex space-x-2">
+                    <a href="../index.html" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                        🏠 Zurück
+                    </a>
+            </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Debug Window -->
+    <div id="debug-window" style="position: fixed; top: 50px; right: 20px; width: 400px; height: 300px; background: rgba(0, 0, 0, 0.9); border: 2px solid #00ff00; border-radius: 10px; z-index: 999999; display: none; font-family: 'Courier New', monospace; color: #00ff00; padding: 10px; overflow-y: auto; box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);">
+        <div id="debug-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #00ff00; padding-bottom: 5px;">
+            <span style="font-weight: bold;">🔧 Debug Console</span>
+            <div>
+                <button id="debug-copy-btn" onclick="window.copyDebugLog()" style="background: #00ff00; color: black; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 10px; margin-right: 5px;">📋 Kopieren</button>
+                <button id="debug-dev-btn" onclick="window.quickDevLogin()" style="background: #10B981; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 10px; margin-right: 5px;">🔧 Dev Login</button>
+                <button id="debug-emergency-btn" onclick="window.emergencyDevLogin()" style="background: #EF4444; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 10px; margin-right: 5px;">🚨 Emergency</button>
+                <button id="debug-metamask-btn" onclick="window.openMetaMaskAlternative()" style="background: #F59E0B; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 10px; margin-right: 5px;">📱 MetaMask</button>
+                <button id="debug-referral-btn" onclick="window.addSpecificUsersToReferralLines()" style="background: #8B5CF6; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 10px; margin-right: 5px;">🎯 Add Ref</button>
+                <button id="debug-referral-debug-btn" onclick="window.debugReferralData()" style="background: #F59E0B; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 10px; margin-right: 5px;">🔍 Debug Ref</button>
+                <button id="debug-navigation-btn" onclick="window.debugNavigation()" style="background: #3B82F6; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 10px; margin-right: 5px;">🧭 Debug Nav</button>
+                <button id="debug-close-btn" onclick="window.closeDebugWindow()" style="background: #ff0000; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; font-size: 10px;">✕</button>
+            </div>
+        </div>
+        <div id="debug-content" style="font-size: 12px; line-height: 1.4; white-space: pre-wrap;"></div>
+    </div>
+
+    <!-- Debug Toggle Button -->
+    <button id="debug-toggle" onclick="window.toggleDebugWindow()" style="position: fixed; top: 10px; right: 10px; background: #00ff00; color: black; border: none; padding: 10px; border-radius: 50%; cursor: pointer; z-index: 999999; font-weight: bold;">🐛</button>
+
+    <!-- Main Content -->
+    <main class="mt-16">
+        <div class="max-w-6xl mx-auto p-6">
+            <div class="flex justify-end items-center mb-8">
+                <div class="flex space-x-2">
+                    <button onclick="showDevLoginPopup()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        🔐 Dev-Login
+                    </button>
+                    <button onclick="logoutDev()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                        🚪 Logout
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Dev Status -->
+            <div class="bg-gray-700 rounded-lg p-6 mb-6">
+                <h3 class="text-xl font-semibold text-white mb-4">🔒 Dev-Status</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-400">Dev-Berechtigung:</p>
+                        <p id="dev-status" class="text-lg font-semibold text-red-400">🔒 Dev-Berechtigung inaktiv</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-400">Aktueller Benutzer:</p>
+                        <p id="current-user" class="text-lg font-semibold text-gray-300">Nicht angemeldet</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dev Tab Navigation -->
+            <div class="flex flex-wrap justify-center gap-2 mb-6">
+                <button class="mehr-tab-btn active" data-tab="dev-main" onclick="showDevTab('dev-main')">
+                    🔧 Hauptbereich
+                </button>
+                <button class="mehr-tab-btn" data-tab="dev-upload" onclick="showDevTab('dev-upload')">
+                    📤 Upload
+                </button>
+                <button class="mehr-tab-btn" data-tab="dev-drops" onclick="showDevTab('dev-drops')">
+                    🎯 Drop Management
+                </button>
+                <button class="mehr-tab-btn" data-tab="dev-test" onclick="showDevTab('dev-test')">
+                    🧪 Tests
+                </button>
+            </div>
+            
+            <!-- Dev Main Tab -->
+            <div id="dev-main" class="dev-tab active">
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">🔧 Dev-Hauptbereich</h3>
+                    <div class="space-y-4 text-gray-300">
+                        
+                        <!-- Dev Drop Button -->
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-red-400 mb-2">🎯 Dev Drop erstellen</h4>
+                            <p class="mb-3">Erstelle einen neuen Dev Drop an deinem aktuellen Standort.</p>
+                            <button id="dev-drop-btn" onclick="createDevDrop()" class="dev-drop-btn" disabled>
+                                🔒 Admin-Modus erforderlich
+                            </button>
+                        </div>
+                        
+                        <!-- Dev Status (vereinfacht) -->
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-blue-400 mb-2">🔧 Dev-Status</h4>
+                            <div class="space-y-2">
+                                <p><strong>Status:</strong> <span id="dev-status-simple" class="text-red-400">🔒 USER MODUS (Dev deaktiviert)</span></p>
+                            </div>
+                        </div>
+                        
+                        <!-- Pool Wallet Status -->
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-blue-400 mb-2">🏦 Pool Wallet</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-300">PixelDrops:</span>
+                                    <span id="pool-pixeldrops" class="text-green-400 font-semibold">Lädt...</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-300">tBNB:</span>
+                                    <span id="pool-bnb" class="text-yellow-400 font-semibold">Lädt...</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-300">Pool Wallet:</span>
+                                    <span class="text-gray-400 text-xs">0x6167...BC4</span>
+                                </div>
+                            </div>
+                            <button onclick="updatePoolWalletBalances()" class="w-full mt-3 px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                🔄 Balances aktualisieren
+                            </button>
+                        </div>
+
+
+                        <!-- Quick Actions -->
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-green-400 mb-2">⚡ Schnellaktionen</h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="authorizeDev()" class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                                    ✅ Dev aktivieren
+                                </button>
+                                <button onclick="deauthorizeDev()" class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                    ❌ Dev deaktivieren
+                                </button>
+                            </div>
+                            <div class="mt-2">
+                                <button onclick="debugDevStatus()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                    🔍 Dev Status Debug
+                                </button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dev Upload Tab -->
+            <div id="dev-upload" class="dev-tab">
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">📤 Dev Upload</h3>
+                    <div class="space-y-4 text-gray-300">
+                        
+                        <!-- Admin Upload Section -->
+                        <div id="admin-upload-section" class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-blue-400 mb-2">📤 Admin Upload</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label for="admin-upload-type" class="block text-sm font-medium text-gray-300 mb-1">Upload-Typ:</label>
+                                    <select id="admin-upload-type" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white">
+                                        <option value="config">Konfiguration</option>
+                                        <option value="update">App-Update</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="admin-upload-input" class="block text-sm font-medium text-gray-300 mb-1">Datei auswählen:</label>
+                                    <input type="file" id="admin-upload-input" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white">
+                                </div>
+                                <button onclick="adminUpload()" class="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                    📤 Upload starten
+                                </button>
+                            </div>
+                        </div>
+
+
+                        <!-- Bildupload Section -->
+                        <div id="bildupload-section" class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-cyan-400 mb-2">📸 Bild Upload mit Drop-Erstellung</h4>
+                            <div class="space-y-3">
+                                <div class="text-sm text-gray-300">
+                                    <p><strong>Nächster Dateiname:</strong></p>
+                                    <p id="next-filename-display" class="text-blue-300">Lädt...</p>
+                                </div>
+                                <input type="file" id="dev-image-file" accept="image/*" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm">
+                                <input type="text" id="dev-filename" placeholder="Dateiname" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm" value="GeoDrop1">
+                                
+                                <!-- Beschreibung -->
+                                <div>
+                                    <label for="dev-drop-description" class="block text-sm font-medium text-gray-300 mb-1">📝 Beschreibung (was fotografiert werden soll):</label>
+                                    <textarea id="dev-drop-description" placeholder="z.B. 'Das rote Gebäude mit dem blauen Dach' oder 'Die Statue vor dem Eingang'" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm" rows="2"></textarea>
+                                    <p class="text-xs text-gray-400 mt-1">💡 Diese Beschreibung wird im Popup der Karte angezeigt</p>
+                                </div>
+                                
+                                <!-- GPS Koordinaten (optional) -->
+                                <div class="bg-gray-700 rounded p-3">
+                                    <h5 class="text-sm font-semibold text-yellow-400 mb-2">📍 GPS-Koordinaten (optional)</h5>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label for="upload-lat" class="block text-xs text-gray-300 mb-1">Breitengrad:</label>
+                                            <input type="number" id="upload-lat" step="0.000001" placeholder="48.2082" class="w-full p-2 bg-gray-600 border border-yellow-500 rounded text-white text-sm">
+                                        </div>
+                                        <div>
+                                            <label for="upload-lng" class="block text-xs text-gray-300 mb-1">Längengrad:</label>
+                                            <input type="number" id="upload-lng" step="0.000001" placeholder="16.3738" class="w-full p-2 bg-gray-600 border border-yellow-500 rounded text-white text-sm">
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-400 mt-1">💡 Leer lassen = aktuelle Position verwenden</p>
+                                </div>
+                                
+                                <button onclick="uploadDevImageWithDrop()" class="w-full px-3 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700">
+                                    📤 Bild hochladen + Drop erstellen
+                                </button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dev Drops Tab -->
+            <div id="dev-drops" class="dev-tab">
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">🎯 Dev Drop Management</h3>
+                    <div class="space-y-4 text-gray-300">
+                        
+                        <!-- Dev Drop Management -->
+                        <div class="bg-gray-600 rounded-lg p-4 mt-4">
+                            <h4 class="text-lg font-semibold text-red-400 mb-2">🗑️ Dev Drop Management</h4>
+                            <div class="space-y-2">
+                                <div class="text-sm text-gray-300">
+                                    <p><strong>Dev Drops löschen:</strong></p>
+                                    <p class="text-red-300">⚠️ Vorsicht: Löscht den Drop und das zugehörige Bild!</p>
+                                </div>
+                                <select id="dev-drop-select" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm">
+                                    <option value="">Dev Drop auswählen...</option>
+                                </select>
+                                <button onclick="deleteSelectedDevDrop()" class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                    🗑️ Ausgewählten Dev Drop löschen
+                                </button>
+                                <button onclick="loadDevDropsForDeletion()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                    🔄 Dev Drops laden
+                                </button>
+                                <button onclick="synchronizeDevDropsWithImages()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                                    🔍 Dev Drops prüfen
+                                </button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dev Test Tab -->
+            <div id="dev-test" class="dev-tab">
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">🧪 Dev Tests</h3>
+                    <div class="space-y-4 text-gray-300">
+                        
+                        <!-- System Tests -->
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-blue-400 mb-2">🔧 System Tests</h4>
+                            <p class="mb-3">Teste verschiedene Funktionen der Anwendung.</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="runAllTests()" class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                    🧪 Alle Tests ausführen
+                                </button>
+                                <button onclick="debugApp()" class="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                                    🔍 App Debug
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Location Tests -->
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-green-400 mb-2">📍 Location Tests</h4>
+                            <div class="space-y-2">
+                                <button onclick="debugLocation()" class="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                                    📍 Standort-Details anzeigen
+                                </button>
+                                <button onclick="getCurrentLocation()" class="w-full px-3 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">
+                                    🎯 Aktuelle Position abrufen
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Firebase Tests -->
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-orange-400 mb-2">🔥 Firebase Tests</h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="debugFirebaseCollections()" class="px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">
+                                    🔥 Collections testen
+                                </button>
+                                <button onclick="debugAllCounters()" class="px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                                    📊 Counter testen
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Drop Tests -->
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-yellow-400 mb-2">🎯 Drop Tests</h4>
+                            <div class="space-y-2">
+                                <button onclick="resetDailyClaims()" class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                    🔄 Tägliche Claims zurücksetzen
+                                </button>
+                                <p class="text-xs text-gray-400">Setzt alle täglichen Claims für den aktuellen User zurück</p>
+                                <button onclick="addDropDescriptions()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                    📝 Beschreibungen hinzufügen
+                                </button>
+                                <p class="text-xs text-gray-400">Fügt Beschreibungen zu allen Drops hinzu</p>
+                                <button onclick="debugDropNumbers()" class="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                                    📊 Drop-Nummern Debug
+                                </button>
+                                <p class="text-xs text-gray-400">Zeigt alle bestehenden Drop-Nummern an</p>
+                                <button onclick="loadGeoDrops()" class="w-full px-3 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                                    🎯 GeoDrops laden
+                                </button>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button onclick="fixOldDevDrops()" class="px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                        🔧 Dev Drops reparieren
+                                    </button>
+                                    <button onclick="resetDropAvailability('test')" class="px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">
+                                        🔄 Drops zurücksetzen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Counter Tests -->
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-red-400 mb-2">📊 Counter Tests</h4>
+                            <div class="space-y-2">
+                                <div class="text-sm text-gray-300">
+                                    <p><strong>Bild-Upload-Counter verwalten:</strong></p>
+                                    <p class="text-red-300">⚠️ Vorsicht: Zurücksetzen kann zu Namenskonflikten führen!</p>
+                                </div>
+                                <button onclick="resetGeoDropCounter()" class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                                    🔄 Counter auf 1 zurücksetzen
+                                </button>
+                                <button onclick="updateNextFilenameDisplay()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                                    🔄 Counter-Anzeige aktualisieren
+                                </button>
+                            </div>
+                        </div>
+
+
+                        <!-- Performance Tests -->
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-cyan-400 mb-2">⚡ Performance Tests</h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="console.log('Performance test started'); performance.now();" class="px-3 py-2 bg-cyan-600 text-white rounded hover:bg-cyan-700">
+                                    ⚡ Performance messen
+                                </button>
+                                <button onclick="console.log('Memory usage:', performance.memory);" class="px-3 py-2 bg-teal-600 text-white rounded hover:bg-teal-700">
+                                    💾 Speicher prüfen
+                                </button>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Custom Alert -->
+    <div id="custom-alert" class="custom-alert" style="display: none;"></div>
+    
+    <!-- Dev Login Popup -->
+    <div id="dev-login-popup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; overflow-y: auto;">
+        <div style="display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 5px;">
+            <div style="background: #374151; border-radius: 8px; max-width: 400px; width: 100%; padding: 16px; max-height: 98vh; overflow-y: auto; margin-top: 10px; margin-bottom: 10px;">
+                <h2 style="color: white; font-size: 20px; font-weight: bold; margin-bottom: 12px; text-align: center;">🔐 Dev-Zugang</h2>
+                <div style="margin-bottom: 16px;">
+                    <input type="password" id="dev-password" placeholder="Dev-Passwort eingeben" style="width: 100%; padding: 8px 12px; border-radius: 6px; background: #4B5563; color: white; border: 1px solid #6B7280; outline: none;" onkeypress="if(event.key === 'Enter') loginDev()">
+                </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <button onclick="loginDev()" style="flex: 1; padding: 8px 16px; background: #2563EB; color: white; border-radius: 6px; border: none; cursor: pointer;">Anmelden</button>
+                    <button onclick="closeDevLoginPopup()" style="flex: 1; padding: 8px 16px; background: #6B7280; color: white; border-radius: 6px; border: none; cursor: pointer;">Abbrechen</button>
+                </div>
+                <div style="color: #9CA3AF; font-size: 12px; text-align: center;">
+                    💡 Nur für Entwickler mit entsprechenden Berechtigungen
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Note: Scripts are already loaded in the head section -->
+    
+    <script>
+        // Note: Firebase and variables are already initialized in shared scripts
+        
+        // Dev tab functions
+        window.showDevTab = function(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.dev-tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.style.display = 'none';
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.mehr-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+                selectedTab.style.display = 'block';
+            }
+            
+            // Add active class to clicked button
+            const clickedBtn = document.querySelector(`[data-tab="${tabName}"]`);
+            if (clickedBtn) {
+                clickedBtn.classList.add('active');
+            }
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🔧 Dev page loaded');
+            
+            // Initialize Dev status from Firebase
+            if (typeof initializeDevStatus === 'function') {
+                await initializeDevStatus();
+            } else {
+                // Fallback to local updateDevStatus
+                updateDevStatus();
+            }
+            
+            // Initialize Pool Wallet
+            if (typeof initializePoolWallet === 'function') {
+                initializePoolWallet();
+            }
+            
+            // Update navigation icons
+            if (typeof updateNavigationDevStatus === 'function') {
+                updateNavigationDevStatus();
+            }
+            
+            // Show main tab by default
+            showDevTab('dev-main');
+        });
+        
+        
+        // Debug functions
+        let debugWindowVisible = false;
+        let debugLogArray = [];
+        
+        // Debug functions
+        window.toggleDebugWindow = function() {
+            console.log('🔧 toggleDebugWindow called');
+            const debugWindow = document.getElementById('debug-window');
+            if (!debugWindow) {
+                console.error('❌ Debug window not found');
+                return;
+            }
+            debugWindowVisible = !debugWindowVisible;
+            debugWindow.style.display = debugWindowVisible ? 'block' : 'none';
+            console.log('🔧 Debug window visible:', debugWindowVisible);
+            
+            if (debugWindowVisible) {
+                window.updateDebugWindow();
+            }
+        };
+        
+        window.closeDebugWindow = function() {
+            const debugWindow = document.getElementById('debug-window');
+            debugWindowVisible = false;
+            debugWindow.style.display = 'none';
+        };
+        
+        window.updateDebugWindow = function() {
+            const debugContent = document.getElementById('debug-content');
+            if (debugContent) {
+                debugContent.textContent = debugLogArray.join('\n');
+                debugContent.scrollTop = debugContent.scrollHeight;
+            }
+        };
+        
+        window.copyDebugLog = function() {
+            const debugText = debugLogArray.join('\n');
+            console.log('🔧 Copying debug log:', debugText);
+            
+            if (debugText.length === 0) {
+                console.log('❌ No debug text to copy');
+                debugLogArray.push('🔧 Debug-Fenster Test');
+                debugLogArray.push('📅 ' + new Date().toLocaleString());
+                debugLogArray.push('🌐 Browser: ' + navigator.userAgent);
+                debugLogArray.push('📱 Screen: ' + screen.width + 'x' + screen.height);
+                window.updateDebugWindow();
+                return;
+            }
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(debugText).then(() => {
+                    console.log('✅ Clipboard API success');
+                    alert('Debug log copied to clipboard!');
+                }).catch(err => {
+                    console.error('❌ Clipboard API failed:', err);
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = debugText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Debug log copied to clipboard!');
+                });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = debugText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Debug log copied to clipboard!');
+            }
+        };
+        
+        // Enhanced debug logging
+        window.debugLog = function(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
+            debugLogArray.push(logEntry);
+            
+            // Keep only last 100 entries
+            if (debugLogArray.length > 100) {
+                debugLogArray = debugLogArray.slice(-100);
+            }
+            
+            // Update debug window if visible
+            if (debugWindowVisible) {
+                window.updateDebugWindow();
+            }
+            
+            // Also log to console
+            console.log(logEntry);
+        };
+        
+        // Note: updateDevStatus is now loaded from dev-functions.js
+    </script>
+</body>
+</html>

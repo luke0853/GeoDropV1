@@ -1,0 +1,260 @@
+# GeoDrop App - .gitignore for GitHub Upload
+# Diese Datei verhindert das Hochladen sensibler Daten auf GitHub
+
+# ===========================================
+# 🚨 KRITISCHE SICHERHEITSDATEIEN
+# ===========================================
+
+# Secrets und API Keys - KRITISCH!
+config/config-secrets.js
+config/config-secrets-secure.js
+config/config-secrets-public.js
+config/config-secrets.js.bak
+config/config-secrets-secure.js.bak
+config/config-secrets-*.js
+config/*secrets*.js
+
+# AWS Credentials
+geodrop-rekognition_accessKeys.csv
+geodrop-rekognition_credentials.csv
+*.csv
+aws-credentials.json
+aws-config.json
+
+# Private Keys und Tokens
+*.pem
+*.key
+*.p12
+*.pfx
+private-keys/
+secrets/
+credentials/
+
+# ===========================================
+# 📁 BACKUP UND TEMPORÄRE DATEIEN
+# ===========================================
+
+# Backup-Verzeichnisse
+backup_cleanup/
+backups/
+backup/
+*.backup
+*.bak
+
+# Backup-HTML-Dateien
+index_backup.html
+*_backup.html
+*_old_backup.html
+
+# Temporäre Dateien
+*.tmp
+*.temp
+*.log
+*.cache
+
+# ===========================================
+# 🎥 MEDIEN UND GROSSE DATEIEN
+# ===========================================
+
+# Videos
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+*.mkv
+
+# Große Bilder (behalte nur kleine Icons/Logos)
+images/*.png
+images/*.jpg
+images/*.jpeg
+images/*.gif
+images/*.bmp
+images/*.tiff
+images/*.webp
+
+# Audio-Dateien
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+
+# ===========================================
+# 📦 DEPENDENCIES UND BUILD-DATEIEN
+# ===========================================
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Build-Verzeichnisse
+dist/
+build/
+out/
+.next/
+.nuxt/
+
+# ===========================================
+# 🔧 ENTWICKLUNG UND IDE
+# ===========================================
+
+# IDE-Dateien
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS-Dateien
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ===========================================
+# 🔐 SICHERHEITSDATEIEN
+# ===========================================
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# SSL/TLS Zertifikate
+*.crt
+*.cer
+*.der
+*.p7b
+*.p7r
+*.spc
+
+# ===========================================
+# 📊 LOGS UND DEBUGGING
+# ===========================================
+
+# Log-Dateien
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime-Dateien
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ===========================================
+# 🌐 DEPLOYMENT UND HOSTING
+# ===========================================
+
+# Netlify
+.netlify/
+.netlify.toml
+
+# Vercel
+.vercel/
+
+# Heroku
+.heroku/
+
+# ===========================================
+# 🧪 TESTING UND COVERAGE
+# ===========================================
+
+# Coverage-Verzeichnisse
+coverage/
+.nyc_output/
+
+# Jest
+.jest/
+
+# ===========================================
+# 📝 DOKUMENTATION (OPTIONAL)
+# ===========================================
+
+# Große Dokumentation
+docs/
+documentation/
+*.pdf
+*.doc
+*.docx
+
+# ===========================================
+# 🔄 VERSION CONTROL
+# ===========================================
+
+# Git
+.git/
+.gitattributes
+.gitignore.bak
+
+# ===========================================
+# 🚀 PRODUCTION
+# ===========================================
+
+# Environment-Dateien
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ===========================================
+# 📱 MOBILE UND NATIVE
+# ===========================================
+
+# React Native
+.expo/
+.expo-shared/
+
+# Cordova
+platforms/
+plugins/
+
+# ===========================================
+# 🎨 DESIGN UND ASSETS
+# ===========================================
+
+# Design-Dateien
+*.psd
+*.ai
+*.sketch
+*.fig
+*.xd
+
+# ===========================================
+# 🔍 SUCHE UND INDEXIERUNG
+# ===========================================
+
+# Such-Indizes
+.search-index/
+.algolia/
+
+# ===========================================
+# ⚠️  WICHTIGE HINWEISE
+# ===========================================
+
+# Diese Dateien MÜSSEN auf GitHub bleiben:
+# - config/config-secure.js (nur öffentliche Konfiguration)
+# - config/config.example.js (Beispiel-Konfiguration)
+# - Alle .html, .css, .js Dateien (außer Secrets)
+# - README.md, package.json, etc.
+
+# Diese Dateien DÜRFEN NIEMALS auf GitHub:
+# - Alle config-secrets*.js Dateien
+# - Alle .csv Dateien mit Credentials
+# - Alle Backup-Verzeichnisse
+# - Alle Videos und großen Bilder
+# - node_modules/

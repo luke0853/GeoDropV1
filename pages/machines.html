@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mining Machines - GeoDrop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.0.0/dist/jsQR.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        .page {
+            display: flex;
+            width: 100%;
+            min-height: calc(100vh - 128px);
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+            text-align: left;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        
+        main {
+            padding-top: 64px;
+            padding-bottom: 64px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div id="machines" class="page">
+            <div class="max-w-6xl mx-auto p-6">
+                <h2 class="text-3xl font-bold text-white mb-8">
+                    <span style="background: rgba(0, 0, 0, 0.7); padding: 8px 12px; border-radius: 8px; display: inline-block;">⛏️ Mining Machines</span>
+                </h2>
+                
+                <!-- Wallet Verbindung Sektion -->
+                <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-6 mb-8">
+                    <h4 class="text-xl font-semibold text-white mb-4">💳 Wallet Verbindung</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="bg-gray-800 bg-opacity-50 rounded-lg p-4">
+                            <div class="text-sm text-gray-300 mb-2">Status:</div>
+                            <div id="wallet-status" class="text-lg font-semibold text-yellow-400">Nicht verbunden</div>
+                        </div>
+                        <div class="bg-gray-800 bg-opacity-50 rounded-lg p-4">
+                            <div class="text-sm text-gray-300 mb-2">Wallet Adresse:</div>
+                            <div id="wallet-address" class="text-sm font-mono text-gray-300">Nicht verbunden</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-3 justify-center">
+                        <button id="connect-wallet-btn" onclick="connectWallet()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold">
+                            🔗 Wallet verbinden
+                        </button>
+                        <button id="connect-wallet-mobile-btn" onclick="connectWalletMobile()" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-semibold hidden">
+                            📱 MetaMask Mobile
+                        </button>
+                        <button id="disconnect-wallet-btn" onclick="disconnectWallet()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold hidden">
+                            ❌ Wallet trennen
+                        </button>
+                        <button onclick="testWalletConnection()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                            🧪 Wallet Test
+                        </button>
+                        <button onclick="updateTbnbDisplays()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold">
+                            💰 Balance aktualisieren
+                        </button>
+                    </div>
+                    
+                    <!-- Mobile Wallet Instructions -->
+                    <div id="mobile-wallet-instructions" class="mt-4 p-4 bg-yellow-600 bg-opacity-20 rounded-lg border border-yellow-500 hidden">
+                        <h5 class="text-yellow-400 font-semibold mb-2">📱 Mobile Wallet Anleitung:</h5>
+                        <ol class="text-sm text-yellow-200 space-y-1">
+                            <li>1. Öffne die MetaMask App auf deinem Handy</li>
+                            <li>2. Tippe auf "Browser" oder "DApp Browser"</li>
+                            <li>3. Gehe zu dieser Website: <span class="font-mono text-xs break-all">${window.location.href}</span></li>
+                            <li>4. Verbinde dein Wallet in der MetaMask App</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="machines-container">
+                    <!-- Mining machines will be loaded here -->
+                </div>
+                
+                <!-- Mining Stats -->
+                <div class="bg-gray-700 rounded-lg p-6 mt-8">
+                    <h3 class="text-xl font-semibold text-white mb-4">📊 Mining Statistiken</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="text-center p-4 bg-gray-600 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-400" id="mining-bonus">0%</div>
+                            <div class="text-sm text-gray-400">Boost in %</div>
+                        </div>
+                        <div class="text-center p-4 bg-gray-600 rounded-lg">
+                            <div class="text-2xl font-bold text-yellow-400" id="mining-tbnb">0.00</div>
+                            <div class="text-sm text-gray-400">Wallet tBNB</div>
+                        </div>
+                        <div class="text-center p-4 bg-gray-600 rounded-lg cursor-pointer hover:bg-gray-500 transition-colors" onclick="showMiningMachinesPopup()">
+                            <div class="text-2xl font-bold text-blue-400" id="mining-machines-count">0</div>
+                            <div class="text-sm text-gray-400">Gekaufte Pakete</div>
+                            <div class="text-sm font-bold text-yellow-400 mt-2 p-2 bg-gray-700 rounded" id="mining-expiry-countdown">Verfällt nie</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mining Machines Popup -->
+    <div id="mining-machines-popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-white">⛏️ Mining Machines Übersicht</h3>
+                <button onclick="closeMiningMachinesPopup()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            
+            <div id="mining-machines-list" class="space-y-3">
+                <!-- Mining machines will be loaded here -->
+            </div>
+            
+            <div class="mt-6 text-center">
+                <button onclick="closeMiningMachinesPopup()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors">
+                    Schließen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/firebase.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/wallet-functions.js"></script>
+    <script src="../js/mining-functions.js"></script>
+    
+    <script>
+        // Firebase Config from global CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbaHV1OY9C_MUt4o3WTkHCGlRVt7ll9UA",
+            authDomain: "geodrop-f3ee1.firebaseapp.com",
+            projectId: "geodrop-f3ee1",
+            storageBucket: "geodrop-f3ee1.firebasestorage.app",
+            messagingSenderId: "1054615552034",
+            appId: "1:1054615552034:web:8d61c64b5296f4e0cc4a7b",
+            measurementId: "G-RBEJES6HX1"
+        };
+
+        // Initialize Firebase
+        let app, db, storage, auth;
+        
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            storage = firebase.storage();
+            auth = firebase.auth();
+            console.log("✅ Firebase initialized successfully");
+        } catch (error) {
+            console.error("❌ Firebase initialization failed:", error);
+        }
+        
+        // Make Firebase services globally available
+        window.auth = auth;
+        window.db = db;
+        window.storage = storage;
+
+        // Navigation function
+        function showPage(pageId) {
+            // For standalone page, redirect to main index
+            if (pageId !== 'machines') {
+                window.location.href = '../index.html#' + pageId;
+            }
+        }
+
+        // Mining machines functions
+        function renderMachines() {
+            const machinesContainer = document.getElementById('machines-container');
+            if (!machinesContainer) {
+                console.error('❌ Machines container not found');
+                return;
+            }
+            
+            console.log('⛏️ Machines container found, rendering machines...');
+            
+            const machines = [
+                { id: 'basic', name: 'Basic Miner', price: 0.01, boost: 2, description: 'Einfacher Mining-Computer' },
+                { id: 'advanced', name: 'Advanced Miner', price: 0.05, boost: 12, description: 'Fortgeschrittener Mining-Computer' },
+                { id: 'pro', name: 'Pro Miner', price: 0.1, boost: 60, description: 'Professioneller Mining-Computer' },
+                { id: 'enterprise', name: 'Enterprise Miner', price: 0.5, boost: 400, description: 'Enterprise Mining-System' }
+            ];
+
+            let html = '';
+            machines.forEach(machine => {
+                html += `
+                    <div class="bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-white mb-2">${machine.name}</h3>
+                        <p class="text-gray-300 text-sm mb-4">${machine.description}</p>
+                        <div class="text-2xl font-bold text-yellow-400 mb-2">${machine.price} tBNB</div>
+                        <div class="text-sm text-gray-400 mb-4">+${machine.boost}% Boost</div>
+                        <button onclick="buyMachine('${machine.id}')" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Kaufen
+                                </button>
+                    </div>
+                `;
+            });
+            
+            machinesContainer.innerHTML = html;
+            console.log('⛏️ Mining machines rendered successfully');
+        }
+
+        function buyMachine(machineId) {
+            const machines = [
+                { id: 'basic', name: 'Basic Miner', price: 0.01, boost: 5 },
+                { id: 'advanced', name: 'Advanced Miner', price: 0.05, boost: 15 },
+                { id: 'pro', name: 'Pro Miner', price: 0.1, boost: 30 },
+                { id: 'enterprise', name: 'Enterprise Miner', price: 0.5, boost: 100 }
+            ];
+            
+            const machine = machines.find(m => m.id === machineId);
+            if (!machine) {
+                alert('❌ Maschine nicht gefunden!');
+                return;
+            }
+            
+            alert(`⛏️ ${machine.name} für ${machine.price} tBNB kaufen?\n\n+${machine.boost}% Mining Boost`);
+        }
+
+        function showMiningMachinesPopup() {
+            const popup = document.getElementById('mining-machines-popup');
+            if (popup) {
+                popup.style.display = 'flex';
+            }
+        }
+
+        function closeMiningMachinesPopup() {
+            const popup = document.getElementById('mining-machines-popup');
+            if (popup) {
+                popup.style.display = 'none';
+            }
+        }
+
+        // Mining Statistiken aktualisieren
+        function updateMiningStats() {
+            console.log('📊 Aktualisiere Mining Statistiken...');
+            
+            const miningBonus = document.getElementById('mining-bonus');
+            const miningTbnb = document.getElementById('mining-tbnb');
+            const miningMachinesCount = document.getElementById('mining-machines-count');
+            
+            if (miningBonus && miningTbnb && miningMachinesCount) {
+                // Get owned machines from userProfile
+                const ownedMachines = window.userProfile?.ownedMachines || {};
+                const totalMachines = Object.values(ownedMachines).reduce((sum, count) => sum + count, 0);
+                
+                let totalBoost = 100; // Base 100%
+                
+                // Basic Miner: 2% each, but after 5th only 1%
+                const basicCount = ownedMachines[1] || 0;
+                if (basicCount <= 5) {
+                    totalBoost += basicCount * 2;
+                } else {
+                    totalBoost += 5 * 2 + (basicCount - 5) * 1;
+                }
+                
+                // Advanced Miner: 12% each, but after 3rd only 6%
+                const advancedCount = ownedMachines[2] || 0;
+                if (advancedCount <= 3) {
+                    totalBoost += advancedCount * 12;
+                } else {
+                    totalBoost += 3 * 12 + (advancedCount - 3) * 6;
+                }
+                
+                // Pro Miner: 60% each, but after 2nd only 30%
+                const proCount = ownedMachines[3] || 0;
+                if (proCount <= 2) {
+                    totalBoost += proCount * 60;
+                } else {
+                    totalBoost += 2 * 60 + (proCount - 2) * 30;
+                }
+                
+                // Mega Miner: 400% each, but after 1st only 200%
+                const megaCount = ownedMachines[4] || 0;
+                if (megaCount <= 1) {
+                    totalBoost += megaCount * 400;
+                } else {
+                    totalBoost += 1 * 400 + (megaCount - 1) * 200;
+                }
+                
+                // Get real wallet balance if connected
+                let realTbnbBalance = 0;
+                if (window.connectedWallet) {
+                    try {
+                        if (typeof window.ethereum !== 'undefined') {
+                            // Use web3 directly instead of ethers
+                            const balance = await window.ethereum.request({
+                                method: 'eth_getBalance',
+                                params: [window.connectedWallet, 'latest']
+                            });
+                            // Convert from wei to tBNB (divide by 10^18)
+                            realTbnbBalance = parseInt(balance, 16) / Math.pow(10, 18);
+                            console.log('💰 updateMiningStats: Using REAL wallet balance:', realTbnbBalance);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error getting real balance in updateMiningStats:', error);
+                        realTbnbBalance = 0;
+                    }
+                }
+                
+                miningBonus.textContent = totalBoost.toFixed(1) + '%';
+                miningTbnb.textContent = realTbnbBalance.toFixed(6);
+                miningMachinesCount.textContent = totalMachines;
+                
+                // Update countdown
+                if (typeof window.updateMiningExpiryCountdown === 'function') {
+                    window.updateMiningExpiryCountdown();
+                }
+                
+                console.log('📊 Mining stats updated:', {
+                    ownedMachines,
+                    totalMachines,
+                    totalBoost,
+                    realTbnbBalance
+                });
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('⛏️ Mining Machines geladen');
+            renderMachines();
+            
+            // Update mining stats immediately
+            updateMiningStats();
+            
+            // Start countdown timer
+            startMiningCountdown();
+            
+            // Also update when userProfile changes using proper event listener
+            const checkUserProfile = () => {
+                if (window.userProfile) {
+                    console.log('👤 UserProfile gefunden, aktualisiere Mining Stats...');
+                    updateMiningStats();
+                    updateMiningCountdown();
+                } else {
+                    console.log('⏳ Warte auf userProfile...');
+                    // Use requestAnimationFrame instead of setTimeout for better performance
+                    requestAnimationFrame(checkUserProfile);
+                }
+            };
+            checkUserProfile();
+        });
+
+        // Mining countdown function
+        function updateMiningCountdown() {
+            const countdownElement = document.getElementById('mining-expiry-countdown');
+            if (!countdownElement) {
+                console.log('❌ mining-expiry-countdown element not found');
+                return;
+            }
+
+            const userProfile = window.userProfile;
+            if (!userProfile || !userProfile.ownedMachines) {
+                countdownElement.textContent = 'Keine Pakete';
+                return;
+            }
+
+            const ownedMachines = userProfile.ownedMachines;
+            let totalMachines = 0;
+            
+            // Count total machines
+            const machineTypes = [1, 2, 3, 4];
+            machineTypes.forEach(machineId => {
+                let count = 0;
+                if (ownedMachines[machineId]) {
+                    count = ownedMachines[machineId];
+                } else if (ownedMachines[`machine${machineId}`]) {
+                    count = ownedMachines[`machine${machineId}`];
+                }
+                totalMachines += count;
+            });
+
+            if (totalMachines === 0) {
+                countdownElement.textContent = 'Keine Pakete';
+                return;
+            }
+
+            // Set expiry date if not set (7 days from now)
+            if (!userProfile.miningPackageExpiry) {
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + 7);
+                userProfile.miningPackageExpiry = expiryDate.toISOString();
+                console.log('⏰ Set mining package expiry to:', expiryDate.toISOString());
+            }
+
+            // Calculate time left
+            const expiryDate = new Date(userProfile.miningPackageExpiry);
+            const now = new Date();
+            const timeLeft = expiryDate - now;
+
+            if (timeLeft <= 0) {
+                countdownElement.textContent = 'Verfallen!';
+                countdownElement.className = 'text-xs text-red-500 mt-1';
+            } else {
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                
+                if (days > 0) {
+                    countdownElement.textContent = `Verfällt in ${days}d ${hours}h`;
+                } else if (hours > 0) {
+                    countdownElement.textContent = `Verfällt in ${hours}h ${minutes}m`;
+                } else {
+                    countdownElement.textContent = `Verfällt in ${minutes}m`;
+                }
+                
+                if (days < 1) {
+                    countdownElement.className = 'text-xs text-red-400 mt-1';
+                } else if (days < 3) {
+                    countdownElement.className = 'text-xs text-yellow-400 mt-1';
+                } else {
+                    countdownElement.className = 'text-xs text-green-400 mt-1';
+                }
+            }
+        }
+
+        // Start countdown timer
+        function startMiningCountdown() {
+            if (!window.miningCountdownInterval) {
+                window.miningCountdownInterval = setInterval(() => {
+                    updateMiningCountdown();
+                }, 30000); // Update every 30 seconds
+                console.log('⏰ Started mining countdown timer (30s interval)');
+            }
+        }
+
+        // Mining functions - from backup
+        function showMiningMachinesPopup() {
+            const popup = document.getElementById('mining-machines-popup');
+            if (popup) {
+                popup.style.display = 'block';
+                loadMiningMachinesList();
+            }
+        }
+
+        function closeMiningMachinesPopup() {
+            const popup = document.getElementById('mining-machines-popup');
+            if (popup) {
+                popup.style.display = 'none';
+            }
+        }
+
+        function loadMiningMachinesList() {
+            const machinesList = document.getElementById('mining-machines-list');
+            if (!machinesList) return;
+            
+            // Get user's owned machines from profile
+            const ownedMachines = window.userProfile ? (window.userProfile.ownedMachines || {}) : {};
+            const totalMachines = Object.values(ownedMachines).reduce((sum, count) => sum + count, 0);
+            
+            if (totalMachines === 0) {
+                machinesList.innerHTML = `
+                    <div class="text-center text-gray-400 p-4">
+                        <div class="text-4xl mb-2">⛏️</div>
+                        <p>Du besitzt noch keine Mining Machines</p>
+                        <p class="text-sm mt-2">Kaufe deine erste Maschine im Mining-Bereich!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            const machines = [
+                { id: 1, name: 'Basic Miner', cost: 0.001, boost: 2, currency: 'tBNB' },
+                { id: 2, name: 'Advanced Miner', cost: 0.005, boost: 12, currency: 'tBNB' },
+                { id: 3, name: 'Pro Miner', cost: 0.02, boost: 60, currency: 'tBNB' },
+                { id: 4, name: 'Mega Miner', cost: 0.1, boost: 400, currency: 'tBNB' }
+            ];
+            
+            machines.forEach(machine => {
+                const owned = ownedMachines[machine.id] || 0;
+                if (owned > 0) {
+                    html += `
+                        <div class="bg-gray-700 rounded-lg p-4 border border-gray-600">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="text-lg font-semibold text-white">${machine.name}</h4>
+                                    <p class="text-sm text-gray-400">Boost: ${machine.boost}% pro Maschine</p>
+                                    <p class="text-sm text-gray-400">Kosten: ${machine.cost} ${machine.currency}</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-blue-400">${owned}</div>
+                                    <div class="text-sm text-gray-400">Besessen</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            machinesList.innerHTML = html;
+        }
+
+        // Real blockchain mining machine purchase function - from backup
+        async function buyMachineWithRealTransaction(machineType) {
+            if (!window.connectedWallet || !window.ethereum) {
+                alert('❌ Bitte zuerst Wallet verbinden!');
+                return;
+            }
+            
+            try {
+                // Check network
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const network = await provider.getNetwork();
+                if (network.chainId !== 97 && network.chainId !== 56) {
+                    alert(`❌ Bitte auf BSC Testnet (97) oder Mainnet (56) wechseln! Aktuell: ${network.chainId}`);
+                    return;
+                }
+                
+                // Get signer
+                const signer = provider.getSigner();
+                
+                // Machine costs
+                const machineCosts = {
+                    1: 0.001,  // Basic Miner
+                    2: 0.005,  // Advanced Miner
+                    3: 0.02,   // Pro Miner
+                    4: 0.1     // Mega Miner
+                };
+                
+                const cost = machineCosts[machineType];
+                if (!cost) {
+                    alert('❌ Unbekannte Machine!');
+                    return;
+                }
+                
+                // Calculate gas limit dynamically - SECURITY FIX: Use config instead of hardcoded address
+                const poolWalletAddress = window.CONFIG?.blockchain?.wallets?.poolWallet || 'MISSING_POOL_WALLET_ADDRESS';
+                const gasEstimate = await provider.estimateGas({
+                    to: poolWalletAddress, // GeoDrop Einnahmen
+                    value: ethers.utils.parseEther(cost.toString())
+                });
+                
+                const gasLimit = Math.ceil(Number(gasEstimate) * 1.2); // Add 20% buffer
+                
+                // Create transaction
+                const tx = {
+                    to: poolWalletAddress,
+                    value: ethers.utils.parseEther(cost.toString()),
+                    gasLimit: gasLimit
+                };
+                
+                console.log('📤 Sending mining machine transaction:', {
+                    from: window.connectedWallet,
+                    to: tx.to,
+                    value: ethers.utils.formatEther(tx.value),
+                    gasLimit: tx.gasLimit
+                });
+                
+                // Send transaction
+                const txResponse = await signer.sendTransaction(tx);
+                console.log('📤 Transaction sent:', txResponse.hash);
+                
+                alert('⏳ Transaktion gesendet! Warte auf Bestätigung...');
+                
+                // Wait for transaction confirmation
+                const receipt = await txResponse.wait();
+                
+                if (receipt.status === 1) {
+                    console.log('✅ Transaction confirmed:', receipt.hash);
+                    
+                    // Update app data only after successful transaction
+                    if (window.userProfile) {
+                        if (!window.userProfile.ownedMachines) window.userProfile.ownedMachines = {};
+                        if (!window.userProfile.ownedMachines[machineType]) window.userProfile.ownedMachines[machineType] = 0;
+                        window.userProfile.ownedMachines[machineType]++;
+                        
+                        // Update mining stats
+                        if (typeof window.updateMiningStats === 'function') {
+                            window.updateMiningStats();
+                        }
+                        
+                        // Save to database
+                        if (typeof window.updateUserProfile === 'function') {
+                            await window.updateUserProfile();
+                        }
+                        
+                        alert('✅ Mining Machine erfolgreich gekauft!');
+                    }
+                } else {
+                    alert('❌ Transaktion fehlgeschlagen!');
+                }
+                
+            } catch (error) {
+                console.error('❌ Transaction error:', error);
+                
+                if (error.code === 4001) {
+                    alert('❌ Transaktion vom Benutzer abgebrochen!');
+                } else if (error.message.includes('timeout')) {
+                    alert('❌ Transaktion-Timeout!');
+                } else {
+                    alert(`❌ Transaktionsfehler: ${error.message}`);
+                }
+            }
+        }
+
+        // Make functions globally available
+        window.showMiningMachinesPopup = showMiningMachinesPopup;
+        window.closeMiningMachinesPopup = closeMiningMachinesPopup;
+        window.loadMiningMachinesList = loadMiningMachinesList;
+        window.buyMachine = buyMachineWithRealTransaction;
+        window.updateMiningStats = updateMiningStats;
+    </script>
+</body>
+</html>
