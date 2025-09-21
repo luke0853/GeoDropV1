@@ -443,6 +443,27 @@ window.debugBonusElements = function() {
     console.log('🔍 Current page content:', document.body.innerHTML.substring(0, 1000));
 };
 
+// Reset bonus for today (for testing)
+window.resetBonusForToday = function() {
+    if (!window.userProfile) {
+        alert('❌ Bitte zuerst anmelden!');
+        return;
+    }
+    
+    window.userProfile.lastBonusClaim = null; // Reset bonus claim
+    
+    // Update Firebase
+    if (typeof window.updateUserProfile === 'function') {
+        window.updateUserProfile().then(() => {
+            alert('✅ Bonus für heute zurückgesetzt!');
+            window.updateBonusDisplay();
+        });
+    } else {
+        alert('✅ Bonus für heute zurückgesetzt! (lokal)');
+        window.updateBonusDisplay();
+    }
+};
+
 // Manual referral code override function
 window.setReferralCode = function(code) {
     if (!code || code.trim() === '') {
