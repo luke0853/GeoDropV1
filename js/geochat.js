@@ -1,7 +1,7 @@
 // GeoChat Functions for GeoDrop App
 
 // GeoChat functions - global functions
-window.sendMessage = function() {
+window.sendMessage = async function() {
     const input = document.getElementById('chat-input');
     const message = input.value.trim();
     
@@ -13,16 +13,34 @@ window.sendMessage = function() {
         return;
     }
     
+    // Get the real username from user profile
+    let username = 'User';
+    try {
+        if (window.userProfile && window.userProfile.username) {
+            username = window.userProfile.username;
+        } else {
+            // Try to load user profile from Firebase
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                username = userData.username || user.displayName || 'User';
+            }
+        }
+    } catch (error) {
+        console.error('❌ Error loading user profile for chat:', error);
+        username = user.displayName || 'User';
+    }
+    
     // Add message to Firebase
     db.collection('chatMessages').add({
         text: message,
         userId: user.uid,
-        username: window.userProfile?.username || user.displayName || 'User' + user.uid.substring(0, 6),
+        username: username,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         userEmail: user.email
     }).then(() => {
         input.value = '';
-        console.log('✅ Message sent');
+        console.log('✅ Message sent with username:', username);
     }).catch(error => {
         console.error('❌ Error sending message:', error);
         alert('❌ Fehler beim Senden der Nachricht!');
@@ -54,8 +72,8 @@ window.loadChatMessages = function() {
             // Clean username - remove email addresses and use only username
             let displayUsername = data.username || 'User';
             if (displayUsername.includes('@')) {
-                // If username is an email, try to get real username from user profile
-                displayUsername = 'User' + (data.userId ? data.userId.substring(0, 6) : '');
+                // If username is an email, use 'User' as fallback
+                displayUsername = 'User';
             }
             
             html += `
