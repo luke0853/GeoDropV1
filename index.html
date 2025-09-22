@@ -1097,7 +1097,7 @@
 
 
                     <!-- Registration Form (shown by default) -->
-                    <div id="registration-section" class="py-20 bg-gray-800" style="display: none;">
+                    <div id="registration-section" class="py-20 bg-gray-800" style="display: block;">
                         <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
                             <div class="text-center mb-8">
                                 <h2 id="form-title" class="text-4xl font-bold mb-4">🚀 Jetzt registrieren</h2>
@@ -1262,6 +1262,8 @@
 
     <!-- Scripts -->
     <script src="config/config-secure.js"></script>
+    <!-- Use public config for hosting, private config for local development -->
+    <script src="config/config-secrets.js"></script>
     <script src="js/firebase.js"></script>
     <script src="js/common.js"></script>
     <script src="js/navigation.js"></script>
@@ -1437,72 +1439,6 @@
                 popup.style.display = 'none';
             }
         }
-
-        // Initialize landing page function
-        window.initializeLandingPage = function() {
-            console.log('🔄 Initializing landing page...');
-            
-            // Check if user is logged in
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-            const userProfile = JSON.parse(localStorage.getItem('userProfile') || 'null');
-            
-            console.log('👤 Current user:', currentUser);
-            console.log('📋 User profile:', userProfile);
-            
-            if (currentUser && userProfile) {
-                console.log('✅ User is logged in - showing app');
-                // User is logged in, show the app
-                document.getElementById('landing-content').style.display = 'none';
-                document.getElementById('app-content').style.display = 'block';
-                
-                // Update user display
-                if (typeof window.updateUserDisplay === 'function') {
-                    window.updateUserDisplay();
-                }
-            } else {
-                console.log('❌ User is not logged in - showing landing page');
-                // User is not logged in, show landing page
-                document.getElementById('landing-content').style.display = 'block';
-                document.getElementById('app-content').style.display = 'none';
-                document.getElementById('registration-section').style.display = 'block';
-                
-                console.log('🌐 Landing page shown');
-                
-                // Hide user info
-                const userInfo = document.getElementById('user-info');
-                if (userInfo) {
-                    userInfo.style.display = 'none';
-                    console.log('👤 User info hidden');
-                }
-            }
-        };
-
-        // Toggle form function
-        window.toggleForm = function() {
-            const isLogin = document.getElementById('form-title').textContent.includes('Anmelden');
-            
-            if (isLogin) {
-                // Switch to registration
-                document.getElementById('form-title').textContent = '🚀 Jetzt registrieren';
-                document.getElementById('form-subtitle').textContent = 'Erstelle deinen Account und starte sofort!';
-                document.getElementById('username-field').style.display = 'block';
-                document.getElementById('referral-field').style.display = 'block'; // Show referral field for registration
-                document.getElementById('main-button').innerHTML = '<i class="fas fa-user-plus mr-2"></i>Kostenlos registrieren';
-                document.getElementById('main-button').onclick = registerFromLanding;
-                document.getElementById('main-button').className = 'w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-green-700 hover:to-emerald-700 transition-all';
-                document.querySelector('p.text-sm.text-gray-300.text-center').innerHTML = 'Bereits registriert? <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300">Hier anmelden</button>';
-            } else {
-                // Switch to login
-                document.getElementById('form-title').textContent = '🔑 Anmelden';
-                document.getElementById('form-subtitle').textContent = 'Willkommen zurück!';
-                document.getElementById('username-field').style.display = 'none';
-                document.getElementById('referral-field').style.display = 'none'; // Hide referral field for login
-                document.getElementById('main-button').innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Anmelden';
-                document.getElementById('main-button').onclick = loginFromLanding;
-                document.getElementById('main-button').className = 'w-full bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-blue-700 hover:to-purple-700 transition-all';
-                document.querySelector('p.text-sm.text-gray-300.text-center').innerHTML = 'Noch kein Account? <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300">Hier zur Registrierung</button>';
-            }
-        };
 
         // Process referral link function
         function processReferralLink() {
