@@ -1,19 +1,19 @@
 <h3 class="text-2xl font-bold text-white mb-8 bg-black px-4 py-2 rounded-lg">⚙️ Einstellungen</h3>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
     <!-- Username Settings -->
     <div class="bg-gray-700 rounded-lg p-6">
-        <h3 class="text-xl font-semibold text-white mb-4">👤 Benutzername</h3>
+        <h3 class="text-xl font-semibold text-white mb-4" id="settings-username-label">👤 Benutzername</h3>
         <div class="space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Benutzername:</label>
+                <label class="block text-sm font-medium text-gray-300 mb-2" id="settings-username-label-text">Benutzername:</label>
                 <div class="flex space-x-2">
                     <input type="text" id="settings-username" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="Benutzername" inputmode="text" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false">
-                    <button onclick="saveUsername()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <button onclick="saveUsername()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" id="settings-username-save">
                         💾 Speichern
                     </button>
                 </div>
-                <div class="text-xs text-gray-400 bg-gray-800 p-2 rounded mt-2">
+                <div class="text-xs text-gray-400 bg-gray-800 p-2 rounded mt-2" id="settings-username-tip">
                     💡 Tipp: Der Benutzername ersetzt deine E-Mail-Adresse im Spiel
                 </div>
             </div>
@@ -22,18 +22,18 @@
     
     <!-- Email Settings -->
     <div class="bg-gray-700 rounded-lg p-6">
-        <h3 class="text-xl font-semibold text-white mb-4">📧 E-Mail Einstellungen</h3>
+        <h3 class="text-xl font-semibold text-white mb-4" id="settings-email-title">📧 E-Mail Einstellungen</h3>
         <div class="space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Aktuelle E-Mail:</label>
+                <label class="block text-sm font-medium text-gray-300 mb-2" id="settings-email-current">Aktuelle E-Mail:</label>
                 <input type="email" id="settings-email" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="E-Mail-Adresse">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Neue E-Mail:</label>
+                <label class="block text-sm font-medium text-gray-300 mb-2" id="settings-email-new">Neue E-Mail:</label>
                 <input type="email" id="settings-new-email" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="Neue E-Mail-Adresse">
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-300 mb-2">Passwort bestätigen:</label>
+                <label class="block text-sm font-medium text-gray-300 mb-2" id="settings-email-password">Passwort bestätigen:</label>
                 <input type="password" id="settings-password" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="Passwort">
             </div>
             <button id="update-email-btn" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
@@ -44,23 +44,41 @@
     
     <!-- Notification Settings -->
     <div class="bg-gray-700 rounded-lg p-6">
-        <h3 class="text-xl font-semibold text-white mb-4">🔔 Benachrichtigungen</h3>
+        <h3 class="text-xl font-semibold text-white mb-4" id="settings-notifications-title">🔔 Benachrichtigungen</h3>
         <div class="space-y-4">
             <div class="flex items-center justify-between">
-                <span class="text-gray-300">E-Mail Benachrichtigungen</span>
+                <span class="text-gray-300" id="settings-notifications-email">E-Mail Benachrichtigungen</span>
                 <input type="checkbox" id="notify-email" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500">
             </div>
             <div class="flex items-center justify-between">
-                <span class="text-gray-300">Push Benachrichtigungen</span>
+                <span class="text-gray-300" id="settings-notifications-push">Push Benachrichtigungen</span>
                 <input type="checkbox" id="notify-push" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500">
             </div>
             <div class="flex items-center justify-between">
-                <span class="text-gray-300">Tägliche Updates</span>
+                <span class="text-gray-300" id="settings-notifications-daily">Tägliche Updates</span>
                 <input type="checkbox" id="notify-daily" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500">
             </div>
-            <button onclick="saveNotificationSettings()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            <button onclick="saveNotificationSettings()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors" id="settings-notifications-save">
                 💾 Einstellungen speichern
             </button>
+        </div>
+    </div>
+    
+    <!-- Language Settings -->
+    <div class="bg-gray-700 rounded-lg p-6">
+        <h3 class="text-xl font-semibold text-white mb-4" id="settings-language-title">🌍 Sprache</h3>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <span class="text-gray-300" id="settings-language-german">🇩🇪 Deutsch</span>
+                <input type="radio" name="language" value="de" id="lang-de" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" onchange="setLanguage('de')">
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-gray-300" id="settings-language-english">🇺🇸 English</span>
+                <input type="radio" name="language" value="en" id="lang-en" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" onchange="setLanguage('en')">
+            </div>
+            <div class="text-xs text-gray-400 bg-gray-800 p-2 rounded mt-2" id="settings-language-tip">
+                💡 Tipp: Die Sprache wird sofort geändert und gespeichert
+            </div>
         </div>
     </div>
 </div>

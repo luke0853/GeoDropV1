@@ -9,7 +9,9 @@ window.sendMessage = async function() {
     
     const user = auth.currentUser;
     if (!user) {
-        alert('❌ Bitte melde dich an um zu chatten!');
+        const isGerman = window.getCurrentLanguage ? window.getCurrentLanguage() === 'de' : true;
+        const message = isGerman ? '❌ Bitte melde dich an um zu chatten!' : '❌ Please log in to chat!';
+        alert(message);
         return;
     }
     
@@ -43,7 +45,9 @@ window.sendMessage = async function() {
         console.log('✅ Message sent with username:', username);
     }).catch(error => {
         console.error('❌ Error sending message:', error);
-        alert('❌ Fehler beim Senden der Nachricht!');
+        const isGerman = window.getCurrentLanguage ? window.getCurrentLanguage() === 'de' : true;
+        const message = isGerman ? '❌ Fehler beim Senden der Nachricht!' : '❌ Error sending message!';
+        alert(message);
     });
 };
 
@@ -72,7 +76,12 @@ window.loadChatMessages = function() {
             // Clean username - remove email addresses and use only username
             let displayUsername = data.username || 'User';
             if (displayUsername.includes('@')) {
-                // If username is an email, use 'User' as fallback
+                // If username is an email, extract the part before @
+                displayUsername = displayUsername.split('@')[0];
+            }
+            
+            // If still no username, use a default
+            if (!displayUsername || displayUsername === 'User' || displayUsername === '') {
                 displayUsername = 'User';
             }
             
@@ -90,10 +99,14 @@ window.loadChatMessages = function() {
         });
         
         if (html === '') {
+            const isGerman = window.getCurrentLanguage ? window.getCurrentLanguage() === 'de' : true;
+            const welcomeText = isGerman ? '💬 Willkommen im GeoChat!' : '💬 Welcome to GeoChat!';
+            const subtitleText = isGerman ? 'Chatte mit anderen GeoDrop-Spielern' : 'Chat with other GeoDrop players';
+            
             html = `
                 <div class="text-center text-gray-400 py-8">
-                    <p>💬 Willkommen im GeoChat!</p>
-                    <p class="text-sm mt-2">Chatte mit anderen GeoDrop-Spielern</p>
+                    <p>${welcomeText}</p>
+                    <p class="text-sm mt-2">${subtitleText}</p>
                 </div>
             `;
         }

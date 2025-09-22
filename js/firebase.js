@@ -371,8 +371,8 @@ window.loadUserProfile = async function(userId) {
 window.login = async function() {
     console.log('🔐 Login function called');
     
-    const email = document.getElementById('startseite-auth-email')?.value || document.getElementById('auth-email')?.value;
-    const password = document.getElementById('startseite-auth-password')?.value || document.getElementById('auth-password')?.value;
+    const email = document.getElementById('startseite-auth-email')?.value || document.getElementById('auth-email')?.value || document.getElementById('reg-email')?.value;
+    const password = document.getElementById('startseite-auth-password')?.value || document.getElementById('auth-password')?.value || document.getElementById('reg-password')?.value;
     
     console.log('📧 Email found:', email ? 'Yes' : 'No');
     console.log('🔑 Password found:', password ? 'Yes' : 'No');
