@@ -5,7 +5,7 @@
 // Lädt Konfiguration aus verschiedenen Quellen
 const TELEGRAM_CONFIG = window.PUBLIC_TELEGRAM_CONFIG || 
                        (window.CONFIG ? window.CONFIG.telegram : null) || {
-    botToken: 'MISSING_BOT_TOKEN',
+    botToken: '1935483099:AAHOfH7npOyPg_xURTQi4uDc3Esh_fg37Bc',
     chatId: '-1001270226245',
     enabled: true
 };
