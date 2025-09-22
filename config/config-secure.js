@@ -98,7 +98,7 @@ const CONFIG = {
     // UI Configuration
     ui: {
         theme: "dark",
-        language: "de", // Will be overridden by localStorage
+        language: "de",
         animations: true,
         soundEffects: false
     },

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impressum - GeoDrop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.0.0/dist/jsQR.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        .page {
+            display: flex;
+            width: 100%;
+            min-height: calc(100vh - 128px);
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+            text-align: left;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        
+        main {
+            padding-top: 64px;
+            padding-bottom: 64px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div id="mehr-impressum" class="page">
+            <div class="max-w-6xl mx-auto p-6">
+                <h2 class="text-3xl font-bold text-white mb-8">📄 Impressum</h2>
+                
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4">📄 Impressum</h3>
+                    <div class="space-y-4 text-gray-300">
+                        
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-blue-400 mb-2">🏢 Anbieter</h4>
+                            <p><strong>GeoDrop</strong><br>
+                            Eine innovative Geolocation-Krypto-App</p>
+                        </div>
+
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-green-400 mb-2">📧 Kontakt</h4>
+                            <p>E-Mail: GeoDrop@proton.me<br>
+                            Website: https://luke0853.github.io/GeoDropV1/#</p>
+                        </div>
+
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-purple-400 mb-2">⚖️ Rechtliches</h4>
+                            <p>Diese App ist ein Demonstrationsprojekt.<br>
+                            Alle Kryptowährungen sind Test-Token.<br>
+                            Keine echten finanziellen Transaktionen.</p>
+                        </div>
+
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-yellow-400 mb-2">🔒 Datenschutz</h4>
+                            <p>Wir respektieren deine Privatsphäre.<br>
+                            Standortdaten werden nur lokal gespeichert.<br>
+                            Keine Weitergabe an Dritte.</p>
+                        </div>
+
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-red-400 mb-2">⚠️ Haftungsausschluss</h4>
+                            <p>Diese App dient nur zu Demonstrationszwecken.<br>
+                            Keine Garantie für Funktionalität oder Verfügbarkeit.<br>
+                            Nutzung auf eigene Gefahr.</p>
+                        </div>
+
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-cyan-400 mb-2">📱 Version</h4>
+                            <p>Version: 1.0.0<br>
+                            Letzte Aktualisierung: 2025<br>
+                            Entwickelt mit ❤️ für die Krypto-Community</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../config/config.js"></script>
+    <script src="../js/firebase.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/wallet-system.js"></script>
+    
+    <script>
+                // Firebase wird bereits in firebase.js initialisiert
+
+        // Navigation function
+        function showPage(pageId) {
+            // For standalone page, redirect to main index
+            if (pageId !== 'impressum') {
+                window.location.href = '../index.html#' + pageId;
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 Impressum geladen');
+        });
+    </script>
+</body>
+</html>

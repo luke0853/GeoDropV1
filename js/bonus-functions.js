@@ -98,7 +98,7 @@ window.claimWeeklyBonus = async function() {
         const lastWeeklyBonus = window.userProfile.lastWeeklyBonus;
         
         if (lastWeeklyBonus === thisWeek) {
-            alert('❌ ' + (window.languageSystem ? window.languageSystem.t('bonus.weekly.already.claimed') : 'Wöchentlicher Bonus bereits diese Woche abgeholt!'));
+            alert('❌ Wöchentlicher Bonus bereits diese Woche abgeholt!');
             return;
         }
         
@@ -121,7 +121,7 @@ window.claimWeeklyBonus = async function() {
         
     } catch (error) {
         console.error('❌ Error claiming weekly bonus:', error);
-        alert('❌ ' + (window.languageSystem ? window.languageSystem.t('bonus.weekly.error') : 'Fehler beim Abholen des wöchentlichen Bonus!'));
+        alert('❌ Fehler beim Abholen des wöchentlichen Bonus!');
     }
 };
 
@@ -378,7 +378,7 @@ window.debugBonusStatus = function() {
               `Heute: ${today}\n` +
               `Letzter Claim: ${lastBonusClaim}\n` +
               `Verfügbar: ${isAvailable ? '✅ JA' : '❌ NEIN'}\n\n` +
-              `Bonus sollte ${isAvailable ? (window.languageSystem ? window.languageSystem.t('bonus.should.be.available') : 'verfügbar') : (window.languageSystem ? window.languageSystem.t('bonus.should.be.claimed') : 'bereits geclaimt')} sein.`);
+              `Bonus sollte ${isAvailable ? 'verfügbar' : 'bereits geclaimt'} sein.`);
     } else {
         alert('❌ Kein User-Profil gefunden!');
     }
@@ -711,7 +711,7 @@ window.debugReferralData = async function() {
     
     if (!window.db || !window.firebase) {
         console.error('❌ Firebase not available');
-        alert('❌ ' + (window.languageSystem ? window.languageSystem.t('bonus.firebase.unavailable') : 'Firebase nicht verfügbar'));
+        alert('❌ Firebase nicht verfügbar');
         return;
     }
     
@@ -767,7 +767,7 @@ window.addSpecificUsersToReferralLines = async function() {
     
     if (!window.db || !window.firebase) {
         console.error('❌ Firebase not available');
-        alert('❌ ' + (window.languageSystem ? window.languageSystem.t('bonus.firebase.unavailable') : 'Firebase nicht verfügbar'));
+        alert('❌ Firebase nicht verfügbar');
         return;
     }
     

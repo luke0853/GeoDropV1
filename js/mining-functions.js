@@ -436,7 +436,7 @@ window.loadMiningMachines = function() {
                 packageExpiryText = 'Verfallen!';
             }
         } else if (ownedCount > 0) {
-            packageExpiryText = window.languageSystem ? window.languageSystem.t('mining.package.expires') : 'Verfällt in 7 Tagen';
+            packageExpiryText = 'Verfällt in 7 Tagen';
         }
         
         html += `
@@ -723,7 +723,7 @@ window.buyMachine = async function(machineType) {
         });
         
             console.log('📤 Burn transaction sent:', tx.hash);
-        alert('⏳ ' + (window.languageSystem ? window.languageSystem.t('mining.transaction.sent') : 'Transaktion gesendet! Warte auf Bestätigung...'));
+        alert('⏳ Transaktion gesendet! Warte auf Bestätigung...');
         
             const receipt = await tx.wait();
         

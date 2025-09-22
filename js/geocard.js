@@ -26,11 +26,11 @@ window.reloadAllDropLists = async function() {
         }
         
         console.log('✅ All drop lists manually reloaded');
-        showMessage('✅ ' + (window.languageSystem ? window.languageSystem.t('geocard.reload.success') : 'Alle Listen wurden neu geladen'), false);
+        showMessage('✅ Alle Listen wurden neu geladen', false);
         
     } catch (error) {
         console.error('❌ Error reloading drop lists:', error);
-        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.reload.error') : 'Fehler beim Neuladen der Listen'), true);
+        showMessage('❌ Fehler beim Neuladen der Listen', true);
     }
 };
 
@@ -39,7 +39,7 @@ window.createAllAustrianStateDrops = async function() {
     console.log('🇦🇹 Creating 9 Austrian State Test Drops...');
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
+        showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
     
@@ -190,7 +190,7 @@ window.createAllAustrianStateDrops = async function() {
         }
         
         if (!realUsername) {
-            alert('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.username.not.found') : 'Username nicht gefunden! Bitte Profil vervollständigen.'));
+            alert('❌ Username nicht gefunden! Bitte Profil vervollständigen.');
             return;
         }
         
@@ -507,7 +507,7 @@ window.checkUserDropCount = async function() {
         
     } catch (error) {
         console.error('❌ Error checking User Drop count:', error);
-        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.check.user.drops.error') : 'Fehler beim Überprüfen der User Drop Anzahl'), true);
+        showMessage('❌ Fehler beim Überprüfen der User Drop Anzahl', true);
     }
 };
 
@@ -516,12 +516,12 @@ window.cleanupDuplicateUserDrops = async function() {
     console.log('🧹 Cleaning up duplicate User Drops...');
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
+        showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
     
     // Show confirmation dialog
-    if (!confirm('🧹 ' + (window.languageSystem ? window.languageSystem.t('geocard.cleanup.confirm') : 'Duplikate bereinigen?\n\nDies löscht alle doppelten User Drops und behält nur die neuesten.'))) {
+    if (!confirm('🧹 Duplikate bereinigen?\n\nDies löscht alle doppelten User Drops und behält nur die neuesten.')) {
         return;
     }
     
@@ -598,7 +598,7 @@ window.createRemainingAustrianDrops = async function() {
     console.log('🇦🇹 Creating all remaining Austrian State Drops...');
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
+        showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
     
@@ -655,7 +655,7 @@ async function createSingleStateDrop(stateName, placeName, lat, lng, dropNumber)
     console.log(`🏛️ Creating ${stateName} drop: ${placeName}...`);
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
+        showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
     
@@ -737,7 +737,7 @@ async function createSingleStateDrop(stateName, placeName, lat, lng, dropNumber)
         }
         
         if (!realUsername) {
-            alert('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.username.not.found') : 'Username nicht gefunden! Bitte Profil vervollständigen.'));
+            alert('❌ Username nicht gefunden! Bitte Profil vervollständigen.');
             return;
         }
         
@@ -947,7 +947,7 @@ window.addUserDropTracking = async function() {
         }, { merge: true });
         
         console.log('✅ User drop tracking added to Firebase');
-        alert('✅ ' + (window.languageSystem ? window.languageSystem.t('geocard.tracking.added') : 'User-Drop-Tracking wurde zu Firebase hinzugefügt!'));
+        alert('✅ User-Drop-Tracking wurde zu Firebase hinzugefügt!');
         
     } catch (error) {
         console.error('❌ Error adding user drop tracking:', error);
@@ -1327,7 +1327,7 @@ window.createTestMelkDrop = async function() {
     console.log('🏛️ Creating TEST Stift Melk Drop...');
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
+        showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
     
@@ -1587,7 +1587,7 @@ window.switchToUploadListType = function(type) {
             loadDevDropsForUpload();
         }
         
-        showMessage('🎯 ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.drops.selected') : 'Dev Drops für Upload ausgewählt'), false);
+        showMessage('🎯 Dev Drops für Upload ausgewählt', false);
     } else if (type === 'user') {
         // Switch to user drops for upload
         devBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white';
@@ -1603,7 +1603,7 @@ window.switchToUploadListType = function(type) {
             loadUserDropsForUpload();
         }
         
-        showMessage('👤 ' + (window.languageSystem ? window.languageSystem.t('geocard.user.drops.selected') : 'User Drops für Upload ausgewählt'), false);
+        showMessage('👤 User Drops für Upload ausgewählt', false);
     }
 };
 
@@ -1620,9 +1620,9 @@ window.useCurrentLocationForUserDrop = function() {
     if (window.currentLocation) {
         document.getElementById('user-drop-lat').value = window.currentLocation.lat.toFixed(6);
         document.getElementById('user-drop-lng').value = window.currentLocation.lng.toFixed(6);
-        showMessage('📍 ' + (window.languageSystem ? window.languageSystem.t('geocard.current.position.inserted') : 'Aktuelle Position eingefügt'), false);
+        showMessage('📍 Aktuelle Position eingefügt', false);
     } else {
-        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.current.position.unavailable') : 'Aktuelle Position nicht verfügbar'), true);
+        showMessage('❌ Aktuelle Position nicht verfügbar', true);
     }
 };
 
@@ -1686,11 +1686,11 @@ window.createUserDrop = async function() {
             return;
         }
         if (isNaN(lat) || isNaN(lng)) {
-            showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.enter.valid.coordinates') : 'Bitte gib gültige Koordinaten ein!'), true);
+            showMessage('❌ Bitte gib gültige Koordinaten ein!', true);
             return;
         }
         if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-            showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.invalid.coordinates') : 'Ungültige Koordinaten!'), true);
+            showMessage('❌ Ungültige Koordinaten!', true);
             return;
         }
         
@@ -1767,7 +1767,7 @@ window.createUserDrop = async function() {
         }
         
         if (!realUsername) {
-            alert('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.username.not.found') : 'Username nicht gefunden! Bitte Profil vervollständigen.'));
+            alert('❌ Username nicht gefunden! Bitte Profil vervollständigen.');
             return;
         }
 
@@ -1882,7 +1882,7 @@ window.loadDevDropsForUpload = async function() {
         // Update dev drops select
         const select = document.getElementById('geocard-drop-select');
         if (select) {
-            select.innerHTML = '<option value="">' + (window.languageSystem ? window.languageSystem.t('geocard.dev.geodrop.select') : 'Dev GeoDrop auswählen...') + '</option>';
+            select.innerHTML = '<option value="">Dev GeoDrop auswählen...</option>';
             devDrops.forEach(drop => {
                 const option = document.createElement('option');
                 option.value = `devDrops:${drop.id}`;
@@ -1937,7 +1937,7 @@ window.loadUserDropsForUpload = async function() {
         // Update user drops select
         const select = document.getElementById('geocard-user-drop-select');
         if (select) {
-            select.innerHTML = '<option value="">' + (window.languageSystem ? window.languageSystem.t('geocard.user.geodrop.select') : 'User GeoDrop auswählen...') + '</option>';
+            select.innerHTML = '<option value="">User GeoDrop auswählen...</option>';
             userDrops.forEach(drop => {
                 const option = document.createElement('option');
                 option.value = `userDrops:${drop.id}`;
@@ -2018,7 +2018,7 @@ window.loadDevGeoDrops = async function() {
                 const today = new Date().toDateString();
                 const lastClaimDate = drop.lastClaimDate ? drop.lastClaimDate.toDate().toDateString() : null;
                 const isClaimedToday = lastClaimDate === today && drop.claimedBy === currentUser?.uid;
-                const statusText = isClaimedToday ? '⏰ ' + (window.languageSystem ? window.languageSystem.t('geocard.collected.today') : 'Heute gesammelt') : '✅ ' + (window.languageSystem ? window.languageSystem.t('geocard.available') : 'Verfügbar');
+                const statusText = isClaimedToday ? '⏰ Heute gesammelt' : '✅ Verfügbar';
                 const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-600' : 'border-b border-gray-700';
                 const textClass = isClaimedToday ? 'text-gray-400' : 'text-white';
                 tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${drop.geodropNumber || drop.id}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;
@@ -2154,7 +2154,7 @@ window.createAustriaTouristDrops = async function() {
     console.log('🇦🇹 Creating Austria Tourist Drops...');
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
+        showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
     
@@ -2328,7 +2328,7 @@ window.createTestAustriaDrop = async function() {
     console.log('🧪 Creating TEST Austria Tourist Drop...');
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
+        showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
     
@@ -3996,7 +3996,7 @@ window.loadDevGeoDrops = async function() {
                 const today = new Date().toDateString();
                 const lastClaimDate = drop.lastClaimDate ? drop.lastClaimDate.toDate().toDateString() : null;
                 const isClaimedToday = lastClaimDate === today && drop.claimedBy === currentUser?.uid;
-                const statusText = isClaimedToday ? '⏰ ' + (window.languageSystem ? window.languageSystem.t('geocard.collected.today') : 'Heute gesammelt') : '✅ ' + (window.languageSystem ? window.languageSystem.t('geocard.available') : 'Verfügbar');
+                const statusText = isClaimedToday ? '⏰ Heute gesammelt' : '✅ Verfügbar';
                 const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-600' : 'border-b border-gray-700';
                 const textClass = isClaimedToday ? 'text-gray-400' : 'text-white';
                 tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${drop.geodropNumber || drop.id}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;

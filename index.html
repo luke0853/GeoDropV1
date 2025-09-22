@@ -1135,26 +1135,18 @@
                                         <input type="password" id="reg-password" placeholder="Mindestens 6 Zeichen" class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') handleEnterKey()">
                                     </div>
                                     
-                                    <!-- REFERRAL ANZEIGE -->
-                                    <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 border border-purple-400 shadow-lg">
-                                        <div class="flex items-center mb-4">
-                                            <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mr-4">
-                                                <span class="text-2xl">🎁</span>
-                                            </div>
-                                            <div>
-                                                <h3 class="text-xl font-bold text-white">Referral-Bonus</h3>
-                                                <p class="text-purple-200 text-sm">Erhalte 50 PixelDrop extra!</p>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="space-y-3">
-                                            <label class="block text-sm font-medium text-white">🔗 Referral-Code (optional)</label>
-                                            <input type="text" id="reg-referral" placeholder="Referral-Code eingeben oder automatisch ausgefüllt" class="w-full px-4 py-3 bg-white/90 text-gray-800 rounded-lg border border-purple-300 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all">
-                                            <div class="flex items-center text-purple-200 text-sm">
-                                                <span class="mr-2">✨</span>
-                                                <span>Automatisch mit Standard-Code gefüllt</span>
-                                            </div>
-                                        </div>
+                                    <!-- REFERRAL FIELD - MUST BE VISIBLE -->
+                                    <div style="background: red !important; padding: 20px !important; margin: 20px 0 !important; border: 5px solid yellow !important; display: block !important; visibility: visible !important; position: relative !important; z-index: 99999 !important; width: 100% !important; box-sizing: border-box !important;">
+                                        <label class="block text-sm font-medium text-white mb-2" style="color: white !important; font-weight: bold !important; font-size: 18px !important;">🔗 REFERRAL-CODE (OPTIONAL)</label>
+                                        <input type="text" id="reg-referral" placeholder="REFERRAL-CODE EINGEBEN" class="w-full px-4 py-3 bg-white text-black rounded-lg border border-red-500 focus:border-blue-500 focus:outline-none" style="background: white !important; color: black !important; border: 5px solid red !important; font-size: 18px !important; width: 100% !important; box-sizing: border-box !important;">
+                                        <p class="text-xs text-white mt-1" style="color: white !important; font-size: 14px !important;">Du erhältst 50 PixelDrop Bonus wenn du über einen Referral-Link kommst!</p>
+                                    </div>
+                                    
+                                    <!-- REFERRAL FIELD - STANDALONE -->
+                                    <div style="background: red !important; padding: 20px !important; margin: 20px 0 !important; border: 5px solid yellow !important; display: block !important; visibility: visible !important; position: relative !important; z-index: 99999 !important; width: 100% !important; box-sizing: border-box !important;">
+                                        <label style="color: white !important; font-weight: bold !important; font-size: 18px !important; display: block !important; margin-bottom: 10px !important;">🔗 REFERRAL-CODE (OPTIONAL)</label>
+                                        <input type="text" id="reg-referral" placeholder="REFERRAL-CODE EINGEBEN" style="background: white !important; color: black !important; border: 5px solid red !important; font-size: 18px !important; width: 100% !important; box-sizing: border-box !important; padding: 15px !important; border-radius: 8px !important;">
+                                        <p style="color: white !important; font-size: 14px !important; margin-top: 10px !important;">Du erhältst 50 PixelDrop Bonus wenn du über einen Referral-Link kommst!</p>
                                     </div>
                                     
                                     <button id="main-button" onclick="registerFromLanding()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-green-700 hover:to-emerald-700 transition-all">
@@ -1294,7 +1286,7 @@
     <script src="config/config-secrets.js"></script>
     <script src="js/firebase.js"></script>
     <script src="js/common.js"></script>
-    <script src="js/language-system.js"></script>
+    <script src="js/language.js"></script>
     <script src="js/navigation.js"></script>
     <script src="js/geochat.js"></script>
     <script src="js/trading.js"></script>
