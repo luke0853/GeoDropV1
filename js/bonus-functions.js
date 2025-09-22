@@ -212,23 +212,18 @@ window.updateBonusDisplay = function() {
         console.log('🔍 today:', today);
         console.log('🔍 lastBonusClaim:', lastBonusClaim);
         
-        // FIX: Always show bonus claimed with real data
-        if (window.userProfile) {
-            // Calculate total bonus from bonus history
-            const bonusHistory = window.userProfile.bonusHistory || [];
-            const totalBonusClaimed = bonusHistory.reduce((sum, bonus) => sum + (bonus.amount || 0), 0);
-            
-            console.log('🎁 Bonus history:', bonusHistory);
-            console.log('🎁 Total bonus claimed:', totalBonusClaimed);
-            
-            // Update the display with real data
-            bonusClaimed.textContent = totalBonusClaimed;
+        // Show correct bonus status based on availability
+        if (isAvailable) {
+            // Bonus is available - show claim button
+            bonusAvailable.style.display = 'block';
+            bonusClaimed.style.display = 'none';
+            console.log('✅ Showing bonus available - can claim!');
+        } else {
+            // Bonus already claimed today - show claimed status
+            bonusAvailable.style.display = 'none';
+            bonusClaimed.style.display = 'block';
+            console.log('✅ Showing bonus claimed - already claimed today');
         }
-        
-        // Always show bonus claimed section
-        bonusAvailable.style.display = 'none';
-        bonusClaimed.style.display = 'block';
-        console.log('✅ Showing bonus claimed with real data');
         
         // Update countdown timer
         updateCountdownTimer();
