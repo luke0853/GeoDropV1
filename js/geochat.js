@@ -17,7 +17,7 @@ window.sendMessage = function() {
     db.collection('chatMessages').add({
         text: message,
         userId: user.uid,
-        username: window.userProfile?.username || user.displayName || user.email,
+        username: window.userProfile?.username || user.displayName || 'User' + user.uid.substring(0, 6),
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         userEmail: user.email
     }).then(() => {
@@ -51,11 +51,18 @@ window.loadChatMessages = function() {
             const messageClass = isCurrentUser ? 'bg-blue-600' : 'bg-gray-600';
             const alignClass = isCurrentUser ? 'ml-auto' : 'mr-auto';
             
+            // Clean username - remove email addresses and use only username
+            let displayUsername = data.username || 'User';
+            if (displayUsername.includes('@')) {
+                // If username is an email, try to get real username from user profile
+                displayUsername = 'User' + (data.userId ? data.userId.substring(0, 6) : '');
+            }
+            
             html += `
                 <div class="chat-message ${alignClass} max-w-xs lg:max-w-md">
                     <div class="${messageClass} rounded-lg p-3">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs font-semibold text-gray-300">${data.username || 'Anonym'}</span>
+                            <span class="text-xs font-semibold text-gray-300">${displayUsername}</span>
                             <span class="text-xs text-gray-400">${timeStr}</span>
                         </div>
                         <p class="text-white">${data.text}</p>
