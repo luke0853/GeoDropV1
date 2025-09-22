@@ -279,6 +279,12 @@ function setupAuthListener() {
                     window.updateAdBannerVisibility();
                 }
                 
+                // Load referrals data after login
+                if (typeof window.loadReferralsData === 'function') {
+                    console.log('👥 Loading referrals data after login...');
+                    window.loadReferralsData();
+                }
+                
                 console.log('✅ Auth state change - user logged in, navigation updated');
             }, 500);
         } else {
@@ -442,6 +448,12 @@ window.login = async function() {
             // Update ad banner visibility
             if (typeof window.updateAdBannerVisibility === 'function') {
                 window.updateAdBannerVisibility();
+            }
+            
+            // Load referrals data after login
+            if (typeof window.loadReferralsData === 'function') {
+                console.log('👥 Loading referrals data after login...');
+                window.loadReferralsData();
             }
             
             console.log('✅ Navigation updated after login');

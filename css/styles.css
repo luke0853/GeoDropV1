@@ -4,12 +4,52 @@ body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    background-image: url('../images/ChatGPT%20Image%2029.%20Aug.%202025,%2008_34_24.png');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    background-color: #1a202c;
+    background-image: url('../images/ChatGPT%20Image%2029.%20Aug.%202025,%2008_34_24.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-attachment: fixed !important;
+    background-color: #1a202c !important;
     color: #e2e8f0;
+}
+
+/* Banner-Bereiche */
+.banner-area {
+    width: 100%;
+    min-height: 90px;
+    background: rgba(240, 240, 240, 0.9);
+    border: 1px solid #ddd;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.banner-area.sidebar {
+    background: rgba(42, 42, 42, 0.9);
+    border-color: #555;
+    color: #fff;
+    min-height: 250px;
+    margin: 20px 0;
+}
+
+.banner-area.content {
+    background: rgba(248, 248, 248, 0.9);
+    min-height: 120px;
+    margin: 20px 0;
+}
+
+.banner-area.footer {
+    background: rgba(224, 224, 224, 0.9);
+    min-height: 100px;
+    margin-top: 20px;
+}
+
+.banner-placeholder {
+    color: #666;
+    font-size: 14px;
+    text-align: center;
 }
 
 /* Removed body overlay filter */

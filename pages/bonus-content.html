@@ -4,25 +4,25 @@
     <div class="space-y-6">
         <!-- Bonus Status -->
         <div class="bg-gradient-to-r from-gray-700 to-gray-600 rounded-lg p-6 shadow-lg border border-gray-500">
-            <h3 class="text-xl font-semibold text-white mb-4 text-center">Tägliche Belohnungen</h3>
-            <p class="text-gray-300 mb-4 text-center">Logge dich täglich ein und erhalte Bonus-Coins!</p>
+            <h3 class="text-xl font-semibold text-white mb-4 text-center" id="bonus-daily-rewards">Tägliche Belohnungen</h3>
+            <p class="text-gray-300 mb-4 text-center" id="bonus-login-daily">Logge dich täglich ein und erhalte Bonus-Coins!</p>
             
             <div id="bonus-available" style="display: none;">
                 <div class="bg-gradient-to-r from-green-900 to-green-800 border-2 border-green-500 rounded-lg p-6 text-center shadow-2xl animate-pulse">
                     <div class="text-6xl mb-4 animate-bounce">🎁</div>
-                    <h4 class="text-2xl font-bold text-green-300 mb-2 animate-pulse">Bonus verfügbar!</h4>
-                    <p class="text-green-200 mb-6 text-lg">Du kannst heute noch deinen Bonus abholen!</p>
+                    <h4 class="text-2xl font-bold text-green-300 mb-2 animate-pulse" id="bonus-available-text">Bonus verfügbar!</h4>
+                    <p class="text-green-200 mb-6 text-lg" id="bonus-can-claim">Du kannst heute noch deinen Bonus abholen!</p>
                     <button onclick="claimBonus()" class="px-8 py-4 bg-gradient-to-r from-green-600 to-green-500 text-white rounded-lg hover:from-green-700 hover:to-green-600 transition-all duration-300 font-bold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 animate-pulse">
-                        ✨ Bonus abholen (50 PixelDrops) ✨
+                        ✨ <span id="bonus-claim">Bonus abholen (50 PixelDrops)</span> ✨
                     </button>
                     <button onclick="testBonusSystem()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mt-2 text-sm">
-                        🧪 Test System
+                        🧪 <span id="bonus-test-system">Test System</span>
                     </button>
                     <button onclick="forceShowBonusButton()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors mt-2 text-sm">
-                        🔧 Force Show Button
+                        🔧 <span id="bonus-force-show">Force Show Button</span>
                     </button>
                     <button onclick="debugBonusElements()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors mt-2 text-sm">
-                        🔍 Debug Elements
+                        🔍 <span id="bonus-debug-elements">Debug Elements</span>
                     </button>
                 </div>
             </div>
@@ -30,10 +30,10 @@
             <div id="bonus-claimed" style="display: block;">
                 <div class="bg-gradient-to-r from-yellow-900 to-yellow-800 border-2 border-yellow-500 rounded-lg p-6 text-center shadow-2xl">
                     <div class="text-6xl mb-4 animate-spin">⏰</div>
-                    <h4 class="text-2xl font-bold text-yellow-300 mb-2">✅ Bonus bereits abgeholt</h4>
-                    <p class="text-yellow-200 mb-6 text-lg">Komm morgen wieder und hol dir deinen neuen Bonus!</p>
+                    <h4 class="text-2xl font-bold text-yellow-300 mb-2" id="bonus-already-claimed">✅ Bonus bereits abgeholt</h4>
+                    <p class="text-yellow-200 mb-6 text-lg" id="bonus-come-tomorrow">Komm morgen wieder und hol dir deinen neuen Bonus!</p>
                     <div id="bonus-countdown" class="bg-yellow-800 rounded-lg p-4 border border-yellow-400">
-                        <p class="text-yellow-200 text-lg">Nächster Reset in:</p>
+                        <p class="text-yellow-200 text-lg" id="bonus-next-reset">Nächster Reset in:</p>
                         <p class="text-3xl font-bold text-yellow-300 animate-pulse" id="countdown-timer">--:--:--</p>
                     </div>
                 </div>
@@ -42,44 +42,44 @@
         
         <!-- Bonus History -->
         <div class="bg-gradient-to-r from-gray-700 to-gray-600 rounded-lg p-6 shadow-lg border border-gray-500">
-            <h3 class="text-xl font-semibold text-white mb-4 text-center">📊 Bonus-Verlauf</h3>
+            <h3 class="text-xl font-semibold text-white mb-4 text-center" id="bonus-history">📊 Bonus-Verlauf</h3>
             <div id="bonus-history-list" class="space-y-3">
                 <!-- Bonus-Historie wird hier dynamisch eingefügt -->
                 <div class="text-center text-gray-400 py-4">
                     <div class="animate-spin text-4xl mb-2">⏳</div>
-                    <p>Lade Bonus-Verlauf...</p>
+                    <p id="bonus-loading-history">Lade Bonus-Verlauf...</p>
                 </div>
             </div>
         </div>
         
         <!-- Referral System Section -->
         <div class="bg-gradient-to-r from-green-900 to-blue-900 rounded-lg p-6 shadow-lg border border-green-500">
-            <h3 class="text-xl font-semibold text-white mb-4 text-center">🔗 Referral-System</h3>
+            <h3 class="text-xl font-semibold text-white mb-4 text-center" id="bonus-referral-system">🔗 Referral-System</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <h4 class="text-lg font-semibold text-green-300 mb-3">Dein Referral-Link</h4>
+                    <h4 class="text-lg font-semibold text-green-300 mb-3" id="bonus-your-referral">Dein Referral-Link</h4>
                     <div class="flex space-x-2">
                         <input type="text" id="referral-link-input" readonly 
                                class="flex-1 p-3 bg-gray-700 border border-gray-600 rounded-lg text-sm"
-                               placeholder="Referral-Link wird geladen...">
+                               placeholder="Referral-Link wird geladen..." id="bonus-referral-loading">
                         <button onclick="copyReferralLink()" class="bg-green-600 px-4 py-3 rounded-lg hover:bg-green-700">
-                            📋 Kopieren
+                            📋 <span id="bonus-copy">Kopieren</span>
                         </button>
                     </div>
                     <p class="text-sm text-gray-300 mt-2">
-                        Teile diesen Link mit Freunden und verdiene 10% von deren ersten Einkäufen!
+                        <span id="bonus-share-earn">Teile diesen Link mit Freunden und verdiene 10% von deren ersten Einkäufen!</span>
                     </p>
                 </div>
                 <div>
-                    <h4 class="text-lg font-semibold text-blue-300 mb-3">Referral-Statistiken</h4>
+                    <h4 class="text-lg font-semibold text-blue-300 mb-3" id="bonus-referral-stats">Referral-Statistiken</h4>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="text-center">
                             <div class="text-2xl font-bold text-green-400" id="referral-count">0</div>
-                            <div class="text-sm text-gray-300">Direkte Refs</div>
+                            <div class="text-sm text-gray-300" id="bonus-direct-refs">Direkte Refs</div>
                         </div>
                         <div class="text-center">
                             <div class="text-2xl font-bold text-blue-400" id="referral-earnings">0</div>
-                            <div class="text-sm text-gray-300">Verdient (PD)</div>
+                            <div class="text-sm text-gray-300" id="bonus-earned-pd">Verdient (PD)</div>
                         </div>
                     </div>
                 </div>
@@ -88,22 +88,22 @@
 
         <!-- Special Effects Section -->
         <div class="bg-gradient-to-r from-purple-900 to-blue-900 rounded-lg p-6 shadow-lg border border-purple-500">
-            <h3 class="text-xl font-semibold text-white mb-4 text-center">✨ Special Effects</h3>
+            <h3 class="text-xl font-semibold text-white mb-4 text-center" id="bonus-special-effects">✨ Special Effects</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-gradient-to-r from-red-600 to-pink-600 rounded-lg p-4 text-center animate-pulse">
                     <div class="text-3xl mb-2">🔥</div>
-                    <p class="text-white font-semibold">Streak Bonus</p>
-                    <p class="text-red-200 text-sm">+10% pro Tag</p>
+                    <p class="text-white font-semibold" id="bonus-streak-bonus">Streak Bonus</p>
+                    <p class="text-red-200 text-sm" id="bonus-streak-percent">+10% pro Tag</p>
                 </div>
                 <div class="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg p-4 text-center animate-bounce">
                     <div class="text-3xl mb-2">⚡</div>
-                    <p class="text-white font-semibold">Speed Bonus</p>
-                    <p class="text-blue-200 text-sm">Schnelle Belohnung</p>
+                    <p class="text-white font-semibold" id="bonus-speed-bonus">Speed Bonus</p>
+                    <p class="text-blue-200 text-sm" id="bonus-speed-reward">Schnelle Belohnung</p>
                 </div>
                 <div class="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg p-4 text-center animate-pulse">
                     <div class="text-3xl mb-2">💎</div>
-                    <p class="text-white font-semibold">Premium Bonus</p>
-                    <p class="text-green-200 text-sm">Exklusive Belohnungen</p>
+                    <p class="text-white font-semibold" id="bonus-premium-bonus">Premium Bonus</p>
+                    <p class="text-green-200 text-sm" id="bonus-premium-rewards">Exklusive Belohnungen</p>
                 </div>
             </div>
         </div>

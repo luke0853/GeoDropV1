@@ -98,7 +98,7 @@ window.claimWeeklyBonus = async function() {
         const lastWeeklyBonus = window.userProfile.lastWeeklyBonus;
         
         if (lastWeeklyBonus === thisWeek) {
-            alert('❌ Wöchentlicher Bonus bereits diese Woche abgeholt!');
+            alert('❌ ' + (window.languageSystem ? window.languageSystem.t('bonus.weekly.already.claimed') : 'Wöchentlicher Bonus bereits diese Woche abgeholt!'));
             return;
         }
         
@@ -121,7 +121,7 @@ window.claimWeeklyBonus = async function() {
         
     } catch (error) {
         console.error('❌ Error claiming weekly bonus:', error);
-        alert('❌ Fehler beim Abholen des wöchentlichen Bonus!');
+        alert('❌ ' + (window.languageSystem ? window.languageSystem.t('bonus.weekly.error') : 'Fehler beim Abholen des wöchentlichen Bonus!'));
     }
 };
 
@@ -378,7 +378,7 @@ window.debugBonusStatus = function() {
               `Heute: ${today}\n` +
               `Letzter Claim: ${lastBonusClaim}\n` +
               `Verfügbar: ${isAvailable ? '✅ JA' : '❌ NEIN'}\n\n` +
-              `Bonus sollte ${isAvailable ? 'verfügbar' : 'bereits geclaimt'} sein.`);
+              `Bonus sollte ${isAvailable ? (window.languageSystem ? window.languageSystem.t('bonus.should.be.available') : 'verfügbar') : (window.languageSystem ? window.languageSystem.t('bonus.should.be.claimed') : 'bereits geclaimt')} sein.`);
     } else {
         alert('❌ Kein User-Profil gefunden!');
     }
@@ -711,7 +711,7 @@ window.debugReferralData = async function() {
     
     if (!window.db || !window.firebase) {
         console.error('❌ Firebase not available');
-        alert('❌ Firebase nicht verfügbar');
+        alert('❌ ' + (window.languageSystem ? window.languageSystem.t('bonus.firebase.unavailable') : 'Firebase nicht verfügbar'));
         return;
     }
     
@@ -767,7 +767,7 @@ window.addSpecificUsersToReferralLines = async function() {
     
     if (!window.db || !window.firebase) {
         console.error('❌ Firebase not available');
-        alert('❌ Firebase nicht verfügbar');
+        alert('❌ ' + (window.languageSystem ? window.languageSystem.t('bonus.firebase.unavailable') : 'Firebase nicht verfügbar'));
         return;
     }
     
@@ -1014,7 +1014,7 @@ window.applyReferralToExistingAccount = async function(referralCode) {
 // Generate referral link for current user
 window.generateReferralLink = function() {
     if (!window.userProfile || !window.userProfile.username) {
-        return 'https://geodrop-cryptogame.netlify.app/#/ref/' + (window.userProfile?.username || 'User');
+        return 'https://luke0853.github.io/GeoDropV1/#/ref/' + (window.userProfile?.username || 'User');
     }
     
     const baseUrl = window.location.origin + window.location.pathname;
@@ -1029,22 +1029,22 @@ window.updateReferralLink = function() {
     console.log('🔍 userProfile:', window.userProfile);
     
     const referralInput = document.getElementById('referral-link-input') || 
-                         document.querySelector('input[value*="geodrop.com/ref/"]');
+                         document.querySelector('input[value*="luke0853.github.io"]');
     
     if (referralInput) {
         let newLink;
         
         if (window.currentUser && window.currentUser.uid) {
             // Use Firebase UID as referral code
-            newLink = `https://geodrop-cryptogame.netlify.app/#/ref/${window.currentUser.uid}`;
+            newLink = `https://luke0853.github.io/GeoDropV1/#/ref/${window.currentUser.uid}`;
             console.log('🔗 Using Firebase UID as referral code:', window.currentUser.uid);
         } else if (window.userProfile && window.userProfile.username) {
             // Use username as referral code
-            newLink = `https://geodrop-cryptogame.netlify.app/#/ref/${window.userProfile.username}`;
+            newLink = `https://luke0853.github.io/GeoDropV1/#/ref/${window.userProfile.username}`;
             console.log('🔗 Using username as referral code:', window.userProfile.username);
         } else {
             // Fallback to generic link
-            newLink = 'https://geodrop-cryptogame.netlify.app/#/ref/User';
+            newLink = 'https://luke0853.github.io/GeoDropV1/#/ref/User';
             console.log('🔗 Using fallback referral link');
         }
         
@@ -1167,7 +1167,7 @@ window.loadProfileData = function() {
 // Copy referral link function
 window.copyReferralLink = function() {
     const referralInput = document.getElementById('referral-link-input') ||
-                         document.querySelector('input[value*="geodrop-cryptogame.netlify.app"]') || 
+                         document.querySelector('input[value*="luke0853.github.io"]') || 
                          document.querySelector('input[value*="?ref="]');
     
     if (referralInput) {
@@ -1214,7 +1214,7 @@ window.loadReferralData = async function() {
             const userData = userDoc.data();
             
             // Update referral link
-            const referralLink = `https://geodrop-cryptogame.netlify.app/#?ref=${window.currentUser.uid}`;
+            const referralLink = `https://luke0853.github.io/GeoDropV1/#?ref=${window.currentUser.uid}`;
             const referralInput = document.getElementById('referral-link-input');
             if (referralInput) {
                 referralInput.value = referralLink;

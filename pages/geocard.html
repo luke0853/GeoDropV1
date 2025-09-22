@@ -16,6 +16,130 @@
     <script src="../js/geocard.js"></script>
     <script src="../js/user-drop-functions.js"></script>
     
+    <!-- Dev Functions -->
+    <script>
+        // DEV FUNCTION - Fix any drop creator name
+        window.devFixDropCreator = async function(dropNumber, newCreatorName) {
+            console.log(`🔧 DEV: Fixing Drop ${dropNumber} creator to: ${newCreatorName}`);
+            
+            // Check multiple dev login indicators
+            const isDevLoggedIn = window.isDevLoggedIn || 
+                                 localStorage.getItem('devLoggedIn') === 'true' || 
+                                 sessionStorage.getItem('devLoggedIn') === 'true' ||
+                                 window.isAdmin === true;
+            
+            if (!isDevLoggedIn) {
+                alert('❌ Dev-Zugang erforderlich! Bitte zuerst als Dev anmelden.');
+                return;
+            }
+            
+            try {
+                const db = window.firebase.firestore();
+                const collections = ['userDrops', 'devDrops'];
+                let found = false;
+                
+                for (const collectionName of collections) {
+                    console.log(`🔍 Searching in ${collectionName}...`);
+                    const snapshot = await db.collection(collectionName).get();
+                    
+                    for (const doc of snapshot.docs) {
+                        const data = doc.data();
+                        if (data.geodropNumber === dropNumber.toString() || data.geodropNumber === dropNumber) {
+                            console.log(`📄 Found Drop ${dropNumber} in ${collectionName}:`, doc.id);
+                            console.log('📊 Current data:', data);
+                            
+                            // Update the document
+                            await doc.ref.update({
+                                createdByName: newCreatorName,
+                                createdBy: 'dev-admin'
+                            });
+                            
+                            console.log(`✅ Drop ${dropNumber} updated successfully!`);
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if (found) break;
+                }
+                
+                if (found) {
+                    alert(`✅ Drop ${dropNumber} Ersteller wurde auf "${newCreatorName}" geändert!`);
+                    // Force reload
+                    setTimeout(() => {
+                        if (typeof loadGeoDrops === 'function') {
+                            loadGeoDrops();
+                        }
+                        if (typeof loadUserGeoDrops === 'function') {
+                            loadUserGeoDrops();
+                        }
+                    }, 1000);
+                } else {
+                    alert(`❌ Drop ${dropNumber} nicht gefunden!`);
+                }
+                
+            } catch (error) {
+                console.error('❌ Error fixing drop:', error);
+                alert('❌ Fehler: ' + error.message);
+            }
+        };
+        
+        // SIMPLE DEV FUNCTION - No login check
+        window.simpleFixDrop11 = async function() {
+            console.log('🔧 SIMPLE: Fixing Drop 11 to KryptoGuru');
+            
+            try {
+                const db = window.firebase.firestore();
+                const collections = ['userDrops', 'devDrops'];
+                let found = false;
+                
+                for (const collectionName of collections) {
+                    console.log(`🔍 Searching in ${collectionName}...`);
+                    const snapshot = await db.collection(collectionName).get();
+                    
+                    for (const doc of snapshot.docs) {
+                        const data = doc.data();
+                        if (data.geodropNumber === '11' || data.geodropNumber === 11) {
+                            console.log(`📄 Found Drop 11 in ${collectionName}:`, doc.id);
+                            console.log('📊 Current data:', data);
+                            
+                            // Update the document
+                            await doc.ref.update({
+                                createdByName: 'KryptoGuru',
+                                createdBy: 'dev-admin'
+                            });
+                            
+                            console.log('✅ Drop 11 updated successfully!');
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if (found) break;
+                }
+                
+                if (found) {
+                    alert('✅ Drop 11 Ersteller wurde auf "KryptoGuru" geändert!');
+                    // Force reload
+                    setTimeout(() => {
+                        if (typeof loadGeoDrops === 'function') {
+                            loadGeoDrops();
+                        }
+                        if (typeof loadUserGeoDrops === 'function') {
+                            loadUserGeoDrops();
+                        }
+                    }, 1000);
+                } else {
+                    alert('❌ Drop 11 nicht gefunden!');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error fixing drop:', error);
+                alert('❌ Fehler: ' + error.message);
+            }
+        };
+    </script>
+    
     <!-- Test Austria Drop Function -->
     <script>
         // Test function - Create Test Drop for Stift Melk
@@ -486,9 +610,11 @@
         <div class="bg-gray-700 rounded-lg p-6 mt-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-semibold text-white">📋 GeoDrops Übersicht</h3>
-                <button onclick="loadGeoDrops()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    🔄 Drops neu laden
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="loadGeoDrops()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        🔄 Drops neu laden
+                    </button>
+                </div>
             </div>
             
             <!-- List Type Toggle -->
@@ -1524,9 +1650,8 @@
                     return;
                 }
                 
-                // Load user's own drops (created by this user)
+                // Load ALL user drops (not just current user's)
                 const userDropsSnapshot = await db.collection('userDrops')
-                    .where('createdBy', '==', currentUser.uid)
                     .orderBy('createdAt', 'desc')
                     .get();
                 
@@ -1538,7 +1663,7 @@
                 // Update user drops table
                 const userDropsTable = document.getElementById('user-drops-table');
                 if (userDropsTable && userDrops.length > 0) {
-                    let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-600"><th class="text-left p-2">Nr.</th><th class="text-left p-2">Reward</th><th class="text-left p-2">Status</th><th class="text-left p-2">Koordinaten</th><th class="text-left p-2">Erstellt</th><th class="text-center p-2">Icon</th><th class="text-left p-2">Aktionen</th></tr></thead><tbody>';
+                    let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-600"><th class="text-left p-2">Nr.</th><th class="text-left p-2">Reward</th><th class="text-left p-2">Status</th><th class="text-left p-2">Ersteller</th><th class="text-left p-2">Koordinaten</th><th class="text-left p-2">Erstellt</th><th class="text-center p-2">Icon</th><th class="text-left p-2">Aktionen</th></tr></thead><tbody>';
                     userDrops.forEach(drop => {
                         const coords = drop.lat && drop.lng ? `${drop.lat.toFixed(4)}, ${drop.lng.toFixed(4)}` : 'N/A';
                         const createdDate = drop.createdAt ? drop.createdAt.toDate().toLocaleDateString() : 'N/A';
@@ -1549,6 +1674,7 @@
                                 <td class="p-2 text-white">${drop.geodropNumber || drop.id}</td>
                                 <td class="p-2 text-white">${drop.reward || 100}</td>
                                 <td class="p-2 ${statusClass}">${statusText}</td>
+                                <td class="p-2 text-white">${drop.ersteller || 'Unknown'}</td>
                                 <td class="p-2 text-xs text-white">${coords}</td>
                                 <td class="p-2 text-xs text-white">${createdDate}</td>
                                 <td class="p-2 text-center">

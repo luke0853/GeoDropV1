@@ -47,6 +47,7 @@ window.showMehrTab = function(tabName) {
     }
     
     try {
+        
         // Remove active class from all tab buttons
         document.querySelectorAll('.mehr-tab-btn').forEach(btn => {
             btn.classList.remove('active');
@@ -88,6 +89,15 @@ window.showMehrTab = function(tabName) {
                         console.log('🔍 Content element after insertion:', content);
                         console.log('🔍 Content innerHTML length:', content.innerHTML.length);
                         console.log('🔍 Content visible:', content.offsetHeight > 0);
+                        
+                        // Debug: Check if language section is present
+                        const languageSection = content.querySelector('#settings-language-title');
+                        if (languageSection) {
+                            console.log('✅ Language section found:', languageSection.textContent);
+                        } else {
+                            console.error('❌ Language section NOT found in loaded content');
+                            console.log('🔍 Available sections:', content.querySelectorAll('h3').length);
+                        }
                         
                         // Fix visibility issues - remove any page classes that might hide content
                         const pageElements = content.querySelectorAll('.page');
@@ -146,6 +156,7 @@ window.showMehrTab = function(tabName) {
                                 if (typeof window.loadProfileData === 'function') {
                                     window.loadProfileData();
                                 }
+                                
                             }, 100);
                         }
                     } else {
@@ -202,7 +213,7 @@ function generateDashboardContent() {
                             </div>
                             
                             <div class="bg-gray-800 rounded-lg p-4">
-                                <h4 class="text-lg font-semibold text-white mb-3">🎯 Heutige Aktivität</h4>
+                                <h4 class="text-lg font-semibold text-white mb-3" id="dashboard-today-activity">🎯 Heutige Aktivität</h4>
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-gray-300">GeoDrops heute:</span>
                                     <span class="text-blue-400 font-bold" id="dashboard-today-drops">0</span>
@@ -225,11 +236,11 @@ function generateDashboardContent() {
                         <div class="space-y-4">
                             <div class="bg-gray-800 rounded-lg p-4">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-gray-300">Verfügbare PixelDrop (App):</span>
+                                    <span class="text-gray-300" id="dashboard-available-pixeldrop-app">Verfügbare PixelDrop (App):</span>
                                     <span class="text-purple-400 font-bold" id="payout-available-coins">0</span>
                                 </div>
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-gray-300">Verfügbare PixelDrop (Blockchain):</span>
+                                    <span class="text-gray-300" id="dashboard-available-pixeldrop-blockchain">Verfügbare PixelDrop (Blockchain):</span>
                                     <span class="text-blue-400 font-bold" id="payout-blockchain-coins">0</span>
                                 </div>
                                 <div class="flex justify-between items-center mb-4">
@@ -239,7 +250,7 @@ function generateDashboardContent() {
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Wallet-Adresse für Auszahlung:</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-2" id="dashboard-wallet-address">Wallet-Adresse für Auszahlung:</label>
                                 <input type="text" id="payout-wallet-input" placeholder="0x..." class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none mb-4">
                             </div>
                             
@@ -643,7 +654,7 @@ window.calculatePayout = function() {
     }
     
     if (amount > currentBalance) {
-        payoutAmount.textContent = '❌ Nicht genügend PixelDrop';
+        payoutAmount.textContent = '❌ ' + (window.languageSystem ? window.languageSystem.t('dashboard.insufficient.pixeldrop') : 'Nicht genügend PixelDrop');
         console.log('💰 Payout calculated: Insufficient balance. Available:', currentBalance, 'Requested:', amount);
         return;
     }
@@ -692,7 +703,7 @@ async function processWithdrawal() {
 
     // Validation
     if (!targetWallet || !targetWallet.startsWith('0x') || targetWallet.length !== 42) {
-        alert('❌ Ungültige Wallet-Adresse!');
+        alert('❌ ' + (window.languageSystem ? window.languageSystem.t('dashboard.invalid.wallet') : 'Ungültige Wallet-Adresse!'));
         return;
     }
 
@@ -806,7 +817,7 @@ async function processWithdrawal() {
         
         if (!poolPrivateKey) {
             // For public version, show demo message instead of real withdrawal
-            alert('🚧 Demo-Modus: Echte Auszahlungen sind nur in der lokalen Version verfügbar.\n\nFür echte Auszahlungen verwende die lokale Version mit Private Keys.');
+            alert('🚧 ' + (window.languageSystem ? window.languageSystem.t('dashboard.demo.mode') : 'Demo-Modus: Echte Auszahlungen sind nur in der lokalen Version verfügbar.\n\nFür echte Auszahlungen verwende die lokale Version mit Private Keys.'));
             return;
         }
         
@@ -822,7 +833,7 @@ async function processWithdrawal() {
         console.log('Transaction hash:', tx.hash);
         
         if (button) {
-            button.textContent = '⏳ Transaktion wird bestätigt...';
+            button.textContent = '⏳ ' + (window.languageSystem ? window.languageSystem.t('dashboard.transaction.confirming') : 'Transaktion wird bestätigt...');
         }
 
         // Wait for transaction confirmation
@@ -960,7 +971,7 @@ async function processWithdrawal() {
         if (error.code === 4001) {
             errorMessage = '❌ Transaktion vom Benutzer abgelehnt.';
         } else if (error.message.includes('insufficient funds')) {
-            errorMessage = '❌ Nicht genügend BNB für Gas-Gebühren.';
+            errorMessage = '❌ ' + (window.languageSystem ? window.languageSystem.t('dashboard.insufficient.bnb') : 'Nicht genügend BNB für Gas-Gebühren.');
         } else if (error.message.includes('user rejected')) {
             errorMessage = '❌ Transaktion vom Benutzer abgelehnt.';
         } else if (error.message.includes('Pool hat nicht genügend')) {
@@ -1177,7 +1188,7 @@ window.updateWithdrawalStatistics = function() {
 // Function to manually reload withdrawal statistics from Firebase
 window.reloadWithdrawalStatistics = async function() {
     if (!window.firebase || !window.firebase.firestore || !window.currentUser) {
-        alert('❌ Firebase oder Benutzer nicht verfügbar');
+        alert('❌ ' + (window.languageSystem ? window.languageSystem.t('dashboard.firebase.unavailable') : 'Firebase oder Benutzer nicht verfügbar'));
         return;
     }
     

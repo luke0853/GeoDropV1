@@ -358,6 +358,31 @@ window.claimGeoDrop = async function() {
         
         console.log('🎯 GeoDrop claim completed successfully');
         
+        // 15.5. Send Telegram notification for successful claim
+        try {
+            const username = window.userProfile?.username || window.currentUser?.email?.split('@')[0] || 'User';
+            const dropName = drop.name || 'Unknown Drop';
+            const telegramMessage = `🎯 **GeoDrop Claimed!**\n\n👤 User: ${username}\n📍 Drop: ${dropName}\n💰 Reward: ${reward} PixelDrops\n📏 Distance: ${distance.toFixed(0)}m\n⏰ Time: ${new Date().toLocaleString('de-DE')}`;
+            
+            console.log('📱 Sending Telegram notification for GeoDrop claim:', telegramMessage);
+            
+            // Use the same Telegram function as trading
+            if (typeof window.sendTelegramNotification === 'function') {
+                await window.sendTelegramNotification(telegramMessage);
+            } else {
+                // Fallback: direct Telegram call
+                const botToken = window.PUBLIC_TELEGRAM_CONFIG?.botToken || '1935483099:AAHOfH7npOyPg_xURTQi4uDc3Esh_fg37Bc';
+                const chatId = window.PUBLIC_TELEGRAM_CONFIG?.chatId || '-1001270226245';
+                const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(telegramMessage)}`;
+                
+                await fetch(telegramUrl);
+                console.log('✅ Telegram notification sent for GeoDrop claim');
+            }
+        } catch (telegramError) {
+            console.error('❌ Error sending Telegram notification for GeoDrop claim:', telegramError);
+            // Don't fail the claim if Telegram fails
+        }
+        
         // 16. Return success result
         return { success: true, reward: reward, distance: distance };
         

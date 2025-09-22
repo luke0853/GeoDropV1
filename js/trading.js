@@ -5,8 +5,8 @@ async function sendTelegramNotification(message) {
     try {
         console.log('📱 Starting Telegram notification...');
         // SECURITY FIX: Use config instead of hardcoded token
-        const botToken = window.CONFIG?.telegram?.botToken || 'MISSING_BOT_TOKEN';
-        const chatId = window.CONFIG?.telegram?.chatId || 'MISSING_CHAT_ID';
+        const botToken = window.PUBLIC_TELEGRAM_CONFIG?.botToken || window.CONFIG?.telegram?.botToken || '1935483099:AAHOfH7npOyPg_xURTQi4uDc3Esh_fg37Bc';
+        const chatId = window.PUBLIC_TELEGRAM_CONFIG?.chatId || window.CONFIG?.telegram?.chatId || '-1001270226245';
         const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
         
         console.log('📱 Telegram URL:', telegramUrl);

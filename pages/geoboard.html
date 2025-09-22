@@ -408,13 +408,25 @@
                 // Load referrals data when switching to this tab
                 if (window.firebase && window.db && window.currentUser) {
                     console.log('🔥 Firebase ready, loading referrals data...');
-                    loadReferralsData();
+                    // Call the global function from navigation.js
+                    if (typeof window.loadReferralsData === 'function') {
+                        window.loadReferralsData();
+                    } else {
+                        console.log('❌ window.loadReferralsData not found, trying local function...');
+                        loadReferralsData();
+                    }
                 } else {
                     console.log('⏳ Firebase not ready yet, waiting...');
                     const waitAndLoad = () => {
                         if (window.firebase && window.db && window.currentUser) {
                             console.log('🔥 Firebase ready now, loading referrals data...');
-                            loadReferralsData();
+                            // Call the global function from navigation.js
+                            if (typeof window.loadReferralsData === 'function') {
+                                window.loadReferralsData();
+                            } else {
+                                console.log('❌ window.loadReferralsData not found, trying local function...');
+                                loadReferralsData();
+                            }
                         } else {
                             setTimeout(waitAndLoad, 500);
                         }
@@ -890,7 +902,7 @@
                 }
                 
                 // Update referral link
-                const referralLink = `https://geodrop-cryptogame.netlify.app/#/ref/${referralCode}`;
+                const referralLink = `https://luke0853.github.io/GeoDropV1/#/ref/${referralCode}`;
                 const referralLinkDisplay = document.getElementById('referral-link-display');
                 if (referralLinkDisplay) {
                     referralLinkDisplay.value = referralLink;
@@ -999,11 +1011,14 @@
             }
             
             // Try to load referrals data
-            if (typeof loadReferralsData === 'function') {
-                console.log('🔄 Calling loadReferralsData...');
+            if (typeof window.loadReferralsData === 'function') {
+                console.log('🔄 Calling window.loadReferralsData...');
+                window.loadReferralsData();
+            } else if (typeof loadReferralsData === 'function') {
+                console.log('🔄 Calling local loadReferralsData...');
                 loadReferralsData();
             } else {
-                console.log('❌ loadReferralsData function not found');
+                console.log('❌ No loadReferralsData function found');
             }
         };
         

@@ -63,6 +63,14 @@
                     <div class="space-y-4">
                         <input type="email" id="startseite-auth-email" placeholder="E-Mail" class="w-full px-4 py-2 rounded-lg bg-gray-600 text-white border border-gray-500 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') login()">
                         <input type="password" id="startseite-auth-password" placeholder="Passwort" class="w-full px-4 py-2 rounded-lg bg-gray-600 text-white border border-gray-500 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') login()">
+                        
+                        <!-- REFERRAL FIELD - MUST BE VISIBLE -->
+                        <div style="background: red !important; padding: 15px !important; margin: 15px 0 !important; border: 3px solid yellow !important; display: block !important; visibility: visible !important; position: relative !important; z-index: 9999 !important;">
+                            <label class="block text-sm font-medium text-white mb-2" style="color: white !important; font-weight: bold !important;">🔗 REFERRAL-CODE (OPTIONAL)</label>
+                            <input type="text" id="reg-referral" placeholder="REFERRAL-CODE EINGEBEN" class="w-full px-4 py-3 bg-white text-black rounded-lg border border-red-500 focus:border-blue-500 focus:outline-none" style="background: white !important; color: black !important; border: 3px solid red !important; font-size: 16px !important;">
+                            <p class="text-xs text-white mt-1" style="color: white !important;">Du erhältst 50 PixelDrop Bonus wenn du über einen Referral-Link kommst!</p>
+                        </div>
+                        
                         <div class="flex space-x-2">
                             <button onclick="login()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Anmelden</button>
                             <button onclick="register()" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Registrieren</button>
@@ -424,6 +432,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🏠 Startseite geladen');
             
+            // Process referral link immediately
+            processReferralLinkOnStartseite();
+            
             // Debug: Test background image loading
             const testImg = new Image();
             testImg.onload = function() {
@@ -434,6 +445,46 @@
             };
             testImg.src = '../images/background.png';
         });
+
+        function processReferralLinkOnStartseite() {
+            console.log('🔗 Processing referral link on startseite...');
+            
+            // Parse URL parameters and hash
+            const urlParams = new URLSearchParams(window.location.search);
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            
+            let refCode = urlParams.get('ref') || urlParams.get('referral') || 
+                         hashParams.get('ref') || hashParams.get('referral');
+            
+            // Also check for path-based referral (e.g., /ref/username)
+            if (!refCode && window.location.pathname.includes('/ref/')) {
+                const pathParts = window.location.pathname.split('/ref/');
+                if (pathParts.length > 1) {
+                    refCode = pathParts[1].split('/')[0];
+                }
+            }
+            
+            // Use default referral code if none found
+            if (!refCode) {
+                refCode = '2b2MBGHgaDTcSOaMzepTnGK2JVz1'; // Default referral code
+                console.log('🔗 No referral code found, using default:', refCode);
+            } else {
+                console.log('🔗 Referral code found:', refCode);
+            }
+            
+            // Store in localStorage
+            localStorage.setItem('referralCode', refCode);
+            console.log('💾 Referral code stored in localStorage:', refCode);
+            
+            // Auto-fill the referral field
+            const referralField = document.getElementById('reg-referral');
+            if (referralField) {
+                referralField.value = refCode;
+                console.log('✅ Referral field auto-filled with:', refCode);
+            } else {
+                console.log('❌ Referral field not found!');
+            }
+        }
     </script>
 </body>
 </html>

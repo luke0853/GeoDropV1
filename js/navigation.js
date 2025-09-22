@@ -31,6 +31,8 @@ window.showPage = function(pageId) {
         selectedPage.style.display = 'block';
         console.log('✅ Page shown:', pageId);
         
+        // Banner system removed
+        
         // Load content via fetch for pages that need it
         if (['geocard', 'machines', 'bonus', 'geochat', 'trading', 'mehr', 'geoboard', 'dev'].includes(pageId)) {
             // Preserve DEV status when switching pages
@@ -462,10 +464,13 @@ function checkAutoLogin() {
                 window.updateUserNavigation();
             }
             
-            // Update ad banner visibility
-            if (typeof window.updateAdBannerVisibility === 'function') {
-                window.updateAdBannerVisibility();
+            // Load referrals data after auto-login
+            if (typeof window.loadReferralsData === 'function') {
+                console.log('👥 Loading referrals data after auto-login...');
+                window.loadReferralsData();
             }
+            
+            // Banner system removed
             
             console.log('✅ Auto-login completed successfully');
         }, 500);
@@ -473,6 +478,8 @@ function checkAutoLogin() {
         console.log('❌ No user logged in');
     }
 }
+
+// Banner system removed
 
 // Initialize navigation
 document.addEventListener('DOMContentLoaded', function() {
@@ -580,6 +587,14 @@ window.switchToReferrals = function() {
 // Load referrals data function
 window.loadReferralsData = async function() {
     console.log('👥 Loading referrals data...');
+    
+    // Check if we're on the geoboard page or referrals tab is visible
+    const referralsContent = document.getElementById('referrals-content');
+    if (!referralsContent || referralsContent.classList.contains('hidden')) {
+        console.log('⏭️ Referrals tab not active, skipping data load');
+        return;
+    }
+    
     try {
         const currentUser = window.currentUser || window.auth?.currentUser;
         if (!currentUser) {
@@ -711,7 +726,7 @@ window.loadReferralsData = async function() {
         }
         
         // Update referral link
-        const referralLink = `https://geodrop-cryptogame.netlify.app/#/ref/${referralCode}`;
+        const referralLink = `https://luke0853.github.io/GeoDropV1/#/ref/${referralCode}`;
         const referralLinkDisplay = document.getElementById('referral-link-display');
         if (referralLinkDisplay) {
             referralLinkDisplay.value = referralLink;
@@ -720,53 +735,6 @@ window.loadReferralsData = async function() {
         // Update referrals list
         console.log('🔄 Calling updateReferralsList with:', referrals.length, 'referrals');
         updateReferralsList(referrals);
-        
-        // FIX: Immediately fix the referredBy relationships in Firebase
-        console.log('🔧 FIXING referredBy relationships immediately...');
-        try {
-            const usersSnapshot = await db.collection('users').get();
-            let kryptoGuruId = null;
-            let geoDrop420Id = null;
-            let nikolausmosId = null;
-            
-            usersSnapshot.forEach(doc => {
-                const userData = doc.data();
-                if (userData.username === 'KryptoGuru') {
-                    kryptoGuruId = doc.id;
-                } else if (userData.username === 'GeoDrop#420') {
-                    geoDrop420Id = doc.id;
-                } else if (userData.username === 'nikolausmos') {
-                    nikolausmosId = doc.id;
-                }
-            });
-            
-            console.log('🔍 User IDs found:', { kryptoGuruId, geoDrop420Id, nikolausmosId });
-            
-            // Fix GeoDrop#420 referredBy
-            if (geoDrop420Id && kryptoGuruId) {
-                await db.collection('users').doc(geoDrop420Id).update({
-                    referredBy: kryptoGuruId
-                });
-                console.log('✅ FIXED: GeoDrop#420 referredBy =', kryptoGuruId);
-            }
-            
-            // Fix nikolausmos referredBy
-            if (nikolausmosId && geoDrop420Id) {
-                await db.collection('users').doc(nikolausmosId).update({
-                    referredBy: geoDrop420Id
-                });
-                console.log('✅ FIXED: nikolausmos referredBy =', geoDrop420Id);
-            }
-            
-            // Reload referrals after fixing
-            console.log('🔄 Reloading referrals after fix...');
-            setTimeout(() => {
-                window.loadReferralsData();
-            }, 2000);
-            
-        } catch (fixError) {
-            console.error('❌ Error fixing referredBy:', fixError);
-        }
         
     } catch (error) {
         console.error('❌ Error loading referrals data:', error);

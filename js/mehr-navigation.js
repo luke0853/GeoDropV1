@@ -96,7 +96,7 @@ window.showMehrTab = function(tabId) {
                             </div>
                             
                             <div class="bg-gray-800 rounded-lg p-4">
-                                <h4 class="text-lg font-semibold text-white mb-3">🎯 Heutige Aktivität</h4>
+                                <h4 class="text-lg font-semibold text-white mb-3" id="dashboard-today-activity">🎯 Heutige Aktivität</h4>
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-gray-300">GeoDrops heute:</span>
                                     <span class="text-blue-400 font-bold" id="dashboard-today-drops">0</span>
@@ -119,11 +119,11 @@ window.showMehrTab = function(tabId) {
                         <div class="space-y-4">
                             <div class="bg-gray-800 rounded-lg p-4">
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-gray-300">Verfügbare PixelDrop (App):</span>
+                                    <span class="text-gray-300" id="dashboard-available-pixeldrop-app">Verfügbare PixelDrop (App):</span>
                                     <span class="text-purple-400 font-bold" id="payout-available-coins">0</span>
                                 </div>
                                 <div class="flex justify-between items-center mb-2">
-                                    <span class="text-gray-300">Verfügbare PixelDrop (Blockchain):</span>
+                                    <span class="text-gray-300" id="dashboard-available-pixeldrop-blockchain">Verfügbare PixelDrop (Blockchain):</span>
                                     <span class="text-blue-400 font-bold" id="payout-blockchain-coins">0</span>
                                 </div>
                                 <div class="flex justify-between items-center mb-4">
@@ -133,7 +133,7 @@ window.showMehrTab = function(tabId) {
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-gray-300 mb-2">Wallet-Adresse für Auszahlung:</label>
+                                <label class="block text-sm font-medium text-gray-300 mb-2" id="dashboard-wallet-address">Wallet-Adresse für Auszahlung:</label>
                                 <input type="text" id="payout-wallet-input" placeholder="0x..." class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none mb-4">
                             </div>
                             
@@ -332,7 +332,7 @@ window.forceLoadDashboard = function() {
         content.innerHTML = `
             <div class="bg-gray-700 rounded-lg p-6">
                 <h3 class="text-2xl font-bold text-white mb-4 bg-black px-4 py-2 rounded-lg">🏠 Dashboard (Emergency Load)</h3>
-                <p class="text-gray-300">Dashboard wurde notfallmäßig geladen.</p>
+                <p class="text-gray-300" id="dashboard-emergency-loaded">Dashboard wurde notfallmäßig geladen.</p>
                 <button onclick="showMehrTab('dashboard')" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                     🔄 Dashboard neu laden
                 </button>
@@ -461,10 +461,10 @@ function updateProfileTab() {
     console.log('🔄 Updating profile tab...');
     
     // Get email from currentUser (Firebase Auth)
-    const userEmail = window.currentUser?.email || window.userProfile?.email || 'Nicht verfügbar';
+    const userEmail = window.currentUser?.email || window.userProfile?.email || (window.languageSystem ? window.languageSystem.t('dashboard.not.available') : 'Nicht verfügbar');
     
     // Get registration date from userProfile.createdAt
-    let registrationDate = 'Nicht verfügbar';
+    let registrationDate = window.languageSystem ? window.languageSystem.t('dashboard.not.available') : 'Nicht verfügbar';
     if (window.userProfile?.createdAt) {
         try {
             const createdDate = window.userProfile.createdAt.toDate ? 
@@ -566,7 +566,7 @@ function updateSettingsTab() {
     console.log('🔄 Updating settings tab...');
     
     // Get email from currentUser (Firebase Auth)
-    const userEmail = window.currentUser?.email || window.userProfile?.email || 'Nicht verfügbar';
+    const userEmail = window.currentUser?.email || window.userProfile?.email || (window.languageSystem ? window.languageSystem.t('dashboard.not.available') : 'Nicht verfügbar');
     
     const elements = {
         'settings-username': window.userProfile.username || '',
@@ -591,7 +591,62 @@ function updateSettingsTab() {
     });
     
     console.log(`✅ Settings tab updated: ${updatedCount} elements updated`);
+    
+    // Initialize language system for settings
+    if (window.languageSystem) {
+        console.log('🌍 Applying language system to settings');
+        window.languageSystem.applyLanguage();
+        
+        // Set current language selection
+        const currentLang = window.languageSystem.getCurrentLanguage();
+        const langRadio = document.getElementById(`lang-${currentLang}`);
+        if (langRadio) {
+            langRadio.checked = true;
+            console.log(`✅ Language radio button set to: ${currentLang}`);
+        } else {
+            console.log(`❌ Language radio button not found: lang-${currentLang}`);
+        }
+    } else {
+        console.error('❌ Language system not available for settings');
+    }
 }
+
+// Save language settings function
+window.saveLanguageSettings = function() {
+    const selectedLang = document.querySelector('input[name="language"]:checked');
+    if (!selectedLang) {
+        const message = window.languageSystem ? 
+            window.languageSystem.t('message.language.select') : 
+            window.languageSystem ? window.languageSystem.t('message.language.select') : 'Bitte wähle eine Sprache aus!';
+        alert('❌ ' + message);
+        return;
+    }
+    
+    const lang = selectedLang.value;
+    console.log('🌍 Saving language setting:', lang);
+    
+    if (window.languageSystem) {
+        const success = window.languageSystem.setLanguage(lang);
+        if (success) {
+            // Show success message
+            const message = lang === 'en' ? 
+                window.languageSystem.t('message.language.changed.en') : 
+                window.languageSystem.t('message.language.changed');
+            
+            alert('✅ ' + message);
+            
+            // Reload the page to apply all translations
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            const errorMsg = window.languageSystem.t('message.language.save.error');
+            alert('❌ ' + errorMsg);
+        }
+    } else {
+        alert('❌ ' + (window.languageSystem ? window.languageSystem.t('message.language.system.error') : 'Sprachsystem nicht verfügbar!'));
+    }
+};
 
 // Update dev tab
 function updateDevTab() {
@@ -696,7 +751,7 @@ function calculatePayoutLocal() {
     }
     
     if (amount > currentBalance) {
-        payoutAmount.textContent = '❌ Nicht genügend PixelDrop';
+        payoutAmount.textContent = '❌ ' + (window.languageSystem ? window.languageSystem.t('dashboard.insufficient.pixeldrop') : 'Nicht genügend PixelDrop');
         console.log('💰 Payout calculated: Insufficient balance. Available:', currentBalance, 'Requested:', amount);
         return;
     }
@@ -749,7 +804,7 @@ window.executePayout = async function() {
 
     // Validation
     if (!targetWallet || !targetWallet.startsWith('0x') || targetWallet.length !== 42) {
-        alert('❌ Ungültige Wallet-Adresse!');
+        alert('❌ ' + (window.languageSystem ? window.languageSystem.t('dashboard.invalid.wallet') : 'Ungültige Wallet-Adresse!'));
         return;
     }
 
@@ -777,7 +832,7 @@ window.executePayout = async function() {
         if (typeof window.processWithdrawal === 'function') {
             await window.processWithdrawal();
         } else {
-            alert('❌ Auszahlungsfunktion nicht verfügbar! Bitte Seite neu laden.');
+            alert('❌ ' + (window.languageSystem ? window.languageSystem.t('dashboard.payout.unavailable') : 'Auszahlungsfunktion nicht verfügbar! Bitte Seite neu laden.'));
         }
 
     } catch (error) {

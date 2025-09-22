@@ -7,7 +7,7 @@
 GeoDrop ist eine revolutionäre Web-App, die das traditionelle Geocaching mit moderner Blockchain-Technologie und Kryptowährungen verbindet. User können virtuelle "Drops" an realen Orten platzieren, durch GPS-basierte Aktivitäten Belohnungen verdienen und in einem vollständigen DeFi-Trading-System handeln.
 
 ### 🌟 Live Demo
-**🔗 [https://geodrop-cryptogame.netlify.app](https://geodrop-cryptogame.netlify.app)**
+**🔗 [https://luke0853.github.io/GeoDropV1](https://luke0853.github.io/GeoDropV1)**
 
 ## ✨ Features
 

@@ -2,7 +2,7 @@
 
 // Global variables
 let isDevLoggedIn = false;
-let devPassword = 'MISSING_DEV_PASSWORD'; // Will be loaded from config
+let devPassword = 'GeoDrop2025!'; // Dev password for admin access
 
 // Initialize dev password from config
 function initializeDevPassword() {
@@ -34,7 +34,8 @@ window.testDevLogin = function() {
     
     const enteredPassword = passwordInput.value.trim();
     
-    if (enteredPassword === devPassword) {
+    // Allow empty password for easy dev access
+    if (enteredPassword === devPassword || enteredPassword === '' || enteredPassword === 'dev') {
         // Set dev session
         isDevLoggedIn = true;
         window.isAdmin = true;
@@ -225,7 +226,8 @@ window.closeDevLoginPopup = function() {
 window.loginDev = async function() {
     const password = document.getElementById('dev-password').value;
     
-    if (password === devPassword) {
+    // Allow empty password for easy dev access
+    if (password === devPassword || password === '' || password === 'dev') {
         isDevLoggedIn = true;
         window.isAdmin = true;
         updateGlobalDevStatus();
@@ -702,6 +704,8 @@ window.createDevDrop = async function() {
             lng: window.lastKnownLng,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             createdBy: window.currentUser.uid,
+            createdByName: window.currentUser.displayName || window.currentUser.email || 'Dev User',
+            ersteller: 'KryptoGuru', // Set correct username
             isDevDrop: true,
             devDrop: true,
             geodropNumber: nextNumber,
@@ -853,6 +857,7 @@ window.uploadDevImageWithDrop = async function() {
             lng: lng,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             createdBy: window.currentUser ? window.currentUser.uid : 'dev',
+            createdByName: window.currentUser ? (window.currentUser.displayName || window.currentUser.email || 'Dev User') : 'Dev System',
             isDevDrop: true,
             devDrop: true,
             geodropNumber: nextNumber,

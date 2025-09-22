@@ -26,11 +26,11 @@ window.reloadAllDropLists = async function() {
         }
         
         console.log('✅ All drop lists manually reloaded');
-        showMessage('✅ Alle Listen wurden neu geladen', false);
+        showMessage('✅ ' + (window.languageSystem ? window.languageSystem.t('geocard.reload.success') : 'Alle Listen wurden neu geladen'), false);
         
     } catch (error) {
         console.error('❌ Error reloading drop lists:', error);
-        showMessage('❌ Fehler beim Neuladen der Listen', true);
+        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.reload.error') : 'Fehler beim Neuladen der Listen'), true);
     }
 };
 
@@ -39,7 +39,7 @@ window.createAllAustrianStateDrops = async function() {
     console.log('🇦🇹 Creating 9 Austrian State Test Drops...');
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ Dev-Zugang erforderlich!', true);
+        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
         return;
     }
     
@@ -173,30 +173,48 @@ window.createAllAustrianStateDrops = async function() {
             const hashArray = Array.from(new Uint8Array(hashBuffer));
             const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
             
-            // Get current user info
-            const currentUser = window.firebase.auth().currentUser;
-            const userName = currentUser.displayName || 'Unknown User';
-            
-            // Create drop document
-            const dropData = {
-                name: `UserDrop${state.dropNumber}_${state.name.replace('ö', 'oe').replace('ä', 'ae').replace('ü', 'ue')}`,
-                geodropNumber: state.dropNumber.toString(),
-                coordinates: new window.firebase.firestore.GeoPoint(state.coordinates.lat, state.coordinates.lng),
-                lat: state.coordinates.lat,
-                lng: state.coordinates.lng,
-                reward: 10,
-                description: `Test-Drop für ${state.name}: ${state.place}`,
-                photoDescription: `Fotografiere ${state.place} in ${state.name}. Das Objekt sollte vollständig sichtbar sein.`,
-                imageUrl: downloadURL,
-                imageHash: hashHex,
-                createdBy: currentUser.uid,
-                createdByName: userName,
-                createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
-                isActive: true,
-                dropType: 'user',
-                state: state.name,
-                place: state.place
-            };
+        // Get current user info
+        const currentUser = window.firebase.auth().currentUser;
+        const userName = currentUser.displayName || currentUser.email || 'Unknown User';
+        
+        // Get the real username from Firebase user profile
+        let realUsername = null;
+        try {
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                realUsername = userData.username || userData.displayName;
+            }
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+        }
+        
+        if (!realUsername) {
+            alert('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.username.not.found') : 'Username nicht gefunden! Bitte Profil vervollständigen.'));
+            return;
+        }
+        
+        // Create drop document
+        const dropData = {
+            name: `UserDrop${state.dropNumber}_${state.name.replace('ö', 'oe').replace('ä', 'ae').replace('ü', 'ue')}`,
+            geodropNumber: state.dropNumber.toString(),
+            coordinates: new window.firebase.firestore.GeoPoint(state.coordinates.lat, state.coordinates.lng),
+            lat: state.coordinates.lat,
+            lng: state.coordinates.lng,
+            reward: 10,
+            description: `Test-Drop für ${state.name}: ${state.place}`,
+            photoDescription: `Fotografiere ${state.place} in ${state.name}. Das Objekt sollte vollständig sichtbar sein.`,
+            imageUrl: downloadURL,
+            imageHash: hashHex,
+            createdBy: currentUser.uid,
+            createdByName: userName,
+            ersteller: realUsername, // Use real username from Firebase profile
+            createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+            isActive: true,
+            dropType: 'user',
+            state: state.name,
+            place: state.place
+        };
             
             await db.collection('userDrops').add(dropData);
             console.log(`✅ ${state.name} Drop created: UserDrop${state.dropNumber}_${state.name.replace('ö', 'oe').replace('ä', 'ae').replace('ü', 'ue')}`);
@@ -489,7 +507,7 @@ window.checkUserDropCount = async function() {
         
     } catch (error) {
         console.error('❌ Error checking User Drop count:', error);
-        showMessage('❌ Fehler beim Überprüfen der User Drop Anzahl', true);
+        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.check.user.drops.error') : 'Fehler beim Überprüfen der User Drop Anzahl'), true);
     }
 };
 
@@ -498,12 +516,12 @@ window.cleanupDuplicateUserDrops = async function() {
     console.log('🧹 Cleaning up duplicate User Drops...');
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ Dev-Zugang erforderlich!', true);
+        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
         return;
     }
     
     // Show confirmation dialog
-    if (!confirm('🧹 Duplikate bereinigen?\n\nDies löscht alle doppelten User Drops und behält nur die neuesten.')) {
+    if (!confirm('🧹 ' + (window.languageSystem ? window.languageSystem.t('geocard.cleanup.confirm') : 'Duplikate bereinigen?\n\nDies löscht alle doppelten User Drops und behält nur die neuesten.'))) {
         return;
     }
     
@@ -580,7 +598,7 @@ window.createRemainingAustrianDrops = async function() {
     console.log('🇦🇹 Creating all remaining Austrian State Drops...');
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ Dev-Zugang erforderlich!', true);
+        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
         return;
     }
     
@@ -637,7 +655,7 @@ async function createSingleStateDrop(stateName, placeName, lat, lng, dropNumber)
     console.log(`🏛️ Creating ${stateName} drop: ${placeName}...`);
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ Dev-Zugang erforderlich!', true);
+        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
         return;
     }
     
@@ -706,6 +724,23 @@ async function createSingleStateDrop(stateName, placeName, lat, lng, dropNumber)
         const currentUser = window.firebase.auth().currentUser;
         const userName = currentUser.displayName || currentUser.email || 'Unknown User';
         
+        // Get the real username from Firebase user profile
+        let realUsername = null;
+        try {
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                realUsername = userData.username || userData.displayName;
+            }
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+        }
+        
+        if (!realUsername) {
+            alert('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.username.not.found') : 'Username nicht gefunden! Bitte Profil vervollständigen.'));
+            return;
+        }
+        
         // Create drop document
         const dropData = {
             name: `UserDrop${dropNumber}_${stateName.replace('ö', 'oe').replace('ä', 'ae').replace('ü', 'ue')}`,
@@ -720,6 +755,7 @@ async function createSingleStateDrop(stateName, placeName, lat, lng, dropNumber)
             imageHash: hashHex,
             createdBy: currentUser.uid,
             createdByName: userName,
+            ersteller: realUsername, // Use real username from Firebase profile
             createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
             isActive: true,
             dropType: 'user',
@@ -745,12 +781,553 @@ async function createSingleStateDrop(stateName, placeName, lat, lng, dropNumber)
     }
 }
 
+// Fix Drop 11 Creator Name - SIMPLIFIED VERSION
+window.fixDrop11Creator = async function() {
+    console.log('🔧 Fixing Drop 11 creator name...');
+    
+    try {
+        const db = window.firebase.firestore();
+        const currentUser = window.firebase.auth().currentUser;
+        
+        if (!currentUser) {
+            alert('❌ Bitte zuerst anmelden!');
+            return;
+        }
+        
+        const correctCreatorName = currentUser.displayName || currentUser.email || 'Unknown User';
+        console.log('👤 Correct creator name:', correctCreatorName);
+        
+        // Search in both collections
+        const collections = ['userDrops', 'devDrops'];
+        let found = false;
+        
+        for (const collectionName of collections) {
+            console.log(`🔍 Searching in ${collectionName}...`);
+            const snapshot = await db.collection(collectionName).get();
+            
+            for (const doc of snapshot.docs) {
+                const data = doc.data();
+                if (data.geodropNumber === '11' || data.geodropNumber === 11) {
+                    console.log(`📄 Found Drop 11 in ${collectionName}:`, doc.id);
+                    console.log('📊 Current data:', data);
+                    
+                    // Update the document
+                    await doc.ref.update({
+                        createdByName: correctCreatorName,
+                        createdBy: currentUser.uid
+                    });
+                    
+                    console.log('✅ Drop 11 updated successfully!');
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (found) break;
+        }
+        
+        if (found) {
+            alert('✅ Drop 11 Ersteller-Name wurde repariert!');
+            // Force reload
+            setTimeout(() => {
+                if (typeof loadGeoDrops === 'function') {
+                    loadGeoDrops();
+                }
+                if (typeof loadUserGeoDrops === 'function') {
+                    loadUserGeoDrops();
+                }
+            }, 1000);
+        } else {
+            alert('❌ Drop 11 nicht gefunden!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error fixing Drop 11:', error);
+        alert('❌ Fehler: ' + error.message);
+    }
+};
+
+// DEV FUNCTION - Fix any drop creator name
+window.devFixDropCreator = async function(dropNumber, newCreatorName) {
+    console.log(`🔧 DEV: Fixing Drop ${dropNumber} creator to: ${newCreatorName}`);
+    
+    if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+        alert('❌ Dev-Zugang erforderlich!');
+        return;
+    }
+    
+    try {
+        const db = window.firebase.firestore();
+        const collections = ['userDrops', 'devDrops'];
+        let found = false;
+        
+        for (const collectionName of collections) {
+            console.log(`🔍 Searching in ${collectionName}...`);
+            const snapshot = await db.collection(collectionName).get();
+            
+            for (const doc of snapshot.docs) {
+                const data = doc.data();
+                if (data.geodropNumber === dropNumber.toString() || data.geodropNumber === dropNumber) {
+                    console.log(`📄 Found Drop ${dropNumber} in ${collectionName}:`, doc.id);
+                    console.log('📊 Current data:', data);
+                    
+                    // Update the document
+                    await doc.ref.update({
+                        createdByName: newCreatorName,
+                        createdBy: 'dev-admin'
+                    });
+                    
+                    console.log(`✅ Drop ${dropNumber} updated successfully!`);
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (found) break;
+        }
+        
+        if (found) {
+            alert(`✅ Drop ${dropNumber} Ersteller wurde auf "${newCreatorName}" geändert!`);
+            // Force reload
+            setTimeout(() => {
+                if (typeof loadGeoDrops === 'function') {
+                    loadGeoDrops();
+                }
+                if (typeof loadUserGeoDrops === 'function') {
+                    loadUserGeoDrops();
+                }
+            }, 1000);
+        } else {
+            alert(`❌ Drop ${dropNumber} nicht gefunden!`);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error fixing drop:', error);
+        alert('❌ Fehler: ' + error.message);
+    }
+};
+
+// SECURITY FIX - Add user drop tracking to Firebase
+window.addUserDropTracking = async function() {
+    console.log('🔒 Adding user drop tracking to Firebase...');
+    
+    try {
+        const db = window.firebase.firestore();
+        const currentUser = window.firebase.auth().currentUser;
+        
+        if (!currentUser) {
+            alert('❌ Bitte zuerst anmelden!');
+            return;
+        }
+        
+        // Get all user drops and count by creator
+        const userDropsSnapshot = await db.collection('userDrops').get();
+        const devDropsSnapshot = await db.collection('devDrops').get();
+        
+        const userDropCounts = {};
+        
+        // Count drops by creator
+        [...userDropsSnapshot.docs, ...devDropsSnapshot.docs].forEach(doc => {
+            const data = doc.data();
+            if (data.createdByName) {
+                userDropCounts[data.createdByName] = (userDropCounts[data.createdByName] || 0) + 1;
+            }
+        });
+        
+        console.log('📊 User drop counts:', userDropCounts);
+        
+        // Update user document with drop count
+        const userDocRef = db.collection('users').doc(currentUser.uid);
+        await userDocRef.set({
+            uid: currentUser.uid,
+            email: currentUser.email,
+            displayName: currentUser.displayName,
+            totalDropsCreated: userDropCounts[currentUser.displayName] || 0,
+            lastUpdated: window.firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        
+        console.log('✅ User drop tracking added to Firebase');
+        alert('✅ ' + (window.languageSystem ? window.languageSystem.t('geocard.tracking.added') : 'User-Drop-Tracking wurde zu Firebase hinzugefügt!'));
+        
+    } catch (error) {
+        console.error('❌ Error adding user drop tracking:', error);
+        alert('❌ Fehler: ' + error.message);
+    }
+};
+
+// KORREKTE LÖSUNG: Setze die RICHTIGEN NUTZERNAMEN in das ersteller Feld
+window.setErstellerNamen = async function() {
+    console.log('👤 Setze die RICHTIGEN NUTZERNAMEN in das ersteller Feld...');
+    try {
+        const db = window.firebase.firestore();
+        const currentUser = window.firebase.auth().currentUser;
+        if (!currentUser) { alert('❌ Bitte zuerst anmelden!'); return; }
+        
+        // Hole alle Drops
+        const userDropsSnapshot = await db.collection('userDrops').get();
+        const devDropsSnapshot = await db.collection('devDrops').get();
+        
+        console.log(`📊 Gefunden: ${userDropsSnapshot.docs.length} userDrops und ${devDropsSnapshot.docs.length} devDrops`);
+        
+        let updatedCount = 0;
+        
+        // Aktualisiere userDrops - RICHTIGE NUTZERNAMEN
+        for (const doc of userDropsSnapshot.docs) {
+            const data = doc.data();
+            let richtigerNutzername = null;
+            
+            // MAPPING: Email zu richtigem Nutzername
+            if (data.createdByName === 'hooch_1994@yahoo.de') {
+                richtigerNutzername = 'KryptoGuru';
+            } else if (data.createdByName === 'KryptoGuru') {
+                richtigerNutzername = 'KryptoGuru';
+            } else if (data.createdByName === 'GeoDrop#420') {
+                richtigerNutzername = 'GeoDrop#420';
+            } else if (data.createdByName === 'nikolausmos') {
+                richtigerNutzername = 'nikolausmos';
+            } else {
+                // Fallback: verwende createdByName
+                richtigerNutzername = data.createdByName;
+            }
+            
+            if (richtigerNutzername) {
+                await doc.ref.update({
+                    ersteller: richtigerNutzername
+                });
+                console.log(`✅ Setze ersteller für userDrop ${doc.id} (${data.geodropNumber}): ${richtigerNutzername}`);
+                updatedCount++;
+            }
+        }
+        
+        // Aktualisiere devDrops - RICHTIGE NUTZERNAMEN
+        for (const doc of devDropsSnapshot.docs) {
+            const data = doc.data();
+            let richtigerNutzername = null;
+            
+            // MAPPING: Email zu richtigem Nutzername
+            if (data.createdByName === 'hooch_1994@yahoo.de') {
+                richtigerNutzername = 'KryptoGuru';
+            } else if (data.createdByName === 'KryptoGuru') {
+                richtigerNutzername = 'KryptoGuru';
+            } else if (data.createdByName === 'GeoDrop#420') {
+                richtigerNutzername = 'GeoDrop#420';
+            } else if (data.createdByName === 'nikolausmos') {
+                richtigerNutzername = 'nikolausmos';
+            } else {
+                // Fallback: verwende createdByName
+                richtigerNutzername = data.createdByName;
+            }
+            
+            if (richtigerNutzername) {
+                await doc.ref.update({
+                    ersteller: richtigerNutzername
+                });
+                console.log(`✅ Setze ersteller für devDrop ${doc.id} (${data.geodropNumber}): ${richtigerNutzername}`);
+                updatedCount++;
+            }
+        }
+        
+        console.log(`🎉 ${updatedCount} Drops haben jetzt die RICHTIGEN NUTZERNAMEN im ersteller Feld!`);
+        alert(`✅ ${updatedCount} Drops haben jetzt die RICHTIGEN NUTZERNAMEN im ersteller Feld!`);
+        
+        // Lade Drops neu
+        setTimeout(() => {
+            if (typeof loadGeoDrops === 'function') loadGeoDrops();
+            if (typeof loadUserGeoDrops === 'function') loadUserGeoDrops();
+        }, 1000);
+        
+    } catch (error) {
+        console.error('❌ Error setting ersteller names:', error);
+        alert('❌ Fehler: ' + error.message);
+    }
+};
+
+// DEBUG: Zeige alle Drops mit ersteller Feld
+window.debugErstellerFeld = async function() {
+    console.log('🔍 DEBUG: Zeige alle Drops mit ersteller Feld...');
+    try {
+        const db = window.firebase.firestore();
+        const userDropsSnapshot = await db.collection('userDrops').get();
+        
+        console.log(`📊 Gefunden: ${userDropsSnapshot.docs.length} userDrops`);
+        
+        userDropsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            console.log(`📄 Drop ${data.geodropNumber}: ersteller="${data.ersteller}", createdByName="${data.createdByName}"`);
+        });
+        
+    } catch (error) {
+        console.error('❌ Error debugging ersteller field:', error);
+    }
+};
+
+// KORREKTUR: Setze ersteller basierend auf echten Usernames
+window.korrigiereErstellerFeld = async function() {
+    console.log('🔧 Korrigiere ersteller Feld mit echten Usernames...');
+    try {
+        const db = window.firebase.firestore();
+        const userDropsSnapshot = await db.collection('userDrops').get();
+        
+        let updatedCount = 0;
+        
+        for (const doc of userDropsSnapshot.docs) {
+            const data = doc.data();
+            let correctErsteller = null;
+            
+            // Hole echten Username aus Firebase User-Profil
+            try {
+                const userDoc = await db.collection('users').doc(data.createdBy).get();
+                if (userDoc.exists) {
+                    const userData = userDoc.data();
+                    correctErsteller = userData.username || userData.displayName;
+                }
+            } catch (error) {
+                console.error('Error loading user profile for drop:', data.geodropNumber);
+            }
+            
+            // Spezielle Behandlung für Drop 11
+            if (data.geodropNumber === '11' || data.geodropNumber === 11) {
+                correctErsteller = 'GeoDrop#420';
+            }
+            
+            if (correctErsteller && data.ersteller !== correctErsteller) {
+                await doc.ref.update({
+                    ersteller: correctErsteller
+                });
+                console.log(`✅ Korrigiert Drop ${data.geodropNumber}: ersteller="${correctErsteller}"`);
+                updatedCount++;
+            }
+        }
+        
+        console.log(`🎉 ${updatedCount} Drops wurden korrigiert!`);
+        alert(`✅ ${updatedCount} Drops wurden korrigiert!`);
+        
+        // Lade Drops neu
+        setTimeout(() => {
+            if (typeof loadUserGeoDrops === 'function') loadUserGeoDrops();
+        }, 1000);
+        
+    } catch (error) {
+        console.error('❌ Error correcting ersteller field:', error);
+        alert('❌ Fehler: ' + error.message);
+    }
+};
+
+// SPEZIELLE KORREKTUR: Drop 11 zu GeoDrop#420
+window.korrigiereDrop11 = async function() {
+    console.log('🔧 Korrigiere Drop 11 zu GeoDrop#420...');
+    try {
+        const db = window.firebase.firestore();
+        const userDropsSnapshot = await db.collection('userDrops').get();
+        
+        console.log(`📊 Gefunden: ${userDropsSnapshot.docs.length} userDrops`);
+        
+        for (const doc of userDropsSnapshot.docs) {
+            const data = doc.data();
+            console.log(`📄 Prüfe Drop ${data.geodropNumber}: ersteller="${data.ersteller}", createdByName="${data.createdByName}"`);
+            
+            if (data.geodropNumber === '11' || data.geodropNumber === 11) {
+                console.log(`🎯 Gefunden: Drop 11 - aktualisiere ersteller zu "GeoDrop#420"`);
+                await doc.ref.update({
+                    ersteller: 'GeoDrop#420'
+                });
+                console.log(`✅ Drop 11 korrigiert: ersteller="GeoDrop#420"`);
+                alert('✅ Drop 11 wurde zu GeoDrop#420 korrigiert!');
+                
+                // Lade Drops neu
+                setTimeout(() => {
+                    if (typeof loadUserGeoDrops === 'function') loadUserGeoDrops();
+                }, 1000);
+                return;
+            }
+        }
+        
+        alert('❌ Drop 11 nicht gefunden!');
+        
+    } catch (error) {
+        console.error('❌ Error correcting Drop 11:', error);
+        alert('❌ Fehler: ' + error.message);
+    }
+};
+
+// KORREKTE LÖSUNG: Setze "ersteller" Feld basierend auf dem was wirklich in Firebase steht
+window.fixErstellerField = async function() {
+    console.log('🔧 Korrigiere "ersteller" Feld basierend auf Firebase-Daten...');
+    try {
+        const db = window.firebase.firestore();
+        const currentUser = window.firebase.auth().currentUser;
+        if (!currentUser) { alert('❌ Bitte zuerst anmelden!'); return; }
+        
+        // Hole alle Drops
+        const userDropsSnapshot = await db.collection('userDrops').get();
+        const devDropsSnapshot = await db.collection('devDrops').get();
+        
+        console.log(`📊 Gefunden: ${userDropsSnapshot.docs.length} userDrops und ${devDropsSnapshot.docs.length} devDrops`);
+        
+        let updatedCount = 0;
+        
+        // Aktualisiere userDrops - IMMER basierend auf createdByName
+        for (const doc of userDropsSnapshot.docs) {
+            const data = doc.data();
+            console.log(`📄 userDrop ${doc.id}: geodropNumber=${data.geodropNumber}, createdByName=${data.createdByName}, ersteller=${data.ersteller}`);
+            
+            if (data.createdByName) {
+                await doc.ref.update({
+                    ersteller: data.createdByName
+                });
+                console.log(`✅ Set "ersteller" field to userDrop ${doc.id} (${data.geodropNumber}): ${data.createdByName}`);
+                updatedCount++;
+            }
+        }
+        
+        // Aktualisiere devDrops - IMMER basierend auf createdByName
+        for (const doc of devDropsSnapshot.docs) {
+            const data = doc.data();
+            console.log(`📄 devDrop ${doc.id}: geodropNumber=${data.geodropNumber}, createdByName=${data.createdByName}, ersteller=${data.ersteller}`);
+            
+            if (data.createdByName) {
+                await doc.ref.update({
+                    ersteller: data.createdByName
+                });
+                console.log(`✅ Set "ersteller" field to devDrop ${doc.id} (${data.geodropNumber}): ${data.createdByName}`);
+                updatedCount++;
+            }
+        }
+        
+        console.log(`🎉 ${updatedCount} Drops haben jetzt das korrekte "ersteller" Feld!`);
+        alert(`✅ ${updatedCount} Drops haben jetzt das korrekte "ersteller" Feld!`);
+        
+        // Lade Drops neu
+        setTimeout(() => {
+            if (typeof loadGeoDrops === 'function') loadGeoDrops();
+            if (typeof loadUserGeoDrops === 'function') loadUserGeoDrops();
+        }, 1000);
+        
+    } catch (error) {
+        console.error('❌ Error fixing ersteller field:', error);
+        alert('❌ Fehler: ' + error.message);
+    }
+};
+
+// EMERGENCY FIX - Direct console function
+window.emergencyFixDrop11 = async function() {
+    console.log('🚨 EMERGENCY FIX for Drop 11');
+    
+    try {
+        const db = window.firebase.firestore();
+        const user = window.firebase.auth().currentUser;
+        const correctName = user.displayName || user.email || 'Unknown User';
+        
+        console.log('👤 User:', user.email);
+        console.log('📝 Correct name:', correctName);
+        
+        // Get all userDrops
+        const userDrops = await db.collection('userDrops').get();
+        console.log('📊 Total userDrops:', userDrops.size);
+        
+        // Find Drop 11
+        let drop11Doc = null;
+        userDrops.forEach(doc => {
+            const data = doc.data();
+            console.log(`Drop ${data.geodropNumber}: ${data.createdByName}`);
+            if (data.geodropNumber === '11' || data.geodropNumber === 11) {
+                drop11Doc = doc;
+                console.log('🎯 FOUND Drop 11!', data);
+            }
+        });
+        
+        if (drop11Doc) {
+            await drop11Doc.ref.update({
+                createdByName: correctName,
+                createdBy: user.uid
+            });
+            console.log('✅ Drop 11 FIXED!');
+            alert('✅ Drop 11 wurde repariert!');
+        } else {
+            console.log('❌ Drop 11 not found');
+            alert('❌ Drop 11 nicht gefunden');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+        alert('❌ Fehler: ' + error.message);
+    }
+};
+
+// Fix All Drops Creator Names
+window.fixAllDropsCreator = async function() {
+    console.log('🔧 Fixing all drops creator names...');
+    
+    try {
+        if (!window.firebase || !window.firebase.firestore()) {
+            console.log('❌ Firebase not available');
+            return;
+        }
+        
+        const db = window.firebase.firestore();
+        const currentUser = window.firebase.auth().currentUser;
+        
+        if (!currentUser) {
+            console.log('❌ No user logged in');
+            showMessage('❌ Bitte zuerst anmelden!', true);
+            return;
+        }
+        
+        // Get correct creator name
+        const correctCreatorName = currentUser.displayName || currentUser.email || 'Unknown User';
+        console.log('👤 Correct creator name:', correctCreatorName);
+        
+        let fixedCount = 0;
+        
+        // Fix userDrops
+        const userDropsSnapshot = await db.collection('userDrops').get();
+        for (const doc of userDropsSnapshot.docs) {
+            const data = doc.data();
+            if (data.createdBy === currentUser.uid && data.createdByName !== correctCreatorName) {
+                await doc.ref.update({
+                    createdByName: correctCreatorName
+                });
+                console.log(`✅ Fixed userDrop ${doc.id} (${data.geodropNumber || 'unknown'})`);
+                fixedCount++;
+            }
+        }
+        
+        // Fix devDrops
+        const devDropsSnapshot = await db.collection('devDrops').get();
+        for (const doc of devDropsSnapshot.docs) {
+            const data = doc.data();
+            if (data.createdBy === currentUser.uid && data.createdByName !== correctCreatorName) {
+                await doc.ref.update({
+                    createdByName: correctCreatorName
+                });
+                console.log(`✅ Fixed devDrop ${doc.id} (${data.geodropNumber || 'unknown'})`);
+                fixedCount++;
+            }
+        }
+        
+        console.log(`🎉 Fixed ${fixedCount} drops total`);
+        showMessage(`✅ ${fixedCount} Drops wurden repariert!`, false);
+        
+        // Reload the drops to show the fixes
+        if (typeof loadGeoDrops === 'function') {
+            loadGeoDrops();
+        }
+        if (typeof loadUserGeoDrops === 'function') {
+            loadUserGeoDrops();
+        }
+        
+    } catch (error) {
+        console.error('❌ Error fixing all drops:', error);
+        showMessage('❌ Fehler beim Reparieren der Drops: ' + error.message, true);
+    }
+};
+
 // Test function - Create Test Drop for Stift Melk
 window.createTestMelkDrop = async function() {
     console.log('🏛️ Creating TEST Stift Melk Drop...');
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ Dev-Zugang erforderlich!', true);
+        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
         return;
     }
     
@@ -1010,7 +1587,7 @@ window.switchToUploadListType = function(type) {
             loadDevDropsForUpload();
         }
         
-        showMessage('🎯 Dev Drops für Upload ausgewählt', false);
+        showMessage('🎯 ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.drops.selected') : 'Dev Drops für Upload ausgewählt'), false);
     } else if (type === 'user') {
         // Switch to user drops for upload
         devBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white';
@@ -1026,7 +1603,7 @@ window.switchToUploadListType = function(type) {
             loadUserDropsForUpload();
         }
         
-        showMessage('👤 User Drops für Upload ausgewählt', false);
+        showMessage('👤 ' + (window.languageSystem ? window.languageSystem.t('geocard.user.drops.selected') : 'User Drops für Upload ausgewählt'), false);
     }
 };
 
@@ -1043,9 +1620,9 @@ window.useCurrentLocationForUserDrop = function() {
     if (window.currentLocation) {
         document.getElementById('user-drop-lat').value = window.currentLocation.lat.toFixed(6);
         document.getElementById('user-drop-lng').value = window.currentLocation.lng.toFixed(6);
-        showMessage('📍 Aktuelle Position eingefügt', false);
+        showMessage('📍 ' + (window.languageSystem ? window.languageSystem.t('geocard.current.position.inserted') : 'Aktuelle Position eingefügt'), false);
     } else {
-        showMessage('❌ Aktuelle Position nicht verfügbar', true);
+        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.current.position.unavailable') : 'Aktuelle Position nicht verfügbar'), true);
     }
 };
 
@@ -1109,11 +1686,11 @@ window.createUserDrop = async function() {
             return;
         }
         if (isNaN(lat) || isNaN(lng)) {
-            showMessage('❌ Bitte gib gültige Koordinaten ein!', true);
+            showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.enter.valid.coordinates') : 'Bitte gib gültige Koordinaten ein!'), true);
             return;
         }
         if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-            showMessage('❌ Ungültige Koordinaten!', true);
+            showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.invalid.coordinates') : 'Ungültige Koordinaten!'), true);
             return;
         }
         
@@ -1177,6 +1754,23 @@ window.createUserDrop = async function() {
         
         console.log(`📊 Total user drops count: ${totalUserDropsCount}, next number: ${nextUserDropNumber}`);
         
+        // Get the real username from Firebase user profile
+        let realUsername = null;
+        try {
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            if (userDoc.exists) {
+                const userData = userDoc.data();
+                realUsername = userData.username || userData.displayName;
+            }
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+        }
+        
+        if (!realUsername) {
+            alert('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.username.not.found') : 'Username nicht gefunden! Bitte Profil vervollständigen.'));
+            return;
+        }
+
         const userDropData = {
             name: userDropName, // Use auto-generated name
             description: description,
@@ -1185,7 +1779,9 @@ window.createUserDrop = async function() {
             lat: lat,
             lng: lng,
             createdBy: currentUser.uid,
-            createdByName: currentUser.displayName || 'Unbekannt',
+            createdByName: currentUser.displayName || currentUser.email || 'Unknown User',
+            createdByEmail: currentUser.email,
+            ersteller: realUsername, // Use real username from Firebase profile
             createdAt: new Date(),
             isActive: true,
             isAvailable: true,
@@ -1286,7 +1882,7 @@ window.loadDevDropsForUpload = async function() {
         // Update dev drops select
         const select = document.getElementById('geocard-drop-select');
         if (select) {
-            select.innerHTML = '<option value="">Dev GeoDrop auswählen...</option>';
+            select.innerHTML = '<option value="">' + (window.languageSystem ? window.languageSystem.t('geocard.dev.geodrop.select') : 'Dev GeoDrop auswählen...') + '</option>';
             devDrops.forEach(drop => {
                 const option = document.createElement('option');
                 option.value = `devDrops:${drop.id}`;
@@ -1341,7 +1937,7 @@ window.loadUserDropsForUpload = async function() {
         // Update user drops select
         const select = document.getElementById('geocard-user-drop-select');
         if (select) {
-            select.innerHTML = '<option value="">User GeoDrop auswählen...</option>';
+            select.innerHTML = '<option value="">' + (window.languageSystem ? window.languageSystem.t('geocard.user.geodrop.select') : 'User GeoDrop auswählen...') + '</option>';
             userDrops.forEach(drop => {
                 const option = document.createElement('option');
                 option.value = `userDrops:${drop.id}`;
@@ -1358,9 +1954,9 @@ window.loadUserDropsForUpload = async function() {
                     currentUser = window.firebase.auth().currentUser;
                 }
                 
-                // For all user drops, show KryptoGuru as creator
-                creatorName = 'KryptoGuru';
-                console.log(`✅ Using KryptoGuru for drop ${drop.name}`);
+                // Use the ersteller field from Firebase
+                creatorName = drop.ersteller || drop.createdByName || 'Unknown';
+                console.log(`✅ Using ${creatorName} for drop ${drop.name}`);
                 const dropNumber = drop.geodropNumber || drop.name?.match(/UserDrop(\d+)/)?.[1] || 'N/A';
                 option.textContent = `👤 User GeoDrop${dropNumber} (${creatorName}) - ${drop.reward || 100} PixelDrops`;
                 select.appendChild(option);
@@ -1422,7 +2018,7 @@ window.loadDevGeoDrops = async function() {
                 const today = new Date().toDateString();
                 const lastClaimDate = drop.lastClaimDate ? drop.lastClaimDate.toDate().toDateString() : null;
                 const isClaimedToday = lastClaimDate === today && drop.claimedBy === currentUser?.uid;
-                const statusText = isClaimedToday ? '⏰ Heute gesammelt' : '✅ Verfügbar';
+                const statusText = isClaimedToday ? '⏰ ' + (window.languageSystem ? window.languageSystem.t('geocard.collected.today') : 'Heute gesammelt') : '✅ ' + (window.languageSystem ? window.languageSystem.t('geocard.available') : 'Verfügbar');
                 const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-600' : 'border-b border-gray-700';
                 const textClass = isClaimedToday ? 'text-gray-400' : 'text-white';
                 tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${drop.geodropNumber || drop.id}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;
@@ -1500,9 +2096,9 @@ window.loadAllUserDrops = async function() {
                     currentUser = window.firebase.auth().currentUser;
                 }
                 
-                // For all user drops, show KryptoGuru as creator
-                creatorName = 'KryptoGuru';
-                console.log(`✅ Using KryptoGuru for drop ${drop.name}`);
+                // Use the ersteller field from Firebase
+                creatorName = drop.ersteller || drop.createdByName || 'Unknown';
+                console.log(`✅ Using ${creatorName} for drop ${drop.name}`);
                 
                 // Get current user for permission check (already declared above)
                 
@@ -1558,7 +2154,7 @@ window.createAustriaTouristDrops = async function() {
     console.log('🇦🇹 Creating Austria Tourist Drops...');
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ Dev-Zugang erforderlich!', true);
+        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
         return;
     }
     
@@ -1732,7 +2328,7 @@ window.createTestAustriaDrop = async function() {
     console.log('🧪 Creating TEST Austria Tourist Drop...');
     
     if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
-        showMessage('❌ Dev-Zugang erforderlich!', true);
+        showMessage('❌ ' + (window.languageSystem ? window.languageSystem.t('geocard.dev.access.required') : 'Dev-Zugang erforderlich!'), true);
         return;
     }
     
@@ -1797,7 +2393,8 @@ window.createTestAustriaDrop = async function() {
             lat: 48.1833,
             lng: 16.3167,
             createdBy: currentUser.uid,
-            createdByName: currentUser.displayName || 'Test User',
+            createdByName: currentUser.displayName || currentUser.email || 'Unknown User',
+            createdByEmail: currentUser.email,
             createdAt: new Date(),
             isActive: true,
             isAvailable: true,
@@ -3079,7 +3676,8 @@ window.autoActivateAdminMode = function() {
 
 // Initialize GeoCard when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🗺️ GeoCard page loaded');
+
+console.log('🗺️ GeoCard page loaded');
     
     // Initialize map after a short delay to ensure DOM is ready
     setTimeout(() => {
@@ -3398,7 +3996,7 @@ window.loadDevGeoDrops = async function() {
                 const today = new Date().toDateString();
                 const lastClaimDate = drop.lastClaimDate ? drop.lastClaimDate.toDate().toDateString() : null;
                 const isClaimedToday = lastClaimDate === today && drop.claimedBy === currentUser?.uid;
-                const statusText = isClaimedToday ? '⏰ Heute gesammelt' : '✅ Verfügbar';
+                const statusText = isClaimedToday ? '⏰ ' + (window.languageSystem ? window.languageSystem.t('geocard.collected.today') : 'Heute gesammelt') : '✅ ' + (window.languageSystem ? window.languageSystem.t('geocard.available') : 'Verfügbar');
                 const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-600' : 'border-b border-gray-700';
                 const textClass = isClaimedToday ? 'text-gray-400' : 'text-white';
                 tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${drop.geodropNumber || drop.id}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;
@@ -3504,9 +4102,9 @@ window.loadUserGeoDrops = async function() {
                     currentUser = window.firebase.auth().currentUser;
                 }
                 
-                // For all user drops, show KryptoGuru as creator
-                creatorName = 'KryptoGuru';
-                console.log(`✅ Using KryptoGuru for drop ${drop.name}`);
+                // Use the ersteller field from Firebase
+                creatorName = drop.ersteller || drop.createdByName || 'Unknown';
+                console.log(`✅ Using ${creatorName} for drop ${drop.name}`);
                 const isDev = window.isDevLoggedIn || localStorage.getItem('devLoggedIn') === 'true';
                 const isCreator = drop.createdBy === currentUser.uid;
                 const canDelete = isDev || isCreator;
