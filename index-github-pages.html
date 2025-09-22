@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoDrop App V2 - GitHub Pages</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo3.1-removebg-preview.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/logo3.1-removebg-preview.png">
+    <link rel="shortcut icon" href="images/logo3.1-removebg-preview.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GeoDrop">
+    <link rel="apple-touch-icon" href="images/logo3.1-removebg-preview.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    
+    <!-- AWS SDK for Rekognition -->
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1490.0.min.js"></script>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-image: url('./images/startseite-bg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        /* GitHub Pages Warning Banner */
+        .github-pages-warning {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-weight: bold;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .github-pages-warning a {
+            color: #fff;
+            text-decoration: underline;
+        }
+        
+        /* Adjust body margin for warning banner */
+        body {
+            margin-top: 80px;
+        }
+        
+        /* User Info with visible background - compact width */
+        #user-info {
+            background: rgba(31, 41, 55, 0.8) !important;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- GitHub Pages + Raspberry Pi Banner -->
+    <div class="github-pages-warning" style="background: linear-gradient(135deg, #10b981, #059669);">
+        🚀 <strong>GitHub Pages + Raspberry Pi Backend</strong> - Vollständige Funktionalität verfügbar! 
+        Backend läuft auf <code>192.168.1.105:3001</code>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-gray-900 bg-opacity-90 backdrop-blur-sm border-b border-gray-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <img src="images/logo3.1-removebg-preview.png" alt="GeoDrop Logo" class="h-10 w-10 mr-3">
+                        <h1 class="text-2xl font-bold text-white">🌍 GeoDrop</h1>
+                    </div>
+                    
+                    <!-- User Info (for logged in users) -->
+                    <div id="user-info" class="bg-gray-800 bg-opacity-70 rounded-lg p-4 backdrop-blur-sm" style="display: none; max-width: 400px; width: fit-content;">
+                        <h3 class="text-xl font-semibold text-white mb-4">👤 Benutzerinfo</h3>
+                        <div class="space-y-2">
+                            <p><strong>E-Mail:</strong> <span id="user-email">-</span></p>
+                            <p><strong>Benutzername:</strong> <span id="user-username">-</span></p>
+                            <p><strong>Level:</strong> <span id="user-level">-</span></p>
+                            <p><strong>Coins:</strong> <span id="user-coins">-</span></p>
+                            <p><strong>Drops:</strong> <span id="user-drops">-</span></p>
+                            <p><strong>Boost:</strong> <span id="user-boost">-</span></p>
+                        </div>
+                        <div class="mt-4 space-y-2">
+                            <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors">
+                                Abmelden
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Landing Page Content (for non-logged in users) -->
+            <div id="landing-content">
+                <!-- Hero Section -->
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl font-bold text-white mb-2">🌍 GeoDrop</h1>
+                    <p class="text-gray-300 text-lg">Willkommen bei der Zukunft des Geo-Minings</p>
+                </div>
+                
+                <!-- GitHub Pages + Raspberry Pi Info Card -->
+                <div class="bg-green-900 bg-opacity-50 border border-green-600 rounded-lg p-6 mb-8">
+                    <h2 class="text-2xl font-bold text-green-300 mb-4">🚀 GitHub Pages + Raspberry Pi Backend</h2>
+                    <p class="text-green-200 mb-4">
+                        Diese Version läuft auf GitHub Pages mit Raspberry Pi Backend! 
+                        Vollständige Funktionalität verfügbar:
+                    </p>
+                    <div class="space-y-3">
+                        <div class="bg-gray-800 rounded-lg p-4">
+                            <h3 class="text-lg font-bold text-white mb-2">🔗 Backend Status:</h3>
+                            <p class="text-green-300">✅ Raspberry Pi: <code>192.168.1.105:3001</code></p>
+                            <p class="text-green-300">✅ Google Places API: Aktiviert</p>
+                            <p class="text-green-300">✅ Firebase: Verbunden</p>
+                        </div>
+                        <div class="text-sm text-green-300">
+                            <p><strong>Features verfügbar:</strong></p>
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li>🗺️ Geo-Mining mit echten Orten</li>
+                                <li>📸 Google Places API Integration</li>
+                                <li>🔥 Firebase Authentication</li>
+                                <li>⛏️ Mining Machines</li>
+                                <li>📈 DeFi Trading</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Login/Register Form -->
+                <div class="max-w-md mx-auto bg-gray-800 bg-opacity-70 rounded-lg p-6 backdrop-blur-sm">
+                    <h2 class="text-2xl font-bold text-white mb-6 text-center">Anmelden / Registrieren</h2>
+                    
+                    <form id="auth-form">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">E-Mail</label>
+                                <input type="email" id="reg-email" placeholder="deine@email.com" 
+                                       class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Passwort</label>
+                                <input type="password" id="reg-password" placeholder="Mindestens 6 Zeichen" 
+                                       class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none">
+                            </div>
+                            
+                            <div class="flex space-x-3">
+                                <button type="button" onclick="loginFromLanding()" 
+                                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                                    Anmelden
+                                </button>
+                                <button type="button" onclick="registerFromLanding()" 
+                                        class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors">
+                                    Registrieren
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Features Overview -->
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-gray-800 bg-opacity-50 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-white mb-3">🗺️ Geo-Mining</h3>
+                        <p class="text-gray-300">Finde virtuelle Drops an realen Orten und verdiene Kryptowährungen.</p>
+                    </div>
+                    
+                    <div class="bg-gray-800 bg-opacity-50 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-white mb-3">⛏️ Mining Machines</h3>
+                        <p class="text-gray-300">4 verschiedene Maschinentypen für passive Einnahmen.</p>
+                    </div>
+                    
+                    <div class="bg-gray-800 bg-opacity-50 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-white mb-3">📈 DeFi Trading</h3>
+                        <p class="text-gray-300">Handel PixelDrop ↔ tBNB direkt in der App.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/firebase.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/common.js"></script>
+    
+    <script>
+        // API-Konfiguration für Raspberry Pi Backend
+        const API_BASE_URL = 'http://192.168.1.105:3001';
+        
+        // GitHub Pages specific initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 GeoDrop GitHub Pages Version initialisiert');
+            console.log('🔗 API Backend:', API_BASE_URL);
+            
+            // Initialize Firebase
+            if (typeof window.initializeFirebase === 'function') {
+                window.initializeFirebase();
+            }
+            
+            // Check for existing login
+            setTimeout(() => {
+                if (typeof window.checkAutoLogin === 'function') {
+                    window.checkAutoLogin();
+                }
+            }, 1000);
+        });
+        
+        // API-Funktionen für Raspberry Pi Backend
+        async function searchPlaces(query) {
+            try {
+                console.log('🔍 Suche Places über Raspberry Pi:', query);
+                const response = await fetch(`${API_BASE_URL}/api/places/search?query=${encodeURIComponent(query)}`);
+                if (response.ok) {
+                    return await response.json();
+                } else {
+                    console.error('API Error:', response.status);
+                    return null;
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                return null;
+            }
+        }
+        
+        async function getPlaceDetails(placeId) {
+            try {
+                console.log('🌍 Hole Place Details über Raspberry Pi:', placeId);
+                const response = await fetch(`${API_BASE_URL}/api/places/details/${placeId}`);
+                if (response.ok) {
+                    return await response.json();
+                } else {
+                    console.error('API Error:', response.status);
+                    return null;
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                return null;
+            }
+        }
+        
+        async function getPlacePhoto(photoRef, maxWidth = 800) {
+            try {
+                console.log('📸 Hole Place Photo über Raspberry Pi:', photoRef);
+                const response = await fetch(`${API_BASE_URL}/api/places/photo?photo_reference=${photoRef}&maxwidth=${maxWidth}`);
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    console.error('API Error:', response.status);
+                    return null;
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                return null;
+            }
+        }
+        
+        // Simplified login function for GitHub Pages
+        window.loginFromLanding = async function() {
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            
+            if (!email || !password) {
+                alert('Bitte E-Mail und Passwort eingeben!');
+                return;
+            }
+            
+            try {
+                console.log('🔐 GitHub Pages login attempt for:', email);
+                
+                if (!window.auth) {
+                    alert('Firebase Auth nicht verfügbar. Bitte verwende die vollständige App auf Netlify.');
+                    return;
+                }
+                
+                const userCredential = await window.auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                console.log('✅ GitHub Pages login successful:', user.email);
+                alert('✅ Erfolgreich angemeldet! Für die vollständige App-Erfahrung besuche: https://geodrop-cryptogame.netlify.app');
+                
+                // Update UI
+                if (typeof updateUserDisplay === 'function') {
+                    updateUserDisplay();
+                }
+                
+                // Hide landing page and show user info
+                const landingContent = document.getElementById('landing-content');
+                const userInfo = document.getElementById('user-info');
+                
+                if (landingContent) {
+                    landingContent.style.display = 'none';
+                }
+                if (userInfo) {
+                    userInfo.style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error('❌ GitHub Pages login error:', error);
+                let errorMessage = 'Anmeldung fehlgeschlagen';
+                
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'Benutzer nicht gefunden';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Falsches Passwort';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Ungültige E-Mail';
+                }
+                
+                alert(`❌ ${errorMessage}`);
+            }
+        };
+        
+        // Simplified registration function for GitHub Pages
+        window.registerFromLanding = async function() {
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            
+            if (!email || !password) {
+                alert('Bitte E-Mail und Passwort eingeben!');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('Passwort muss mindestens 6 Zeichen lang sein!');
+                return;
+            }
+            
+            try {
+                console.log('🚀 GitHub Pages registration attempt for:', email);
+                
+                if (!window.auth) {
+                    alert('Firebase Auth nicht verfügbar. Bitte verwende die vollständige App auf Netlify.');
+                    return;
+                }
+                
+                const userCredential = await window.auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                console.log('✅ GitHub Pages user created:', user.uid);
+                alert('✅ Registrierung erfolgreich! Für die vollständige App-Erfahrung besuche: https://geodrop-cryptogame.netlify.app');
+                
+                // Update UI
+                if (typeof updateUserDisplay === 'function') {
+                    updateUserDisplay();
+                }
+                
+                // Hide landing page and show user info
+                const landingContent = document.getElementById('landing-content');
+                const userInfo = document.getElementById('user-info');
+                
+                if (landingContent) {
+                    landingContent.style.display = 'none';
+                }
+                if (userInfo) {
+                    userInfo.style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error('❌ GitHub Pages registration error:', error);
+                let errorMessage = 'Registrierung fehlgeschlagen';
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'E-Mail bereits registriert';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'Passwort zu schwach';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Ungültige E-Mail';
+                }
+                
+                alert(`❌ ${errorMessage}`);
+            }
+        };
+    </script>
+</body>
+</html>
