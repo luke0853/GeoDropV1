@@ -2,8 +2,9 @@
 // Extracted from backup to keep index.html clean
 
 // Telegram Bot Configuration
-// Lädt Konfiguration aus CONFIG oder verwendet Fallback
-const TELEGRAM_CONFIG = window.CONFIG ? window.CONFIG.telegram : {
+// Lädt Konfiguration aus verschiedenen Quellen
+const TELEGRAM_CONFIG = window.PUBLIC_TELEGRAM_CONFIG || 
+                       (window.CONFIG ? window.CONFIG.telegram : null) || {
     botToken: 'MISSING_BOT_TOKEN',
     chatId: '-1001270226245',
     enabled: true
@@ -201,10 +202,42 @@ async function sendCustomTelegramMessage(message) {
     }
 }
 
+// Set Telegram Bot Token (Admin function)
+function setTelegramBotToken(token) {
+    if (!token || token.trim() === '') {
+        console.error('❌ Invalid Telegram bot token provided');
+        return false;
+    }
+    
+    console.log('🔧 Setting Telegram bot token...');
+    TELEGRAM_CONFIG.botToken = token.trim();
+    
+    // Update global config if available
+    if (window.PUBLIC_TELEGRAM_CONFIG) {
+        window.PUBLIC_TELEGRAM_CONFIG.botToken = token.trim();
+    }
+    
+    console.log('✅ Telegram bot token updated');
+    return true;
+}
+
+// Get Telegram status
+function getTelegramStatus() {
+    return {
+        enabled: TELEGRAM_CONFIG.enabled,
+        hasToken: TELEGRAM_CONFIG.botToken !== 'MISSING_BOT_TOKEN',
+        chatId: TELEGRAM_CONFIG.chatId,
+        tokenPreview: TELEGRAM_CONFIG.botToken.substring(0, 10) + '...'
+    };
+}
+
 // Make functions globally available
 window.sendTelegramNotification = sendTelegramNotification;
 window.sendTelegramPixelDropNotification = sendTelegramPixelDropNotification;
 window.testTelegram = testTelegram;
 window.sendCustomTelegramMessage = sendCustomTelegramMessage;
+window.setTelegramBotToken = setTelegramBotToken;
+window.getTelegramStatus = getTelegramStatus;
 
 console.log('📱 Telegram system loaded successfully');
+console.log('📱 Telegram status:', getTelegramStatus());
