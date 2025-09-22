@@ -1097,7 +1097,7 @@
 
 
                     <!-- Registration Form (shown by default) -->
-                    <div id="registration-section" class="py-20 bg-gray-800" style="display: block;">
+                    <div id="registration-section" class="py-20 bg-gray-800" style="display: none;">
                         <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
                             <div class="text-center mb-8">
                                 <h2 id="form-title" class="text-4xl font-bold mb-4">🚀 Jetzt registrieren</h2>
@@ -1464,6 +1464,7 @@
                 // User is not logged in, show landing page
                 document.getElementById('landing-content').style.display = 'block';
                 document.getElementById('app-content').style.display = 'none';
+                document.getElementById('registration-section').style.display = 'block';
                 
                 console.log('🌐 Landing page shown');
                 
