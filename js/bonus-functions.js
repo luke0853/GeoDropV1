@@ -1017,9 +1017,8 @@ window.generateReferralLink = function() {
         return 'https://luke0853.github.io/GeoDropV1/#/ref/' + (window.userProfile?.username || 'User');
     }
     
-    const baseUrl = window.location.origin + window.location.pathname;
     const refCode = window.userProfile.username.replace(/[^a-zA-Z0-9]/g, '');
-    return `${baseUrl}?ref=${refCode}`;
+    return `https://luke0853.github.io/GeoDropV1/#/ref/${refCode}`;
 };
 
 // Update referral link display

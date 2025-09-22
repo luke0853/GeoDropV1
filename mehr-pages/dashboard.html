@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - GeoDrop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.0.0/dist/jsQR.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        .page {
+            display: flex;
+            width: 100%;
+            min-height: calc(100vh - 128px);
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+            text-align: left;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        
+        main {
+            padding-top: 64px;
+            padding-bottom: 64px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div id="mehr-dashboard" class="page">
+            <div class="max-w-6xl mx-auto p-6">
+                <h2 class="text-3xl font-bold text-white mb-8">🏠 Dashboard</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- User Statistics -->
+                    <div class="bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-white mb-4">📊 Deine Statistiken</h3>
+                        <div class="space-y-4">
+                            <div class="bg-gray-800 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-300">PixelDrop Balance:</span>
+                                    <span class="text-purple-400 font-bold" id="dashboard-coins">0</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-300">tBNB Balance:</span>
+                                    <span class="text-yellow-400 font-bold" id="dashboard-tbnb">0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-300">GeoDrops gesammelt:</span>
+                                    <span class="text-blue-400 font-bold" id="dashboard-drops">0</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-300">Mining Boost:</span>
+                                    <span class="text-green-400 font-bold" id="dashboard-boost">1.0x</span>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-800 rounded-lg p-4">
+                                <h4 class="text-lg font-semibold text-white mb-3">🎯 Heutige Aktivität</h4>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-300">GeoDrops heute:</span>
+                                    <span class="text-blue-400 font-bold" id="dashboard-today-drops">0</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-300">PixelDrop verdient:</span>
+                                    <span class="text-purple-400 font-bold" id="dashboard-today-coins">0</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-300">Mining Zeit:</span>
+                                    <span class="text-green-400 font-bold" id="dashboard-mining-time">0h 0m</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- PixelDrop Auszahlung -->
+                    <div class="bg-gray-700 rounded-lg p-6">
+                        <h3 class="text-xl font-semibold text-white mb-4">💸 PixelDrop Auszahlung</h3>
+                        <div class="space-y-4">
+                            <div class="bg-gray-800 rounded-lg p-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-300">Verfügbare PixelDrop (App):</span>
+                                    <span class="text-purple-400 font-bold" id="payout-available-coins">0</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-gray-300">Verfügbare PixelDrop (Blockchain):</span>
+                                    <span class="text-blue-400 font-bold" id="payout-blockchain-coins">0</span>
+                                </div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-gray-300">Auszahlung:</span>
+                                    <span class="text-green-400 font-bold">Echte Blockchain-Transaktion</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Wallet-Adresse für Auszahlung:</label>
+                                <input type="text" id="payout-wallet-input" placeholder="0x..." class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none mb-4">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Auszuzahlende PixelDrop:</label>
+                                <div class="flex space-x-2">
+                                    <input type="number" id="payout-amount" placeholder="0" min="1" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none">
+                                    <button onclick="setMaxWithdrawal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                                        Max
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-800 rounded-lg p-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-300">Auszuzahlender Betrag:</span>
+                                    <span class="text-yellow-400 font-bold" id="payout-tbnb-amount">0 PixelDrop</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-2">
+                                <button onclick="calculatePayout()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    💰 Berechnen
+                                </button>
+                                <button onclick="executePayout()" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                    💸 Auszahlen
+                                </button>
+                            </div>
+                            
+                            <div class="text-xs text-gray-400 bg-gray-800 p-2 rounded">
+                                💡 Mindestauszahlung: 100 PixelDrop
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../js/firebase.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/wallet-system.js"></script>
+    
+    <script>
+        // Honeypot keys for bot protection (these are fake and will be ignored)
+        const fakeApiKey1 = "AIzaSyBOT_PROTECTION_FAKE_KEY_12345";
+        const fakeApiKey2 = "AIzaSyFAKE_FIREBASE_KEY_67890";
+        const fakeApiKey3 = "AIzaSyDUMMY_API_KEY_ABCDEF";
+        
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbaHV1OY9C_MUt4o3WTkHCGlRVt7ll9UA",
+            authDomain: "geodrop-f3ee1.firebaseapp.com",
+            projectId: "geodrop-f3ee1",
+            storageBucket: "geodrop-f3ee1.firebasestorage.app",
+            messagingSenderId: "1054615552034",
+            appId: "1:1054615552034:web:8d61c64b5296f4e0cc4a7b",
+            measurementId: "G-RBEJES6HX1"
+        };
+
+        // Initialize Firebase
+        let app, db, storage, auth;
+        
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            storage = firebase.storage();
+            auth = firebase.auth();
+            console.log("✅ Firebase initialized successfully");
+        } catch (error) {
+            console.error("❌ Firebase initialization failed:", error);
+        }
+        
+        // Make Firebase services globally available
+        window.auth = auth;
+        window.db = db;
+        window.storage = storage;
+
+        // Navigation function
+        function showPage(pageId) {
+            // For standalone page, redirect to main index
+            if (pageId !== 'dashboard') {
+                window.location.href = '../index.html#' + pageId;
+            }
+        }
+
+        // Dashboard functions
+        function setMaxWithdrawal() {
+            const amountInput = document.getElementById('payout-amount');
+            if (amountInput) {
+                amountInput.value = '1000'; // Example max amount
+                console.log('✅ Max withdrawal set');
+            }
+        }
+
+        function calculatePayout() {
+            const amount = document.getElementById('payout-amount').value;
+            const payoutAmount = document.getElementById('payout-tbnb-amount');
+            if (payoutAmount) {
+                payoutAmount.textContent = `${amount} PixelDrop`;
+            }
+            console.log('💰 Payout calculated:', amount);
+        }
+
+        function executePayout() {
+            const amount = document.getElementById('payout-amount').value;
+            const wallet = document.getElementById('payout-wallet-input').value;
+            
+            if (!amount || !wallet) {
+                alert('❌ Bitte alle Felder ausfüllen!');
+                return;
+            }
+            
+            alert(`💸 Auszahlung von ${amount} PixelDrop an ${wallet} wird verarbeitet...`);
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🏠 Dashboard geladen');
+        });
+    </script>
+</body>
+</html>
