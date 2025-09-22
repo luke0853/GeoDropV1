@@ -91,8 +91,8 @@
 <body>
     <!-- GitHub Pages + Raspberry Pi Banner -->
     <div class="github-pages-warning" style="background: linear-gradient(135deg, #10b981, #059669);">
-        🚀 <strong>GitHub Pages + Cloud Backend</strong> - Vollständige Funktionalität verfügbar! 
-        Backend läuft auf <code>geodrop-backend.herokuapp.com</code>
+        🚀 <strong>GitHub Pages + Firebase Backend</strong> - Vollständige Funktionalität verfügbar! 
+        Backend läuft auf <code>Firebase Functions</code>
     </div>
 
     <!-- Main App Container -->
@@ -147,7 +147,7 @@
                     <div class="space-y-3">
                         <div class="bg-gray-800 rounded-lg p-4">
                             <h3 class="text-lg font-bold text-white mb-2">🔗 Backend Status:</h3>
-                            <p class="text-green-300">✅ Cloud Backend: <code>geodrop-backend.herokuapp.com</code></p>
+                            <p class="text-green-300">✅ Firebase Backend: <code>Firebase Functions</code></p>
                             <p class="text-green-300">✅ Google Places API: Aktiviert</p>
                             <p class="text-green-300">✅ Firebase: Verbunden</p>
                         </div>
@@ -223,8 +223,8 @@
     <script src="js/common.js"></script>
     
     <script>
-        // API-Konfiguration für öffentliches Backend
-        const API_BASE_URL = 'https://geodrop-backend.herokuapp.com';
+        // API-Konfiguration für Firebase Functions
+        const API_BASE_URL = 'https://us-central1-geodrop-f3ee1.cloudfunctions.net';
         
         // GitHub Pages specific initialization
         document.addEventListener('DOMContentLoaded', function() {
@@ -247,7 +247,7 @@
         // API-Funktionen für Raspberry Pi Backend
         async function searchPlaces(query) {
             try {
-                console.log('🔍 Suche Places über Cloud Backend:', query);
+                console.log('🔍 Suche Places über Firebase Functions:', query);
                 const response = await fetch(`${API_BASE_URL}/api/places/search?query=${encodeURIComponent(query)}`);
                 if (response.ok) {
                     return await response.json();
@@ -263,7 +263,7 @@
         
         async function getPlaceDetails(placeId) {
             try {
-                console.log('🌍 Hole Place Details über Cloud Backend:', placeId);
+                console.log('🌍 Hole Place Details über Firebase Functions:', placeId);
                 const response = await fetch(`${API_BASE_URL}/api/places/details/${placeId}`);
                 if (response.ok) {
                     return await response.json();
@@ -279,7 +279,7 @@
         
         async function getPlacePhoto(photoRef, maxWidth = 800) {
             try {
-                console.log('📸 Hole Place Photo über Cloud Backend:', photoRef);
+                console.log('📸 Hole Place Photo über Firebase Functions:', photoRef);
                 const response = await fetch(`${API_BASE_URL}/api/places/photo?photo_reference=${photoRef}&maxwidth=${maxWidth}`);
                 if (response.ok) {
                     return response.blob();
