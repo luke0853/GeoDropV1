@@ -66,13 +66,13 @@ index_backup.html
 *.mkv
 
 # Große Bilder (behalte nur kleine Icons/Logos)
-images/*.png
-images/*.jpg
-images/*.jpeg
-images/*.gif
-images/*.bmp
-images/*.tiff
-images/*.webp
+# images/*.png - COMMENTED OUT: Needed for GitHub Pages
+# images/*.jpg - COMMENTED OUT: Needed for GitHub Pages  
+# images/*.jpeg - COMMENTED OUT: Needed for GitHub Pages
+# images/*.gif - COMMENTED OUT: Needed for GitHub Pages
+# images/*.bmp - COMMENTED OUT: Needed for GitHub Pages
+# images/*.tiff - COMMENTED OUT: Needed for GitHub Pages
+# images/*.webp - COMMENTED OUT: Needed for GitHub Pages
 
 # Audio-Dateien
 *.mp3
