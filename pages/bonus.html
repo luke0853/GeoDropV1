@@ -243,6 +243,33 @@
             }
         }
 
+        // Message function for bonus system
+        function showMessage(message, isError = false) {
+            if (isError) {
+                console.error('❌', message);
+                alert('❌ ' + message);
+            } else {
+                console.log('✅', message);
+                alert('✅ ' + message);
+            }
+        }
+
+        // Update user profile function
+        window.updateUserProfile = async function() {
+            if (!window.currentUser || !window.userProfile) {
+                console.error('❌ No user or profile to update');
+                return;
+            }
+            
+            try {
+                await db.collection('users').doc(window.currentUser.uid).set(window.userProfile, { merge: true });
+                console.log('✅ User profile updated successfully');
+            } catch (error) {
+                console.error('❌ Error updating user profile:', error);
+                throw error;
+            }
+        };
+
         // Bonus functions
 
         function initializeBonusSystem() {
@@ -283,6 +310,38 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🎁 Bonus System geladen');
             initializeBonusSystem();
+            
+            // Initialize auth state listener
+            if (auth) {
+                auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        console.log('👤 User logged in, loading profile...');
+                        window.currentUser = user;
+                        
+                        // Load user profile
+                        try {
+                            const userDoc = await db.collection('users').doc(user.uid).get();
+                            if (userDoc.exists) {
+                                window.userProfile = userDoc.data();
+                                console.log('✅ User profile loaded:', window.userProfile);
+                                
+                                // Update bonus display
+                                if (typeof window.updateBonusDisplay === 'function') {
+                                    window.updateBonusDisplay();
+                                }
+                            } else {
+                                console.log('❌ User profile not found in Firestore');
+                            }
+                        } catch (error) {
+                            console.error('❌ Error loading user profile:', error);
+                        }
+                    } else {
+                        console.log('❌ User not logged in');
+                        window.currentUser = null;
+                        window.userProfile = null;
+                    }
+                });
+            }
         });
     </script>
 </body>
