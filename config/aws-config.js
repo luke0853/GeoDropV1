@@ -62,4 +62,9 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = AWS_CONFIG;
 } else {
     window.AWS_CONFIG = AWS_CONFIG;
+    
+    // Also integrate into main CONFIG if available
+    if (window.CONFIG) {
+        window.CONFIG.aws = AWS_CONFIG;
+    }
 }

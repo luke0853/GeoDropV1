@@ -1,8 +1,8 @@
 // Upload Functions for GeoDrop App
 
-// Validate image for GeoDrop
+// Validate image for GeoDrop using AWS Rekognition
 async function validateImageForGeoDrop(file, drop) {
-    console.log('🔍 Validating image for GeoDrop...');
+    console.log('🔍 Validating image for GeoDrop with AWS Rekognition...');
     
     try {
         // Basic file validation
@@ -15,43 +15,70 @@ async function validateImageForGeoDrop(file, drop) {
             return { valid: false, error: 'Bild ist zu groß! Maximal 10MB erlaubt.' };
         }
         
-        // For Dev Drops or Dev users, be more lenient (for testing)
+        // For Dev Drops or Dev users, use proper validation (not lenient)
         if (drop.isDevDrop || drop.collection === 'devDrops' || window.isDevLoggedIn) {
-            console.log('🔧 Dev Drop/User - skipping strict validation');
-            return { valid: true };
+            console.log('🔧 Dev Drop/User - using AWS validation for proper testing');
+            
+            // Use AWS validation for dev users too (for proper testing)
+            if (window.awsRekognitionService) {
+                try {
+                    const validation = await window.awsRekognitionService.validateImage(file);
+                    console.log('🔧 Dev AWS validation result:', validation);
+                    
+                    // For dev users, still require proper validation
+                    if (validation.valid) {
+                        return { valid: true, confidence: validation.confidence };
+                    } else {
+                        return { valid: false, error: `AWS Validation failed: ${validation.reasons ? validation.reasons.join(', ') : validation.error}` };
+                    }
+                } catch (awsError) {
+                    console.log('🔧 AWS validation failed for dev user:', awsError);
+                    return { valid: false, error: `AWS Validation error: ${awsError.message}` };
+                }
+            } else {
+                console.log('🔧 No AWS service available for dev user');
+                return { valid: false, error: 'AWS validation service not available' };
+            }
         }
         
-        // For normal drops, implement stricter validation
-        // Check if this is a reference image drop (has referenceImage field)
-        if (drop.referenceImage) {
-            // This is a reference image drop - require more validation
-            const hasGPS = await checkImageHasGPS(file);
-            if (!hasGPS) {
-                return { valid: false, error: 'Bild enthält keine GPS-Daten! Bitte mache ein Foto mit aktiviertem GPS.' };
+        // For normal users, use strict AWS validation
+        if (window.awsRekognitionService) {
+            console.log('🔍 Using AWS Rekognition for image validation...');
+            
+            // Get reference image if available
+            let referenceImage = null;
+            if (drop.referenceImage) {
+                try {
+                    // Try to load reference image from Firebase Storage
+                    const referenceImageUrl = `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder%2F${drop.referenceImage}.jpg?alt=media`;
+                    const response = await fetch(referenceImageUrl);
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        referenceImage = blob;
+                        console.log('📸 Reference image loaded for comparison');
+                    }
+                } catch (error) {
+                    console.log('⚠️ Could not load reference image:', error);
+                }
             }
             
-            // Additional validation: Check image similarity (basic)
-            const imageSimilarity = await checkImageSimilarity(file, drop);
-            if (!imageSimilarity.similar) {
-                return { valid: false, error: imageSimilarity.error || 'Das Foto entspricht nicht dem Referenzbild! Bitte mache ein Foto vom gleichen Ort.' };
+            const validation = await window.awsRekognitionService.validateImage(file, referenceImage);
+            console.log('🔍 AWS validation result:', validation);
+            
+            if (validation.valid) {
+                console.log(`✅ AWS validation passed (Confidence: ${validation.confidence.toFixed(1)}%)`);
+                return { valid: true, confidence: validation.confidence };
+            } else {
+                const errorMessage = validation.reasons.length > 0 
+                    ? validation.reasons.join(', ') 
+                    : validation.error || 'Bildvalidierung fehlgeschlagen';
+                console.log('❌ AWS validation failed:', errorMessage);
+                return { valid: false, error: `AWS Validation: ${errorMessage}` };
             }
         } else {
-            // Regular drop - still require GPS validation
-            const hasGPS = await checkImageHasGPS(file);
-            if (!hasGPS) {
-                return { valid: false, error: 'Bild enthält keine GPS-Daten! Bitte mache ein Foto mit aktiviertem GPS.' };
-            }
-            console.log('🌍 Regular drop - GPS validation passed');
+            console.error('❌ AWS Rekognition service not available');
+            return { valid: false, error: 'Bildvalidierungsservice nicht verfügbar!' };
         }
-        
-        // Additional validation: Check if image is not too dark/blurry
-        const imageQuality = await checkImageQuality(file);
-        if (!imageQuality.good) {
-            return { valid: false, error: imageQuality.error || 'Bildqualität zu schlecht! Bitte mache ein klareres Foto.' };
-        }
-        
-        console.log('✅ Image validation passed');
-        return { valid: true };
         
     } catch (error) {
         console.error('❌ Image validation error:', error);
@@ -59,111 +86,7 @@ async function validateImageForGeoDrop(file, drop) {
     }
 }
 
-// Check if image has GPS data
-async function checkImageHasGPS(file) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                // Simple check - if image loads, assume it might have GPS
-                // In a real implementation, you'd use EXIF.js to check for GPS data
-                resolve(true);
-            };
-            img.onerror = () => resolve(false);
-            img.src = e.target.result;
-        };
-        reader.onerror = () => resolve(false);
-        reader.readAsDataURL(file);
-    });
-}
-
-// Extract GPS from image
-async function extractGPSFromImage(file) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            // In a real implementation, you'd use EXIF.js to extract GPS
-            // For now, return null to skip GPS validation
-            resolve(null);
-        };
-        reader.onerror = () => resolve(null);
-        reader.readAsDataURL(file);
-    });
-}
-
-// Check image similarity to reference
-async function checkImageSimilarity(file, drop) {
-    return new Promise((resolve) => {
-        // For now, implement a simple validation
-        // In a real implementation, you'd compare with the reference image
-        
-        // Check if file is recent (taken within last 2 minutes)
-        const now = new Date();
-        const fileTime = new Date(file.lastModified);
-        const timeDiff = now - fileTime;
-        
-        if (timeDiff > 2 * 60 * 1000) { // 2 minutes
-            resolve({ similar: false, error: 'Bild ist zu alt! Bitte mache ein neues Foto (max. 2 Minuten alt).' });
-            return;
-        }
-        
-        // Check file size (should be reasonable for a photo)
-        if (file.size < 50 * 1024) { // Less than 50KB
-            resolve({ similar: false, error: 'Bild ist zu klein! Bitte mache ein vollständiges Foto.' });
-            return;
-        }
-        
-        // For now, accept the image (in a real implementation, you'd do image comparison)
-        resolve({ similar: true });
-    });
-}
-
-// Check image quality
-async function checkImageQuality(file) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.onload = function() {
-                // Basic quality checks
-                if (img.width < 200 || img.height < 200) {
-                    resolve({ good: false, error: 'Bild ist zu klein! Mindestens 200x200 Pixel erforderlich.' });
-                    return;
-                }
-                
-                // Check if image is too dark (basic check)
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-                
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imageData.data;
-                let totalBrightness = 0;
-                
-                for (let i = 0; i < data.length; i += 4) {
-                    const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                    totalBrightness += brightness;
-                }
-                
-                const avgBrightness = totalBrightness / (data.length / 4);
-                
-                if (avgBrightness < 30) {
-                    resolve({ good: false, error: 'Bild ist zu dunkel! Bitte mache ein helleres Foto.' });
-                    return;
-                }
-                
-                resolve({ good: true });
-            };
-            img.onerror = () => resolve({ good: false, error: 'Bild konnte nicht geladen werden!' });
-            img.src = e.target.result;
-        };
-        reader.onerror = () => resolve({ good: false, error: 'Bild konnte nicht gelesen werden!' });
-        reader.readAsDataURL(file);
-    });
-}
+// GPS and image quality functions removed - now using AWS Rekognition for all validation
 
 // Enhanced Photo Upload with Coordinate Adjustment
 window.claimGeoDrop = async function() {
@@ -197,6 +120,26 @@ window.claimGeoDrop = async function() {
     try {
         showMessage('📸 Verarbeite Foto und Koordinaten...', false);
         
+        // 0. Client-side file validation
+        if (!file) {
+            showMessage('❌ Bitte wähle eine Datei aus!', true);
+            return { success: false, error: 'No file selected' };
+        }
+        
+        // Check file format
+        const supportedFormats = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!supportedFormats.includes(file.type)) {
+            showMessage(`❌ Unsupported Dateiformat: ${file.type}. Erlaubt: JPEG, PNG, WebP`, true);
+            return { success: false, error: 'Unsupported file format' };
+        }
+        
+        // Check file size (5MB limit)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.size > maxSize) {
+            showMessage(`❌ Datei zu groß: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum: 5MB`, true);
+            return { success: false, error: 'File too large' };
+        }
+        
         // 1. Get current location with high accuracy
         let location = await getCurrentLocationWithAccuracy();
         if (!location) {
@@ -207,7 +150,7 @@ window.claimGeoDrop = async function() {
         
         // Check if Dev coordinates are set and user is Dev - use them instead
         const isDevLoggedIn = window.isDevLoggedIn || 
-                             localStorage.getItem('devLoggedIn') === 'true';
+                             sessionStorage.getItem('devLoggedIn') === 'true';
         
         if (isDevLoggedIn && window.devTestLat && window.devTestLng) {
             console.log('🎯 Dev user - using Dev test coordinates instead of GPS');
@@ -240,14 +183,20 @@ window.claimGeoDrop = async function() {
         
         console.log('✅ Photo upload successful:', downloadURL);
         
-        // 4. Determine drop collection (devDrops or geodrops)
+        // 4. Determine drop collection (devDrops or userDrops)
         let dropCollection;
         if (window.currentDropCollection) {
             // Use collection from GeoCard
             dropCollection = window.currentDropCollection;
+            console.log('🎯 Using currentDropCollection:', dropCollection);
         } else {
-            // Fallback to old logic
-            dropCollection = selectedDropId.includes('dev') ? 'devDrops' : 'geodrops';
+            // Fallback logic: check if it's a user drop or dev drop
+            if (selectedDropId.includes('UserDrop') || selectedDropId.includes('user')) {
+                dropCollection = 'userDrops';
+            } else {
+                dropCollection = 'devDrops';
+            }
+            console.log('🎯 Using fallback collection logic:', { selectedDropId, dropCollection });
         }
         
         // 5. Get drop document
@@ -266,10 +215,10 @@ window.claimGeoDrop = async function() {
         
         console.log('📏 Distance to drop:', distance, 'meters');
         
-        // 7. Check if user is close enough (within 50 meters for normal users, 200km for Dev users)
-        const maxDistance = window.isDevLoggedIn ? 200000 : 50; // 200km for Dev, 50m for normal users
+        // 7. Check if user is close enough (within 50 meters for normal users, unlimited for Dev users)
+        const maxDistance = window.isDevLoggedIn ? Infinity : 50; // Unlimited for Dev, 50m for normal users
         if (distance > maxDistance) {
-            const errorMsg = `Zu weit entfernt! Du bist ${distance.toFixed(0)}m vom GeoDrop entfernt. Maximal ${maxDistance === 200000 ? '200km' : '50m'} erlaubt.`;
+            const errorMsg = `Zu weit entfernt! Du bist ${distance.toFixed(0)}m vom GeoDrop entfernt. Maximal ${maxDistance === Infinity ? 'unbegrenzt (Dev)' : '50m'} erlaubt.`;
             showMessage(`❌ ${errorMsg}`, true);
             return { success: false, error: errorMsg };
         }
@@ -316,7 +265,19 @@ window.claimGeoDrop = async function() {
             isAvailable: true
         };
         
+        console.log('🎯 Updating drop with claim data:', { 
+            dropCollection, 
+            selectedDropId, 
+            claimData: {
+                claimedBy: claimData.claimedBy,
+                lastClaimDate: 'serverTimestamp',
+                isClaimedToday: claimData.isClaimedToday
+            }
+        });
+        
         await db.collection(dropCollection).doc(selectedDropId).update(claimData);
+        
+        console.log('✅ Drop claim data updated successfully');
         
         // 10. Update user's PixelDrop balance
         const reward = drop.reward || 100;

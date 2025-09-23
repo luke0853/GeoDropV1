@@ -89,7 +89,7 @@
                             <div class="text-gray-400 text-sm">German - Vollständige Übersetzung</div>
                         </div>
                     </div>
-                    <input type="radio" name="language" value="de" id="lang-de" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500">
+                    <input type="radio" name="language" value="de" id="lang-de" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" checked>
                 </div>
                 
                 <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-750 transition-colors cursor-pointer" onclick="switchLanguage('en')">
@@ -103,6 +103,54 @@
                     <input type="radio" name="language" value="en" id="lang-en" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500">
                 </div>
             </div>
+            
+            <!-- Language Selection Script -->
+            <script>
+                // Mark current language as selected when page loads
+                document.addEventListener('DOMContentLoaded', function() {
+                    const currentLanguage = localStorage.getItem('selectedLanguage') || 'de';
+                    const deRadio = document.getElementById('lang-de');
+                    const enRadio = document.getElementById('lang-en');
+                    
+                    if (currentLanguage === 'de') {
+                        deRadio.checked = true;
+                        enRadio.checked = false;
+                    } else if (currentLanguage === 'en') {
+                        deRadio.checked = false;
+                        enRadio.checked = true;
+                    }
+                });
+                
+                // Update radio buttons when language is switched
+                function switchLanguage(lang) {
+                    const deRadio = document.getElementById('lang-de');
+                    const enRadio = document.getElementById('lang-en');
+                    
+                    if (lang === 'de') {
+                        deRadio.checked = true;
+                        enRadio.checked = false;
+                    } else if (lang === 'en') {
+                        deRadio.checked = false;
+                        enRadio.checked = true;
+                    }
+                    
+                    // Save language preference
+                    localStorage.setItem('selectedLanguage', lang);
+                    
+                    // Update language display
+                    const currentLanguageDisplay = document.getElementById('settings-current-language-display');
+                    if (currentLanguageDisplay) {
+                        currentLanguageDisplay.textContent = lang === 'de' ? 'Deutsch' : 'English';
+                    }
+                    
+                    // Update all other language switchers using global function
+                    if (window.syncAllLanguageSwitchers) {
+                        window.syncAllLanguageSwitchers(lang);
+                    }
+                    
+                    console.log('Language switched to:', lang);
+                }
+            </script>
             
             <!-- Language Preview -->
             <div class="bg-gray-800 rounded-lg p-4 mt-4">

@@ -1,212 +1,2462 @@
-# 🔒 SECURITY AUDIT REPORT - GeoDrop V1
-**Datum:** 21. September 2025  
-**Auditor:** AI Assistant  
-**Dauer:** 5+ Minuten ausführlicher Check  
-**Status:** ✅ SEHR GUT
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoDrop App V2</title>
+    
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo3.1-removebg-preview.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/logo3.1-removebg-preview.png">
+    <link rel="shortcut icon" href="images/logo3.1-removebg-preview.png">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GeoDrop">
+    <link rel="apple-touch-icon" href="images/logo3.1-removebg-preview.png">
 
----
+    <script>
+        // Debug System - Disabled for Production
+        let debugWindowVisible = false;
+        
+        // Dev Tab Functions - Load Early
+        window.showDevTab = function(tabName) {
+            console.log('🔧 Switching to dev tab:', tabName);
+            
+            // Hide all dev tabs
+            document.querySelectorAll('.dev-tab').forEach(tab => {
+                tab.classList.remove('active');
+                tab.style.display = 'none';
+            });
+            
+            // Remove active class from all dev tab buttons
+            document.querySelectorAll('.mehr-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+                selectedTab.style.display = 'block';
+                console.log('✅ Dev tab shown:', tabName);
+            }
+            
+            // Add active class to clicked button
+            const clickedBtn = document.querySelector(`[data-tab="${tabName}"]`);
+            if (clickedBtn) {
+                clickedBtn.classList.add('active');
+            }
+        };
+        
+        
+        
+        
+        console.log('🔧 Early debug functions loaded');
+    </script>
 
-## 📊 EXECUTIVE SUMMARY
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1490.0.min.js"></script>
+    
+    
+    
+    
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-image: url('./images/startseite-bg.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        /* Removed body overlay filter */
+        
+        .page {
+            display: none;
+            width: 100%;
+            min-height: calc(100vh - 128px);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 1rem;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+        }
+        .page.active {
+            display: flex;
+        }
+        main {
+            padding-top: 64px;
+            padding-bottom: 64px;
+        }
 
-Das GeoDrop V1 System wurde einer umfassenden Sicherheitsprüfung unterzogen. **Alle kritischen Bereiche wurden als sicher eingestuft.** Das System ist bereit für Production mit den empfohlenen Verbesserungen.
+        .nav-btn {
+            transition: all 0.3s ease;
+        }
+        .nav-btn:hover {
+            transform: translateY(-2px);
+        }
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
 
-### 🎯 GESAMTBEWERTUNG: **SEHR GUT** ✅
+        /* Mobile responsive design */
+        @media (max-width: 768px) {
+            main {
+                margin-left: 0 !important;
+                margin-top: 4rem !important;
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+            }
+            
+            .page {
+                min-height: calc(100vh - 80px);
+                padding: 0.5rem;
+            }
+            
+            .nav-btn {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+                min-height: 44px; /* Touch-friendly */
+            }
 
----
+            /* Modern Mobile Navigation */
+            .mobile-nav {
+                position: fixed;
+                bottom: 60px; /* Über der Ad-Banner (60px Höhe) */
+                left: 0;
+                right: 0;
+                background: linear-gradient(180deg, rgba(26, 32, 44, 0.95) 0%, rgba(26, 32, 44, 1) 100%);
+                backdrop-filter: blur(20px);
+                border-top: 1px solid rgba(59, 130, 246, 0.3);
+                z-index: 100000;
+                display: flex;
+                overflow-x: auto;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                padding: 0.75rem 0.5rem 1rem 0.5rem;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+            }
+            
+            .mobile-nav::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .mobile-nav .nav-btn {
+                flex: 0 0 auto;
+                min-width: 60px;
+                margin: 0 0.25rem;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 70px;
+                position: relative;
+                border-radius: 12px;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                color: #9ca3af;
+                text-decoration: none;
+            }
+            
+            .mobile-nav .nav-btn:hover {
+                background: rgba(59, 130, 246, 0.1);
+                transform: translateY(-2px);
+            }
+            
+            .mobile-nav .nav-btn.active {
+                background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%);
+                color: #3b82f6;
+                transform: translateY(-3px);
+                box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            }
+            
+            .mobile-nav .nav-icon {
+                font-size: 1.5rem;
+                margin-bottom: 0.25rem;
+                transition: all 0.3s ease;
+            }
+            
+            .mobile-nav .nav-btn.active .nav-icon {
+                transform: scale(1.1);
+                filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
+            }
+            
+            .mobile-nav .nav-label {
+                font-size: 0.6rem;
+                font-weight: 600;
+                margin-top: 0.125rem;
+                transition: all 0.3s ease;
+            }
+            
+            .mobile-nav .nav-indicator {
+                position: absolute;
+                top: 0.5rem;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 4px;
+                height: 4px;
+                background: #3b82f6;
+                border-radius: 50%;
+                opacity: 0;
+                transition: all 0.3s ease;
+            }
+            
+            .mobile-nav .nav-btn.active .nav-indicator {
+                opacity: 1;
+                transform: translateX(-50%) scale(1.5);
+                box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+            }
+            
+            /* Hide desktop navigation on mobile */
+            .desktop-nav {
+                display: none;
+            }
+            
+            /* Mobile-optimized content */
+            .mobile-content {
+                padding-bottom: 220px; /* Space for mobile nav + ad banner (60px + 160px) */
+            }
+            
+            /* Touch-friendly buttons */
+            button, .btn {
+                min-height: 48px;
+                min-width: 48px;
+                font-size: 1rem;
+                padding: 0.75rem 1rem;
+                border-radius: 12px;
+                transition: all 0.3s ease;
+            }
+            
+            button:hover, .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+            
+            /* Mobile-optimized forms */
+            input, textarea, select {
+                min-height: 48px;
+                font-size: 1rem;
+                padding: 0.75rem;
+                border-radius: 12px;
+                border: 2px solid #374151;
+                background: #2d3748;
+                color: white;
+                transition: all 0.3s ease;
+            }
+            
+            input:focus, textarea:focus, select:focus {
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                outline: none;
+            }
+            
+            /* Mobile-optimized cards */
+            .card, .bg-gray-700, .bg-gray-800 {
+                border-radius: 16px;
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                border: 1px solid rgba(59, 130, 246, 0.1);
+            }
+            
+            /* Mobile-optimized text */
+            h1, h2, h3, h4, h5, h6 {
+                line-height: 1.3;
+                margin-bottom: 1rem;
+            }
+            
+            p {
+                line-height: 1.6;
+                margin-bottom: 1rem;
+            }
+            
+            /* Mobile-optimized spacing */
+            .space-y-4 > * + * {
+                margin-top: 1.5rem;
+            }
+            
+            .space-y-6 > * + * {
+                margin-top: 2rem;
+            }
+            
+            /* Mobile-optimized grid */
+            .grid {
+                gap: 1rem;
+            }
+            
+            .grid-cols-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .grid-cols-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            /* Mobile-optimized popups */
+            .fixed {
+                padding: 1rem;
+            }
+            
+            .max-w-4xl {
+                max-width: 95vw;
+            }
+            
+            /* Mobile-optimized animations */
+            .animate-pulse {
+                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            
+            .animate-bounce {
+                animation: bounce 1s infinite;
+            }
+            
+            /* Mobile-optimized scrollbars */
+            ::-webkit-scrollbar {
+                width: 4px;
+            }
+            
+            ::-webkit-scrollbar-track {
+                background: #1a202c;
+            }
+            
+            ::-webkit-scrollbar-thumb {
+                background: #3b82f6;
+                border-radius: 2px;
+            }
+            
+            ::-webkit-scrollbar-thumb:hover {
+                background: #2563eb;
+            }
+            
+            /* Mobile-optimized input fields */
+            input[type="text"], input[type="email"], input[type="password"], input[type="number"] {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 12px;
+                border-radius: 8px;
+                border: 2px solid #4b5563;
+                background-color: #374151;
+                color: white;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
+            input:focus, textarea:focus, select:focus {
+                border-color: #3b82f6;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+            
+            /* Mobile-optimized buttons */
+            button {
+                border-radius: 8px;
+                font-weight: 600;
+                transition: all 0.2s ease;
+                touch-action: manipulation;
+            }
+            
+            button:active {
+                transform: scale(0.98);
+            }
+            
+            /* Mobile-optimized labels */
+            label {
+                font-weight: 500;
+                margin-bottom: 8px;
+                display: block;
+            }
+            
+            /* Mobile-optimized cards */
+            .bg-gray-700, .bg-gray-800 {
+                margin: 0.5rem;
+                border-radius: 8px;
+            }
+            
+            /* Mobile grid adjustments */
+            .grid-cols-1 {
+                gap: 1rem;
+            }
+            
+            .lg\\:grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            /* Mobile map controls */
+            .mobile-zoom-control, .mobile-location-control {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            
+            .mobile-zoom-control button, .mobile-location-control button {
+                min-width: 44px;
+                min-height: 44px;
+                border-radius: 50%;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                border: none;
+                cursor: pointer;
+            }
+            
+            /* Mobile map container */
+            #mapid {
+                height: 60vh !important;
+                min-height: 300px;
+            }
+            
+            /* Mobile camera modal - NO ZOOM */
+            #camera-modal {
+                z-index: 9999;
+                overflow-y: auto !important;
+                padding: 10px !important;
+            }
+            
+            #camera-modal > div {
+                max-height: 90vh !important;
+                overflow-y: auto !important;
+                margin-top: 10px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            #camera-modal video {
+                width: 100%;
+                height: 50vh;
+                object-fit: cover;
+            }
+            
+            #camera-modal button {
+                min-height: 48px;
+                font-size: 16px;
+            }
+        }
+        
+        /* Desktop navigation */
+        @media (min-width: 769px) {
+            .mobile-nav {
+                display: none;
+            }
+            
+            .desktop-nav {
+                display: block;
+            }
+            
+            /* Desktop: Ad Banner sichtbar machen */
+            #ad-banner {
+                display: flex !important;
+            }
+            
+            /* Desktop: Content anpassen */
+            .mobile-content {
+                padding-bottom: 60px; /* Nur Platz für Ad Banner (60px Höhe) */
+            }
+        }
 
-## 🔍 DETAILED FINDINGS
+        /* Background Logo for Start Page */
+        #startseite {
+            position: relative;
+        }
 
-### **PHASE 1: API KEYS & SECRETS AUDIT** ✅
+        /* Removed dark overlay filter from startseite */
 
-#### **Firebase API Keys:**
-- **Status:** ✅ SICHER
-- **Korrekter Key:** `AIzaSyBbaHV1OY9C_MUt4o3WTkHCGlRVt7ll9UA` in 20 Dateien
-- **Honeypot Keys:** 12 Fake Keys in 4 HTML-Dateien (Bot-Schutz)
-- **Alte Keys:** Keine gefunden
+        /* User Info with visible background - compact width */
+        #user-info {
+            background: rgba(31, 41, 55, 0.8) !important;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            max-width: 400px;
+            width: fit-content;
+        }
 
-#### **Blockchain Addresses:**
-- **Status:** ✅ SICHER
-- **PixelDrop Contract:** `0xecF36D6E0324cA88ced6D64329717c45f3dc0B1B`
-- **Pool Wallet:** `0x6167202E3dA90e92da3A85b79e9eDA265e4EEBC4`
-- **Alle Adressen sind Testnet-Adressen** (sicher)
+        /* Mobile-specific fixes */
+        @media (max-width: 768px) {
+            /* Fix background attachment for mobile */
+            #startseite {
+                background-attachment: scroll !important;
+            }
+            
+            /* Improve navigation for mobile */
+            .nav-btn {
+                font-size: 0.875rem;
+                padding: 0.5rem 0.75rem;
+            }
+            
+            /* Better mobile layout */
+            .page {
+                padding: 0.5rem;
+            }
+            
+            /* Hide ad banner on mobile for all pages except startseite */
+            #ad-banner {
+                display: none !important;
+            }
+            
+            /* Ad banner visibility will be controlled by JavaScript */
+        }
+        
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+            .mobile-nav {
+                padding: 0.5rem 0.25rem 0.75rem 0.25rem;
+            }
+            
+            .mobile-nav .nav-btn {
+                min-height: 65px;
+                min-width: 55px;
+                margin: 0 0.125rem;
+            }
+            
+            .mobile-nav .nav-icon {
+                font-size: 1.25rem;
+            }
+            
+            .mobile-nav .nav-label {
+                font-size: 0.55rem;
+            }
+            
+            .page {
+                padding: 0.25rem;
+            }
+            
+            .card, .bg-gray-700, .bg-gray-800 {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+            
+            button, .btn {
+                min-height: 44px;
+                font-size: 0.9rem;
+                padding: 0.625rem 0.875rem;
+            }
+            
+            h1 { font-size: 1.75rem; }
+            h2 { font-size: 1.5rem; }
+            h3 { font-size: 1.25rem; }
+            h4 { font-size: 1.125rem; }
+        }
+        
+        /* Landscape mobile orientation - Move tabs to left side */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .mobile-nav {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 80px;
+                height: 100vh;
+                flex-direction: column;
+                padding: 1rem 0.5rem;
+                background: linear-gradient(90deg, rgba(26, 32, 44, 0.95) 0%, rgba(26, 32, 44, 1) 100%);
+                border-right: 1px solid rgba(59, 130, 246, 0.3);
+                border-top: none;
+                box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+            
+            .mobile-nav .nav-btn {
+                min-height: 60px;
+                min-width: 60px;
+                margin: 0.25rem 0;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding: 0.5rem;
+            }
+            
+            .mobile-nav .nav-icon {
+                font-size: 1.5rem;
+                margin-bottom: 0.25rem;
+            }
+            
+            .mobile-nav .nav-label {
+                font-size: 0.6rem;
+                text-align: center;
+                line-height: 1.1;
+            }
+            
+            main {
+                margin-left: 80px !important;
+                margin-top: 0 !important;
+                padding-left: 1rem;
+            }
+            
+            .page {
+                min-height: calc(100vh - 2rem);
+                padding: 1rem;
+            }
+        }
+        
+        /* Dark mode optimizations */
+        @media (prefers-color-scheme: dark) {
+            .mobile-nav {
+                background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 1) 100%);
+                border-top: 1px solid rgba(59, 130, 246, 0.4);
+            }
+        }
+        
+        /* High contrast mode */
+        @media (prefers-contrast: high) {
+            .mobile-nav .nav-btn {
+                border: 2px solid #3b82f6;
+            }
+            
+            .mobile-nav .nav-btn.active {
+                background: #3b82f6;
+                color: white;
+            }
+        }
+        
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .mobile-nav .nav-btn,
+            .mobile-nav .nav-icon,
+            .mobile-nav .nav-indicator,
+            button, .btn {
+                transition: none;
+            }
+            
+            .mobile-nav .nav-btn:hover,
+            .mobile-nav .nav-btn.active {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="desktop-nav fixed top-0 left-0 w-64 h-full bg-gray-800 shadow-lg z-50">
+        <div class="h-full flex flex-col">
+            <div class="flex items-center p-4 border-b border-gray-700">
+                <img src="images/logo.png" alt="GeoDrop" class="h-8 w-8 mr-2">
+                <span class="text-white font-bold text-xl">GeoDrop</span>
+            </div>
+            
+            <!-- LEFT AD BANNER -->
+            <div class="bg-purple-600 border border-purple-400 text-white p-3 m-4 rounded text-center">
+              <a href="https://otieu.com/4/9919405" target="_blank" class="text-white hover:text-purple-200 font-bold text-sm">
+                💰 Verdiene Geld mit Gaming!
+              </a>
+            </div>
+            
+            <div class="flex-1 p-4 space-y-2">
+                <a href="#" class="nav-btn active w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('startseite')">
+                    <span class="mr-3">🏠</span> Start
+                </a>
+                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('geocard')">
+                    <span class="mr-3">🗺️</span> GeoCard
+                </a>
+                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('geoboard')">
+                    <span class="mr-3">📊</span> GeoBoard
+                </a>
+                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('machines')">
+                    <span class="mr-3">⛏️</span> Mining
+                </a>
+                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('bonus')">
+                    <span class="mr-3">🎁</span> Bonus
+                </a>
+                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('geochat')">
+                    <span class="mr-3">💬</span> GeoChat
+                </a>
+                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('trading')">
+                    <span class="mr-3">📈</span> Trading
+                </a>
+                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('mehr')">
+                    <span class="mr-3">⚙️</span> Mehr
+                </a>
+                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showDevLoginPopup();">
+                    <span class="mr-3">🔧</span> Dev
+                </a>
+                
+            </div>
+        </div>
+    </nav>
 
-#### **Private Keys:**
-- **Status:** ✅ SICHER
-- **Nur in config-secrets.js** (sicher verwaltet)
-- **Keine hardcoded Secrets** im Code
 
----
+    <main class="ml-64 mobile-content">
+        <!-- TOP AD BANNER -->
+        <div class="bg-blue-600 border border-blue-400 text-white p-3 rounded mx-4 mb-4 shadow-lg text-center">
+          <a href="https://otieu.com/4/9919405" target="_blank" class="text-white hover:text-blue-200 font-bold">
+            🎮 Best Idle-RPG Game! - Jetzt spielen!
+          </a>
+        </div>
+        
+        <!-- Page Container -->
+        <div id="page-container">
+            <div class="page" id="startseite" style="display: block;">
+                <div id="geodrop-section" class="bg-gray-800 bg-opacity-70 rounded-lg p-4 mb-6 backdrop-blur-sm text-center" style="max-width: 500px; width: fit-content; margin: 0 auto 1.5rem auto;">
+                    <h1 class="text-4xl font-bold text-white mb-2">🌍 GeoDrop</h1>
+                    <p class="text-gray-300 text-lg">Willkommen bei der Zukunft des Geo-Minings</p>
+                </div>
+                
+                <div id="user-info" class="bg-gray-800 bg-opacity-70 rounded-lg p-4 mb-6 backdrop-blur-sm" style="display: none; max-width: 400px; width: fit-content; margin: 0 auto 1.5rem auto;">
+                    <h3 class="text-xl font-semibold text-white mb-4">👤 Benutzerinfo</h3>
+                    <div class="space-y-2">
+                        <p><strong>E-Mail:</strong> <span id="user-email">-</span></p>
+                        <p><strong>Benutzername:</strong> <span id="user-username">-</span></p>
+                        <p><strong>Level:</strong> <span id="user-level">-</span></p>
+                        <p><strong>Coins:</strong> <span id="user-coins">-</span></p>
+                        <p><strong>Drops:</strong> <span id="user-drops">-</span></p>
+                        <p><strong>Boost:</strong> <span id="user-boost">-</span></p>
+                    </div>
+                    
+                    <div id="referral-info" class="mt-4 p-3 bg-green-600 bg-opacity-20 rounded border border-green-500 hidden">
+                        <p class="text-green-300 text-sm">
+                            🎉 <strong>Referral Bonus!</strong><br>
+                            Du wurdest von <span id="referral-user">-</span> eingeladen!<br>
+                            Du erhältst 50 PixelDrop Startbonus!
+                        </p>
+                    </div>
+                    
+                    <button onclick="logout()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Abmelden</button>
+                </div>
+                
+                <div id="whitepaper-section" class="bg-gray-800 bg-opacity-70 rounded-lg p-4 mb-6 mt-24 backdrop-blur-sm" style="max-width: 500px; width: fit-content; margin: 6rem auto 1.5rem auto;">
+                    <h3 class="text-xl font-semibold text-white mb-4">📄 Whitepaper</h3>
+                    <p class="text-gray-300 mb-4">Erfahre mehr über das GeoDrop Konzept und die Technologie dahinter.</p>
+                    <div class="flex flex-wrap gap-3 justify-center">
+                        <button onclick="showWhitepaper()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            📄 Whitepaper lesen
+                        </button>
+                        <button onclick="showRoadmap()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                            🗺️ Roadmap anzeigen
+                        </button>
+                        <button onclick="showTokenomics()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            💰 Tokenomics
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="landing-content" style="display: none;">
+                    <div class="min-h-screen flex items-center relative overflow-hidden" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+                        <div class="absolute inset-0 bg-black/20"></div>
+                        
+                        <div class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
+                            <button onclick="showLoginForm()" class="bg-white/20 backdrop-blur-md border border-white/30 px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-white font-semibold hover:bg-white/30 transition-all shadow-lg text-sm sm:text-base">
+                                <i class="fas fa-sign-in-alt mr-1 sm:mr-2"></i>
+                                <span class="hidden sm:inline">Anmelden</span>
+                                <span class="sm:hidden">Login</span>
+                            </button>
+                        </div>
+                        
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                                <div class="space-y-8">
+                        <div class="space-y-4">
+                                        <h1 class="text-5xl lg:text-7xl font-bold leading-tight">
+                                            Die Zukunft des
+                                            <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                                                Geo-Minings
+                                            </span>
+                                        </h1>
+                                        <p class="text-xl text-gray-300 leading-relaxed">
+                                            Verdiene Kryptowährungen durch Geocaching! Entdecke virtuelle Drops an realen Orten und sammle Belohnungen mit der innovativen Blockchain-Technologie.
+                                        </p>
+                            </div>
+                    
+                                    <div class="flex flex-col sm:flex-row gap-4">
+                                        <button onclick="showRegistrationForm()" class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 rounded-lg text-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all pulse-glow text-center">
+                                            <i class="fas fa-user-plus mr-2"></i>
+                                            Kostenlos registrieren
+                                        </button>
+                                        <button onclick="scrollToFeatures()" class="border-2 border-white/20 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white/10 transition-all text-center">
+                                            <i class="fas fa-play mr-2"></i>
+                                            Mehr erfahren
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-3 gap-8 pt-8">
+                                        <div class="text-center">
+                                            <div class="text-3xl font-bold text-blue-400">1000+</div>
+                                            <div class="text-gray-400">Aktive User</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-3xl font-bold text-purple-400">50+</div>
+                                            <div class="text-gray-400">GeoDrops</div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="text-3xl font-bold text-green-400">$10K+</div>
+                                            <div class="text-gray-400">Ausgezahlt</div>
+                                        </div>
+                        </div>
+                    </div>
+                    
+                                <div class="relative">
+                                    <div class="floating">
+                                        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+                                            <div class="space-y-6">
+                                                <div class="flex items-center space-x-3">
+                                                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                                        <i class="fas fa-map-marker-alt text-white"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-semibold">GeoDrop gefunden!</div>
+                                                        <div class="text-sm text-gray-300">+150 PixelDrop</div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="flex items-center space-x-3">
+                                                    <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-600 rounded-lg flex items-center justify-center">
+                                                        <i class="fas fa-coins text-white"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-semibold">Täglicher Bonus</div>
+                                                        <div class="text-sm text-gray-300">+50 PixelDrop</div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="flex items-center space-x-3">
+                                                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+                                                        <i class="fas fa-users text-white"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-semibold">Referral Bonus</div>
+                                                        <div class="text-sm text-gray-300">+5% von Käufen</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-### **PHASE 2: CODE QUALITY & SYNTAX AUDIT** ✅
+                    <section id="features" class="py-20 bg-gray-800">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="text-center mb-16">
+                                <h2 class="text-4xl font-bold mb-4">Was kann GeoDrop?</h2>
+                                <p class="text-xl text-gray-400">Entdecke die revolutionären Features der Geo-Mining App</p>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
+                                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-6">
+                                        <i class="fas fa-map-marked-alt text-2xl text-white"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold mb-4">GPS-basiertes Mining</h3>
+                                    <p class="text-gray-300">Finde virtuelle Drops an realen Orten und verdiene Kryptowährungen durch Geocaching-Aktivitäten.</p>
+                                </div>
+                                
+                                <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
+                                    <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-6">
+                                        <i class="fas fa-coins text-2xl text-white"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold mb-4">Mining Machines</h3>
+                                    <p class="text-gray-300">4 verschiedene Maschinentypen für passive Einnahmen. Von Basic bis Mega Miner mit unterschiedlichen Boosts.</p>
+                                </div>
+                                
+                                <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
+                                    <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mb-6">
+                                        <i class="fas fa-exchange-alt text-2xl text-white"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold mb-4">DeFi Trading</h3>
+                                    <p class="text-gray-300">Handel PixelDrop ↔ tBNB direkt in der App. Vollständiges DeFi-Trading mit Smart Contracts.</p>
+                                </div>
+                                
+                                <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
+                                    <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center mb-6">
+                                        <i class="fas fa-gift text-2xl text-white"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold mb-4">Tägliche Boni</h3>
+                                    <p class="text-gray-300">Sammle täglich 50 PixelDrop als Login-Bonus. Spezielle Effekte und Animationen inklusive.</p>
+                                </div>
+                                
+                                <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
+                                    <div class="w-16 h-16 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center mb-6">
+                                        <i class="fas fa-users text-2xl text-white"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold mb-4">Referral System</h3>
+                                    <p class="text-gray-300">Lade Freunde ein und verdiene 5% ihrer Einnahmen. 2. Ebene: 1% zusätzlich.</p>
+                                </div>
+                                
+                                <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
+                                    <div class="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center mb-6">
+                                        <i class="fas fa-mobile-alt text-2xl text-white"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold mb-4">PWA Support</h3>
+                                    <p class="text-gray-300">Installierbare Web-App für mobile Geräte. Funktioniert offline und wie eine native App.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
-#### **Console Logs:**
-- **Status:** ✅ SICHER
-- **Keine Passwort-Logs** gefunden
-- **Nur Debug-Informationen** (sicher)
+                    <section id="how-it-works" class="py-20 bg-gray-900">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="text-center mb-16">
+                                <h2 class="text-4xl font-bold mb-4">So funktioniert's</h2>
+                                <p class="text-xl text-gray-400">In 4 einfachen Schritten zu deinen ersten Kryptowährungen</p>
+                            </div>
+                            
+                            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                <div class="text-center">
+                                    <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <span class="text-2xl font-bold">1</span>
+                                    </div>
+                                    <h3 class="text-xl font-semibold mb-4">Registrieren</h3>
+                                    <p class="text-gray-400">Erstelle kostenlos deinen Account und verbinde dein MetaMask Wallet.</p>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <span class="text-2xl font-bold">2</span>
+                                    </div>
+                                    <h3 class="text-xl font-semibold mb-4">Drops finden</h3>
+                                    <p class="text-gray-400">Nutze die Karte um GeoDrops in deiner Nähe zu entdecken.</p>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <span class="text-2xl font-bold">3</span>
+                                    </div>
+                                    <h3 class="text-xl font-semibold mb-4">Fotos machen</h3>
+                                    <p class="text-gray-400">Mache ein Foto vom Standort und bestätige deine Anwesenheit.</p>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <div class="w-20 h-20 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <span class="text-2xl font-bold">4</span>
+                                    </div>
+                                    <h3 class="text-xl font-semibold mb-4">Belohnung erhalten</h3>
+                                    <p class="text-gray-400">Erhalte PixelDrop Tokens direkt in dein Wallet.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
-#### **Code Quality:**
-- **Status:** ✅ GUT
-- **8 TODO/FIXME** Kommentare (normal für Entwicklung)
-- **Keine HACK/XXX** Kommentare
-- **Sauberer Code-Stil**
+                    <section id="referral" class="py-20 bg-gradient-to-r from-blue-900 to-purple-900">
+                        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="text-center mb-16">
+                                <h2 class="text-4xl font-bold mb-4">Referral System</h2>
+                                <p class="text-xl text-gray-300">Verdiene mit jedem Freund, den du einlädst</p>
+                            </div>
+                            
+                            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                                <div class="space-y-8">
+                                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
+                                        <h3 class="text-2xl font-bold mb-6">🎯 2-Ebenen System</h3>
+                        <div class="space-y-4">
+                                            <div class="flex items-center space-x-4">
+                                                <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                                                    <span class="text-white font-bold">1</span>
+                            </div>
+                                                <div>
+                                                    <div class="font-semibold">Direkte Referrals</div>
+                                                    <div class="text-green-400 font-bold">5% ihrer Einnahmen</div>
+                        </div>
+                    </div>
+                    
+                                            <div class="flex items-center space-x-4">
+                                                <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                                                    <span class="text-white font-bold">2</span>
+                                                </div>
+                                                <div>
+                                                    <div class="font-semibold">Referrals deiner Referrals</div>
+                                                    <div class="text-blue-400 font-bold">1% ihrer Einnahmen</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
+                                        <h3 class="text-2xl font-bold mb-6">💰 Beispiel-Rechnung</h3>
+                                        <div class="space-y-3 text-sm">
+                                            <div class="flex justify-between">
+                                                <span>Dein Referral verdient:</span>
+                                                <span class="font-semibold">1000 PixelDrop</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Dein Anteil (5%):</span>
+                                                <span class="text-green-400 font-bold">50 PixelDrop</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Referral deines Referrals:</span>
+                                                <span class="font-semibold">500 PixelDrop</span>
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span>Dein Anteil (1%):</span>
+                                                <span class="text-blue-400 font-bold">5 PixelDrop</span>
+                                            </div>
+                                            <hr class="border-white/20">
+                                            <div class="flex justify-between text-lg">
+                                                <span class="font-bold">Gesamt-Einnahmen:</span>
+                                                <span class="text-yellow-400 font-bold">55 PixelDrop</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-6">
+                                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
+                                        <h3 class="text-2xl font-bold mb-6">🚀 Jetzt starten</h3>
+                                        <div class="space-y-4">
+                                            <button onclick="showRegistrationForm()" class="block w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-green-700 hover:to-emerald-700 transition-all">
+                                                <i class="fas fa-rocket mr-2"></i>
+                                                App starten
+                                            </button>
+                                            <p class="text-sm text-gray-300 text-center">
+                                                Registriere dich kostenlos und erhalte sofort 100 PixelDrop Startbonus!
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
+                                        <h3 class="text-2xl font-bold mb-6">📱 Mobile App</h3>
+                                        <p class="text-gray-300 mb-4">
+                                            GeoDrop funktioniert perfekt auf dem Handy. Installiere die PWA für die beste Erfahrung.
+                                        </p>
+                                        <div class="flex space-x-4">
+                                            <button class="flex-1 bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition-colors">
+                                                <i class="fas fa-download mr-2"></i>
+                                                Installieren
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
----
+                    <section class="py-20 bg-gray-800">
+                        <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+                            <h2 class="text-4xl font-bold mb-6">Bereit für die Zukunft des Geo-Minings?</h2>
+                            <p class="text-xl text-gray-400 mb-8">
+                                Schließe dich tausenden von Usern an und verdiene Kryptowährungen durch Geocaching!
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                                <button onclick="showRegistrationForm()" class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 rounded-lg text-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all">
+                                    <i class="fas fa-user-plus mr-2"></i>
+                                    Kostenlos registrieren
+                                </button>
+                                <button onclick="scrollToFeatures()" class="border-2 border-white/20 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white/10 transition-all">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Mehr erfahren
+                                </button>
+                            </div>
+                        </div>
+                    </section>
 
-### **PHASE 3: FIREBASE SECURITY AUDIT** ✅
 
-#### **Firestore Rules:**
-- **Status:** ✅ EXZELLENT
-- **Benutzer können nur eigene Daten** lesen/schreiben
-- **Authentifizierung erforderlich** für alle Operationen
-- **Globale Statistiken** nur für authentifizierte User
+                    <div id="registration-section" class="py-20 bg-gray-800" style="display: block;">
+                        <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
+                            <div class="text-center mb-8">
+                                <h2 id="form-title" class="text-4xl font-bold mb-4">🚀 Jetzt registrieren</h2>
+                                <p id="form-subtitle" class="text-xl text-gray-400">Erstelle deinen Account und starte sofort!</p>
+                            </div>
+                            
+                            <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
+                                <div id="registration-form" class="space-y-4">
+                                    <div id="username-field">
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">Benutzername</label>
+                                        <input type="text" id="reg-username" placeholder="Wähle deinen Username" class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') handleEnterKey()">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">E-Mail</label>
+                                        <input type="email" id="reg-email" placeholder="deine@email.com" class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') handleEnterKey()">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-300 mb-2">Passwort</label>
+                                        <input type="password" id="reg-password" placeholder="Mindestens 6 Zeichen" class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') handleEnterKey()">
+                                    </div>
+                                    
+                                    <div id="referral-field" style="background: red !important; padding: 15px !important; margin: 15px 0 !important; border: 3px solid yellow !important; display: block !important; visibility: visible !important;">
+                                        <label class="block text-sm font-medium text-white mb-2" style="color: white !important; font-weight: bold !important;">🔗 REFERRAL-CODE (OPTIONAL)</label>
+                                        <input type="text" id="reg-referral" placeholder="REFERRAL-CODE EINGEBEN" class="w-full px-4 py-3 bg-white text-black rounded-lg border border-red-500 focus:border-blue-500 focus:outline-none" style="background: white !important; color: black !important; border: 3px solid red !important;">
+                                        <p class="text-xs text-white mt-1" style="color: white !important;">Du erhältst 50 PixelDrop Bonus wenn du über einen Referral-Link kommst!</p>
+                                    </div>
+                                    
+                                    
+                                    <button id="main-button" onclick="registerFromLanding()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-green-700 hover:to-emerald-700 transition-all">
+                                        <i class="fas fa-user-plus mr-2"></i>
+                                        Kostenlos registrieren
+                                    </button>
+                                    
+                                    <p class="text-sm text-gray-300 text-center">
+                                        Bereits registriert? <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300">Hier anmelden</button>
+                                    </p>
+                                </div>
+                                
+                                <div id="registration-success" class="hidden text-center">
+                                    <div class="text-6xl mb-4">🎉</div>
+                                    <h4 class="text-2xl font-bold text-green-400 mb-2">Registrierung erfolgreich!</h4>
+                                    <p class="text-gray-300 mb-4">Du erhältst 100 PixelDrop Startbonus!</p>
+                                    <button onclick="goToApp()" class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all">
+                                        <i class="fas fa-rocket mr-2"></i>
+                                        Zur App
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-```javascript
-// Beispiel: Perfekte User-Isolation
-match /users/{userId} {
-  allow read, write: if request.auth != null && request.auth.uid == userId;
-}
-```
 
-#### **Storage Rules:**
-- **Status:** ⚠️ TEMPORÄR (bis 21. September 2025)
-- **Alle Uploads erlaubt** (für Testing)
-- **TODO: Später auf authentifizierte User beschränken**
+                    </div>
+                </div>
+            </div>
+            
+            <div class="page" id="geocard" style="display: none;">
+                </div>
+            
+            <div class="page" id="dev" style="display: none;">
+                </div>
+            
+            <div class="page" id="geoboard" style="display: none;">
+                </div>
+            
+            <div class="page" id="machines" style="display: none;">
+                </div>
+            
+            <div class="page" id="bonus" style="display: none;">
+                </div>
+            
+            <div class="page" id="trading" style="display: none;">
+                </div>
+            
+            <div class="page" id="geochat" style="display: none;">
+                </div>
+            
+            <div class="page" id="mehr" style="display: none;">
+                <div class="max-w-6xl mx-auto p-6">
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <button class="mehr-tab-btn active px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors border border-blue-500" data-tab="dashboard" onclick="showMehrTab('dashboard')">
+                            🏠 Dashboard
+                        </button>
+                        <button class="mehr-tab-btn px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors border border-gray-500" data-tab="profile" onclick="showMehrTab('profile')">
+                            👤 Profil
+                        </button>
+                        <button class="mehr-tab-btn px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors border border-gray-500" data-tab="settings" onclick="showMehrTab('settings')">
+                            ⚙️ Einstellungen
+                        </button>
+                        <button class="mehr-tab-btn px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors border border-gray-500" data-tab="stats" onclick="showMehrTab('stats')">
+                            📊 Statistiken
+                        </button>
+                        <button class="mehr-tab-btn px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors border border-gray-500" data-tab="leitfaden" onclick="showMehrTab('leitfaden')">
+                            📖 Leitfaden
+                        </button>
+                        <button class="mehr-tab-btn px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors border border-gray-500" data-tab="impressum" onclick="showMehrTab('impressum')">
+                            ℹ️ Impressum
+                        </button>
+                        <button class="mehr-tab-btn px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors border border-gray-500" data-tab="dev" onclick="showPage('dev')">
+                            🔧 Dev
+                        </button>
+                    </div>
+                    
+                    <div id="mehr-tab-content" style="min-height: 400px; background: transparent;">
+                        </div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <!-- BOTTOM AD BANNER -->
+        <div class="bg-green-600 border border-green-400 text-white p-3 rounded mx-4 mt-4 shadow-lg text-center">
+          <a href="https://otieu.com/4/9919405" target="_blank" class="text-white hover:text-green-200 font-bold">
+            🚀 Neue Krypto-Chance - Jetzt starten!
+          </a>
+        </div>
+    </main>
 
----
+    <div id="custom-alert" class="custom-alert" style="display: none;"></div>
+    
+    <div id="message-display" style="position: fixed; top: 20px; right: 20px; z-index: 10000; max-width: 400px; display: none;">
+        <div id="message-content" style="background: #374151; color: white; padding: 16px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <div id="message-text"></div>
+        </div>
+    </div>
 
-### **PHASE 4: DEPENDENCY & VULNERABILITY AUDIT** ✅
+    <div id="dev-login-popup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none;">
+        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+            <div style="background: #374151; border-radius: 8px; max-width: 400px; width: 100%; padding: 24px;">
+                <h2 style="color: white; font-size: 24px; font-weight: bold; margin-bottom: 16px; text-align: center;">🔐 Dev-Zugang</h2>
+                <div style="margin-bottom: 16px;">
+                    <input type="password" id="dev-password" placeholder="Dev-Passwort eingeben" style="width: 100%; padding: 8px 12px; border-radius: 6px; background: #4B5563; color: white; border: 1px solid #6B7280; outline: none;" onkeypress="if(event.key === 'Enter') loginDev()">
+                        </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <button onclick="loginDev()" style="flex: 1; padding: 8px 16px; background: #2563EB; color: white; border-radius: 6px; border: none; cursor: pointer;">Anmelden</button>
+                    <button onclick="closeDevLoginPopup()" style="flex: 1; padding: 8px 16px; background: #6B7280; color: white; border-radius: 6px; border: none; cursor: pointer;">Abbrechen</button>
+                                        </div>
+                <div style="color: #9CA3AF; font-size: 12px; text-align: center;">
+                    💡 Nur für Entwickler mit entsprechenden Berechtigungen
+                                        </div>
+                                        </div>
+                                        </div>
+                                    </div>
 
-#### **Dependencies:**
-- **Status:** ✅ SICHER
-- **Firebase 8.10.0** (stabile Version)
-- **Ethers 6.7.0** (aktuelle Version)
-- **Leaflet 1.9.4** (stabile Version)
-- **Keine bekannten Vulnerabilities**
+    <script src="config/config-secure.js"></script>
+    <script src="config/config-secrets.js"></script>
+    <script src="js/firebase.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/geochat.js"></script>
+    <script src="js/trading.js"></script>
+    <script src="js/mining-functions.js"></script>
+    <script src="js/wallet-functions.js"></script>
+    <script src="js/ui-utils.js"></script>
+    <script src="js/geoboard.js"></script>
+    <script src="js/geocard.js"></script>
+    <script src="js/dev-functions.js"></script>
+    <script src="js/upload-functions.js"></script>
+    <script src="js/upload-functions-fixed.js"></script>
+    <script src="js/dashboard-functions.js"></script>
+    <script src="js/bonus-functions.js"></script>
+    <script src="js/mehr-navigation.js"></script>
+    <script>
+        // FALLBACK: Ensure showMehrTab is available
+        if (typeof window.showMehrTab !== 'function') {
+            console.error('❌ showMehrTab not loaded! Creating fallback...');
+            window.showMehrTab = function(tabId) {
+                console.log('🚨 FALLBACK showMehrTab called with:', tabId);
+                alert('Mehr Navigation nicht geladen! Bitte Seite neu laden.');
+            };
+        } else {
+            console.log('✅ showMehrTab loaded successfully');
+        }
+        
+        // Message Functions
+        function showMessage(message, isError = false) {
+            const messageDisplay = document.getElementById('message-display');
+            const messageText = document.getElementById('message-text');
+            const messageContent = document.getElementById('message-content');
+            
+            if (messageDisplay && messageText && messageContent) {
+                messageText.textContent = message;
+                messageContent.style.background = isError ? '#dc2626' : '#059669';
+                messageDisplay.style.display = 'block';
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    messageDisplay.style.display = 'none';
+                }, 3000);
+            } else {
+                // Fallback to alert
+                alert(message);
+            }
+        }
+        
+        // Direct Dev Login Function (fallback)
+        function showDevLoginPopup() {
+            console.log('🔐 showDevLoginPopup called directly');
+            const popup = document.getElementById('dev-login-popup');
+            if (popup) {
+                popup.style.display = 'block';
+                document.getElementById('dev-password').focus();
+                console.log('🔐 Dev login popup shown');
+            } else {
+                console.error('❌ Dev login popup not found!');
+                showMessage('❌ Dev-Popup nicht gefunden!', true);
+            }
+        }
+        
+        // SECURITY: Dev login function is handled by js/dev-functions.js
+        // No local dev login function to prevent security issues
+        console.log('🔒 Dev login handled by secure dev-functions.js');
+        
+        // SECURITY: Quick Dev Login removed for security
+        // All dev login functions are handled by js/dev-functions.js
+        console.log('🔒 Quick Dev Login removed for security');
+        // SECURITY: All dev login code removed for security
+        
+        // Update Dev Navigation
+        window.updateDevNavigation = function() {
+            console.log('🔧 Dev Navigation wird aktualisiert');
+            console.log('🔧 isDevLoggedIn:', window.isDevLoggedIn);
+            
+            // Update dev links to show they're active and make them clickable
+            const devLinks = document.querySelectorAll('[data-page="dev"], [onclick*="showDevLoginPopup"]');
+            console.log('🔧 Found dev links:', devLinks.length);
+            
+            devLinks.forEach((link, index) => {
+                console.log(`🔧 Processing dev link ${index}:`, link);
+                
+                // Make sure the link is clickable and goes to dev page
+                if (window.isDevLoggedIn) {
+                    console.log('🔧 Setting up clickable dev link');
+                    link.style.background = '#10B981';
+                    link.style.color = 'white';
+                    link.title = 'Dev-Zugang aktiv - Klicken zum Öffnen';
+                    
+                    // Remove the login popup onclick and make it go directly to dev page
+                    link.onclick = function(e) {
+                        e.preventDefault();
+                        console.log('🔧 Dev-Tab geklickt - öffne Dev-Seite');
+                        if (typeof showPage === 'function') {
+                            showPage('dev');
+                        } else if (typeof window.showPage === 'function') {
+                            window.showPage('dev');
+                        } else {
+                            window.location.href = 'pages/dev.html';
+                        }
+                        return false;
+                    };
+                    
+                    // Also try setting the href as backup
+                    link.href = '#';
+                    link.style.cursor = 'pointer';
+                } else {
+                    console.log('🔧 Dev not logged in - resetting to normal appearance');
+                    // Reset to normal appearance when not logged in
+                    link.style.background = '';
+                    link.style.color = '';
+                    link.title = 'Dev-Zugang - Klicken zum Anmelden';
+                    link.style.cursor = 'pointer';
+                    
+                    // Restore original onclick behavior
+                    link.onclick = function(e) {
+                        e.preventDefault();
+                        console.log('🔧 Dev-Tab geklickt - zeige Login Popup');
+                        if (typeof showDevLoginPopup === 'function') {
+                            showDevLoginPopup();
+                        }
+                        return false;
+                    };
+                }
+            });
+            
+            // Also update any dev buttons in the navigation
+            const devButtons = document.querySelectorAll('button[onclick*="showDevLoginPopup"], a[onclick*="showDevLoginPopup"]');
+            console.log('🔧 Found dev buttons:', devButtons.length);
+            
+            devButtons.forEach((button, index) => {
+                console.log(`🔧 Processing dev button ${index}:`, button);
+                if (window.isDevLoggedIn) {
+                    button.style.background = '#10B981';
+                    button.style.color = 'white';
+                    button.onclick = function(e) {
+                        e.preventDefault();
+                        console.log('🔧 Dev-Button geklickt - öffne Dev-Seite');
+                        if (typeof showPage === 'function') {
+                            showPage('dev');
+                        } else if (typeof window.showPage === 'function') {
+                            window.showPage('dev');
+                        } else {
+                            window.location.href = 'pages/dev.html';
+                        }
+                        return false;
+                    };
+                    button.style.cursor = 'pointer';
+                } else {
+                    // Reset to normal appearance when not logged in
+                    button.style.background = '';
+                    button.style.color = '';
+                    button.style.cursor = 'pointer';
+                    
+                    // Restore original onclick behavior
+                    button.onclick = function(e) {
+                        e.preventDefault();
+                        console.log('🔧 Dev-Button geklickt - zeige Login Popup');
+                        if (typeof showDevLoginPopup === 'function') {
+                            showDevLoginPopup();
+                        }
+                        return false;
+                    };
+                }
+            });
+        }
+        
+        function closeDevLoginPopup() {
+            const popup = document.getElementById('dev-login-popup');
+            if (popup) {
+                popup.style.display = 'none';
+            }
+        }
 
-#### **External URLs:**
-- **Status:** ✅ SICHER
-- **Nur legitime URLs** (Netlify, MetaMask, Apple Store)
-- **Keine verdächtigen Domains**
+        // Process referral link function
+        function processReferralLink() {
+            console.log('🔗 Processing referral link...');
+            
+            // Parse URL parameters and hash
+            const urlParams = new URLSearchParams(window.location.search);
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            
+            let refCode = urlParams.get('ref') || urlParams.get('referral') || 
+                         hashParams.get('ref') || hashParams.get('referral');
+            
+            // Also check for path-based referral (e.g., /ref/username)
+            if (!refCode && window.location.pathname.includes('/ref/')) {
+                const pathParts = window.location.pathname.split('/ref/');
+                if (pathParts.length > 1) {
+                    refCode = pathParts[1].split('/')[0];
+                }
+            }
+            
+            // Use default referral code if none found
+            if (!refCode) {
+                refCode = '2b2MBGHgaDTcSOaMzepTnGK2JVz1'; // Default referral code
+                console.log('🔗 No referral code found, using default:', refCode);
+            } else {
+                console.log('🔗 Referral code found:', refCode);
+            }
+            
+            // Store in localStorage
+            localStorage.setItem('referralCode', refCode);
+            console.log('💾 Referral code stored in localStorage:', refCode);
+            
+            // Auto-fill the referral field
+            setTimeout(() => {
+                const referralField = document.getElementById('reg-referral');
+                if (referralField) {
+                    referralField.value = refCode;
+                    console.log('✅ Referral field auto-filled with:', refCode);
+                }
+            }, 1000);
+        }
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 DOM loaded, initializing app...');
+            
+            // Process referral link first
+            processReferralLink();
+            
+            // Check for page parameter (only for DEV navigation)
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetPage = urlParams.get('page');
+            
+            // Initialize landing page logic
+            window.initializeLandingPage();
+            
+            // If page parameter exists, navigate immediately (only for DEV navigation)
+            if (targetPage && targetPage === 'geocard') {
+                console.log('🎯 DEV Navigation: Navigating to GeoCard from URL parameter');
+                setTimeout(() => {
+                    if (typeof showPage === 'function') {
+                        showPage(targetPage);
+                    }
+                }, 1000);
+            }
+            
+            // Wait for Firebase to be ready, then check auto-login
+            setTimeout(() => {
+                window.initializeLandingPage();
+            }, 500);
+            
+            setTimeout(() => {
+                window.initializeLandingPage();
+            }, 1000);
+            
+            setTimeout(() => {
+                window.initializeLandingPage();
+            }, 2000);
+            
+            // Initialize Dev status
+            if (typeof window.initializeDevStatus === 'function') {
+                await window.initializeDevStatus();
+            }
+            // Show startseite by default
+            showPage('startseite');
+            
+            // Initialize navigation for normal users
+            setTimeout(() => {
+                if (typeof window.updateUserNavigation === 'function') {
+                    window.updateUserNavigation();
+                }
+            }, 500);
+            
+            // Initialize ad banner visibility
+            setTimeout(() => {
+                if (typeof window.updateAdBannerVisibility === 'function') {
+                    window.updateAdBannerVisibility();
+                }
+            }, 500);
+        });
+    </script>
 
----
+    <div id="whitepaper-popup" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-white">📄 GeoDrop Whitepaper</h2>
+                        <button onclick="closeWhitepaper()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                        </div>
+                    
+                    <div class="mb-6 p-4 bg-gray-700 rounded-lg">
+                        <h3 class="text-lg font-semibold text-blue-400 mb-3">📖 Vollständige Whitepaper anzeigen</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <a href="whitepaper.html" target="_blank" class="px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition-all transform hover:scale-105 font-semibold text-sm min-h-[44px] flex items-center justify-center">
+                                📄 Haupt-Whitepaper
+                            </a>
+                            <a href="whitepaper_alt.html" target="_blank" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 font-semibold text-sm min-h-[44px] flex items-center justify-center">
+                                📋 Alternative Version
+                            </a>
+                        </div>
+                        <p class="text-gray-400 text-xs mt-2">
+                            💡 Klicke auf die Buttons um die vollständigen Whitepaper-Dokumente in neuen Tabs zu öffnen
+                        </p>
+                        
+                        <div class="mt-3 p-2 bg-blue-600 bg-opacity-20 rounded border border-blue-500 hidden md:block">
+                            <p class="text-blue-300 text-xs">
+                                📱 <strong>Mobile Nutzer:</strong> Die Whitepaper öffnen sich in neuen Browser-Tabs. 
+                                Du kannst zwischen den Tabs wechseln oder die App im Hintergrund lassen.
+                            </p>
+                        </div>
+                        </div>
+                    <div class="prose prose-invert max-w-none">
+                        <h3 class="text-xl font-semibold text-white mb-4">🎯 Was ist GeoDrop?</h3>
+                        <p class="text-gray-300 mb-4">
+                            GeoDrop ist eine innovative Blockchain-basierte App, die Geocaching mit Kryptowährungen verbindet. 
+                            User können virtuelle "Drops" an realen Orten platzieren und durch das Lösen von Aufgaben Belohnungen verdienen.
+                        </p>
+                        
+                        <h3 class="text-xl font-semibold text-white mb-4">🔧 Technologie (Stand: September 2025)</h3>
+                        <ul class="text-gray-300 mb-4 list-disc list-inside">
+                            <li><strong>Blockchain:</strong> tBNB-basierte Smart Contracts mit PixelDrop Token</li>
+                            <li><strong>Trading System:</strong> Vollständiges DeFi-Trading zwischen PixelDrop ↔ tBNB</li>
+                            <li><strong>Mining Machines:</strong> 4 verschiedene Maschinentypen mit Boost-System</li>
+                            <li><strong>GPS:</strong> Präzise Standortbestimmung mit 20m Genauigkeit</li>
+                            <li><strong>Firebase:</strong> Echtzeitdatenbank für Drops und User-Interaktionen</li>
+                            <li><strong>Dev Area:</strong> Erweiterte Admin-Tools und Drop-Management</li>
+                            <li><strong>Bonus System:</strong> Tägliche Belohnungen mit Special Effects</li>
+                            <li><strong>PWA Support:</strong> Installierbare Web-App für mobile Geräte</li>
+                            <li><strong>Real-time Updates:</strong> Live-Updates für alle App-Funktionen</li>
+                        </ul>
+                        
+                        <h3 class="text-xl font-semibold text-white mb-4">🎮 Gameplay</h3>
+                        <p class="text-gray-300 mb-4">
+                            User navigieren zu GeoDrops, machen Fotos vom Standort und erhalten Belohnungen in Form von 
+                            Kryptowährungen. Das System verhindert Betrug durch GPS-Validierung und Bildanalyse.
+                        </p>
+                        
+                        <h3 class="text-xl font-semibold text-white mb-4">🔒 Sicherheit</h3>
+                        <ul class="text-gray-300 mb-4 list-disc list-inside">
+                            <li>Dezentrale Blockchain-Architektur</li>
+                            <li>Smart Contract-basierte Belohnungen</li>
+                            <li>Anti-Cheat-Systeme</li>
+                            <li>Verschlüsselte Datenübertragung</li>
+                        </ul>
+                                        </div>
+                                        </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                    
+    <div id="roadmap-popup" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-white">🗺️ GeoDrop Roadmap</h2>
+                        <button onclick="closeRoadmap()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                                        </div>
+                    <div class="space-y-6">
+                        <div class="border-l-4 border-green-500 pl-4">
+                            <h3 class="text-lg font-semibold text-green-400">✅ Phase 1 - Foundation (August 2025)</h3>
+                            <ul class="text-gray-300 mt-2 list-disc list-inside">
+                                <li>Grundlegende GeoDrop-Funktionalität</li>
+                                <li>User-Registrierung und Authentifizierung</li>
+                                <li>GPS-basierte Standortbestimmung</li>
+                                <li>Bildupload und Validierung</li>
+                                <li>GeoChat System</li>
+                            </ul>
+                                        </div>
+                        
+                        <div class="border-l-4 border-green-500 pl-4">
+                            <h3 class="text-lg font-semibold text-green-400">✅ Phase 2 - Blockchain Integration (September 2025)</h3>
+                            <ul class="text-gray-300 mt-2 list-disc list-inside">
+                                <li>Vollständige tBNB Integration</li>
+                                <li>PixelDrop Token System</li>
+                                <li>Trading System (PixelDrop ↔ tBNB)</li>
+                                <li>Mining Machines (4 Typen)</li>
+                                <li>MetaMask Wallet Integration</li>
+                            </ul>
+                                        </div>
+                        
+                        <div class="border-l-4 border-green-500 pl-4">
+                            <h3 class="text-lg font-semibold text-green-400">✅ Phase 3 - Advanced Features (September 2025)</h3>
+                            <ul class="text-gray-300 mt-2 list-disc list-inside">
+                                <li>Dev Area mit Admin-Tools</li>
+                                <li>Drop Nummerierung System</li>
+                                <li>Konsistenz-Checks</li>
+                                <li>Performance Optimierung</li>
+                                <li>Mobile Responsiveness</li>
+                                <li>Bonus System mit Special Effects</li>
+                                <li>PWA Installation Support</li>
+                                <li>Real-time Location Updates</li>
+                            </ul>
+                                    </div>
+                        
+                        <div class="border-l-4 border-yellow-500 pl-4">
+                            <h3 class="text-lg font-semibold text-yellow-400">⏳ Phase 4 - Future Development (Q4 2025)</h3>
+                            <ul class="text-gray-300 mt-2 list-disc list-inside">
+                                <li>Enhanced Security Features</li>
+                                <li>Advanced Trading Analytics</li>
+                                <li>Multi-Chain Support (Ethereum, Polygon)</li>
+                                <li>Improved UX/UI</li>
+                                <li>NFT Integration für GeoDrops</li>
+                                <li>Social Features & Leaderboards</li>
+                                <li>Advanced Mining Algorithms</li>
+                            </ul>
+                                </div>
+                        
+                        <div class="border-l-4 border-purple-500 pl-4">
+                            <h3 class="text-lg font-semibold text-purple-400">🔮 Phase 5 - Future Vision (2026)</h3>
+                            <ul class="text-gray-300 mt-2 list-disc list-inside">
+                                <li>AI-Powered GeoDrop Recommendations</li>
+                                <li>AR/VR-Integration für immersive Erlebnisse</li>
+                                <li>Cross-Platform Expansion (iOS/Android Apps)</li>
+                                <li>Advanced Analytics & Machine Learning</li>
+                                <li>Metaverse Integration</li>
+                                <li>Global Community Events</li>
+                                <li>Enterprise Solutions</li>
+                            </ul>
+                                </div>
+                            </div>
+                                        </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                    
+    <div id="tokenomics-popup" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-white">💰 GeoDrop Tokenomics</h2>
+                        <button onclick="closeTokenomics()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                                    </div>
+                    <div class="grid md:grid-cols-2 gap-6">
+                                    <div>
+                            <h3 class="text-xl font-semibold text-white mb-4">🪙 Token-Verteilung</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
+                                    <span class="text-gray-300">Community Rewards</span>
+                                    <span class="text-green-400 font-bold">40%</span>
+                                        </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
+                                    <span class="text-gray-300">Development Team</span>
+                                    <span class="text-blue-400 font-bold">20%</span>
+                                    </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
+                                    <span class="text-gray-300">Liquidity Pool</span>
+                                    <span class="text-purple-400 font-bold">15%</span>
+                                        </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
+                                    <span class="text-gray-300">Marketing & Partnerships</span>
+                                    <span class="text-yellow-400 font-bold">15%</span>
+                                    </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
+                                    <span class="text-gray-300">Reserve Fund</span>
+                                    <span class="text-red-400 font-bold">10%</span>
+                                </div>
+                            </div>
+                                    </div>
+                                    
+                        <div>
+                            <h3 class="text-xl font-semibold text-white mb-4">💎 Belohnungssystem</h3>
+                            <div class="space-y-3">
+                                <div class="p-3 bg-gray-700 rounded">
+                                    <h4 class="text-white font-semibold">GeoDrop sammeln</h4>
+                                    <p class="text-gray-300 text-sm">100 PixelDrops pro Drop (max)</p>
+                                    </div>
+                                <div class="p-3 bg-gray-700 rounded">
+                                    <h4 class="text-white font-semibold">Täglicher Bonus</h4>
+                                    <p class="text-gray-300 text-sm">50 PixelDrops täglich</p>
+                                </div>
+                                <div class="p-3 bg-gray-700 rounded">
+                                    <h4 class="text-white font-semibold">Mining Machines</h4>
+                                    <p class="text-gray-300 text-sm">Passive Einnahmen durch 4 Maschinentypen</p>
+                            </div>
+                                <div class="p-3 bg-gray-700 rounded">
+                                    <h4 class="text-white font-semibold">Referral-Programm</h4>
+                                    <p class="text-gray-300 text-sm">5% der Einnahmen deiner Referrals</p>
+                        </div>
+                                <div class="p-3 bg-gray-700 rounded">
+                                    <h4 class="text-white font-semibold">Trading Rewards</h4>
+                                    <p class="text-gray-300 text-sm">Belohnungen für aktives Trading</p>
+                        </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h3 class="text-xl font-semibold text-white mb-4">📊 Token-Details</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="p-4 bg-gray-700 rounded text-center">
+                                <h4 class="text-white font-semibold">Total Supply</h4>
+                                <p class="text-2xl text-green-400 font-bold">1,000,000,000</p>
+                                <p class="text-gray-400 text-sm">PixelDrop Tokens</p>
+                                </div>
+                            <div class="p-4 bg-gray-700 rounded text-center">
+                                <h4 class="text-white font-semibold">Current Price</h4>
+                                <p class="text-2xl text-blue-400 font-bold">$0.001</p>
+                                <p class="text-gray-400 text-sm">tBNB Pair</p>
+                            </div>
+                            <div class="p-4 bg-gray-700 rounded text-center">
+                                <h4 class="text-white font-semibold">Market Cap</h4>
+                                <p class="text-2xl text-purple-400 font-bold">$1,000,000</p>
+                                <p class="text-gray-400 text-sm">Fully Diluted</p>
+                        </div>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-gradient-to-r from-blue-900 to-purple-900 rounded-lg">
+                            <h4 class="text-white font-semibold mb-2">🚀 Aktuelle Features</h4>
+                            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p class="text-gray-300">✅ Live Trading System</p>
+                                    <p class="text-gray-300">✅ 4 Mining Machine Types</p>
+                                    <p class="text-gray-300">✅ Daily Bonus System</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-300">✅ Real-time GPS Tracking</p>
+                                    <p class="text-gray-300">✅ PWA Installation</p>
+                                    <p class="text-gray-300">✅ Dev Tools & Analytics</p>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
 
-### **PHASE 5: HONEYPOT & BOT PROTECTION AUDIT** ✅
+    <script>
+        // Whitepaper, Roadmap und Tokenomics Funktionen
+        function showWhitepaper() {
+            document.getElementById('whitepaper-popup').classList.remove('hidden');
+        }
+        
+        function closeWhitepaper() {
+            document.getElementById('whitepaper-popup').classList.add('hidden');
+        }
+        
+        function showRoadmap() {
+            document.getElementById('roadmap-popup').classList.remove('hidden');
+        }
+        
+        function closeRoadmap() {
+            document.getElementById('roadmap-popup').classList.add('hidden');
+        }
+        
+        function showTokenomics() {
+            document.getElementById('tokenomics-popup').classList.remove('hidden');
+        }
+        
+        function closeTokenomics() {
+            document.getElementById('tokenomics-popup').classList.add('hidden');
+        }
+        
+        // Close popups when clicking outside
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('fixed')) {
+                event.target.classList.add('hidden');
+            }
+        });
+        
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('✅ Service Worker registered:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+        
+        // PWA Install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('📱 PWA install prompt available');
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button
+            showInstallButton();
+        });
+        
+        function showInstallButton() {
+            // Check if already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                console.log('📱 App already installed');
+                return;
+            }
+            
+            // Only show on mobile devices
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (!isMobile) {
+                console.log('💻 Desktop browser detected - not showing install button');
+                return;
+            }
+            
+            console.log('📱 Mobile device detected - showing install button');
+            
+            // Create install button
+            const installBtn = document.createElement('button');
+            installBtn.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">📱</span>
+                    <div class="text-left">
+                        <div class="font-bold text-sm">App installieren</div>
+                        <div class="text-xs opacity-90">Für bessere Performance</div>
+                    </div>
+                </div>
+            `;
+            installBtn.className = 'fixed bottom-24 right-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-3 rounded-xl shadow-2xl z-50 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 border border-blue-400';
+            installBtn.onclick = () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('✅ PWA installed');
+                            showInstallSuccess();
+                        }
+                        deferredPrompt = null;
+                        installBtn.remove();
+                    });
+                }
+            };
+            
+            // Add to page
+            document.body.appendChild(installBtn);
+            
+            // Auto-hide after 15 seconds
+            setTimeout(() => {
+                if (document.body.contains(installBtn)) {
+                    installBtn.style.transition = 'opacity 0.5s ease-out';
+                    installBtn.style.opacity = '0';
+                    setTimeout(() => {
+                        if (document.body.contains(installBtn)) {
+                            installBtn.remove();
+                        }
+                    }, 500);
+                }
+            }, 15000);
+        }
+        
+        function showInstallSuccess() {
+            const successMsg = document.createElement('div');
+            successMsg.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">✅</span>
+                    <span class="font-bold">App erfolgreich installiert!</span>
+                </div>
+            `;
+            successMsg.className = 'fixed top-4 right-4 bg-green-600 text-white px-4 py-3 rounded-xl shadow-2xl z-50';
+            document.body.appendChild(successMsg);
+            
+            setTimeout(() => {
+                if (document.body.contains(successMsg)) {
+                    document.body.removeChild(successMsg);
+                }
+            }, 3000);
+        }
+        
+        // Mobile Navigation Enhancement
+        function updateMobileNav() {
+            const navButtons = document.querySelectorAll('.mobile-nav .nav-btn');
+            navButtons.forEach(btn => {
+                btn.classList.remove('active');
+                const page = btn.getAttribute('data-page');
+                if (page === window.currentPage) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+        
+        // Enhanced showPage function for mobile
+        const originalShowPage = window.showPage;
+        window.showPage = function(pageId) {
+            if (originalShowPage) {
+                originalShowPage(pageId);
+            }
+            window.currentPage = pageId;
+            updateMobileNav();
+            
+            // Update ad banner visibility when page changes
+            setTimeout(() => {
+                if (typeof window.updateAdBannerVisibility === 'function') {
+                    window.updateAdBannerVisibility();
+                }
+            }, 100);
+            
+            // Add haptic feedback on mobile
+            if ('vibrate' in navigator) {
+                navigator.vibrate(50);
+            }
+        };
+        
+        // Initialize mobile navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            updateMobileNav();
+            
+            // Add touch feedback to mobile nav buttons
+            const navButtons = document.querySelectorAll('.mobile-nav .nav-btn');
+            navButtons.forEach(btn => {
+                btn.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.95)';
+                });
+                
+                btn.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
+            });
+        });
+    </script>
 
-#### **Honeypot-System:**
-- **Status:** ✅ EXZELLENT
-- **4 Honeypot-Dateien** implementiert
-- **Smart Contract** für Wallet-Drainage
-- **Admin Panel** für Management
-- **196 Honeypot-Referenzen** (vollständig implementiert)
 
-#### **Bot Protection:**
-- **Status:** ✅ EXZELLENT
-- **Fake API Keys** in HTML-Dateien
-- **Honeypot Keys** verwirren Scanner
-- **Echte Keys versteckt** zwischen Fake Keys
+    
+    <style>
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+        
+        
+    </style>
 
----
 
-## 🛡️ SECURITY SCORECARD
 
-| Kategorie | Status | Bewertung | Details |
-|-----------|--------|-----------|---------|
-| **API Keys** | ✅ | Sehr gut | Korrekte Keys, Honeypot-Schutz |
-| **Code Quality** | ✅ | Sehr gut | Sauberer Code, keine Secrets |
-| **Firestore Rules** | ✅ | Exzellent | Perfekte User-Isolation |
-| **Storage Rules** | ⚠️ | Temporär | Testing-Modus bis 21.09.2025 |
-| **Dependencies** | ✅ | Sehr gut | Aktuelle, sichere Versionen |
-| **Honeypot System** | ✅ | Exzellent | Vollständig implementiert |
-| **Bot Protection** | ✅ | Exzellent | Mehrschichtiger Schutz |
 
----
+    <nav class="mobile-nav">
+        <a href="#" class="nav-btn active" onclick="showPage('startseite')" data-page="startseite">
+            <div class="nav-icon">🏠</div>
+            <span class="nav-label">Start</span>
+            <div class="nav-indicator"></div>
+        </a>
+        <a href="#" class="nav-btn" onclick="showPage('geocard')" data-page="geocard">
+            <div class="nav-icon">🗺️</div>
+            <span class="nav-label">GeoCard</span>
+            <div class="nav-indicator"></div>
+        </a>
+        <a href="#" class="nav-btn" onclick="showPage('geoboard')" data-page="geoboard">
+            <div class="nav-icon">📊</div>
+            <span class="nav-label">Board</span>
+            <div class="nav-indicator"></div>
+        </a>
+        <a href="#" class="nav-btn" onclick="showPage('machines')" data-page="machines">
+            <div class="nav-icon">⛏️</div>
+            <span class="nav-label">Mining</span>
+            <div class="nav-indicator"></div>
+        </a>
+        <a href="#" class="nav-btn" onclick="showPage('bonus')" data-page="bonus">
+            <div class="nav-icon">🎁</div>
+            <span class="nav-label">Bonus</span>
+            <div class="nav-indicator"></div>
+        </a>
+        <a href="#" class="nav-btn" onclick="showPage('trading')" data-page="trading">
+            <div class="nav-icon">📈</div>
+            <span class="nav-label">Trading</span>
+            <div class="nav-indicator"></div>
+        </a>
+        <a href="#" class="nav-btn" onclick="showPage('geochat')" data-page="geochat">
+            <div class="nav-icon">💬</div>
+            <span class="nav-label">Chat</span>
+            <div class="nav-indicator"></div>
+        </a>
+        <a href="#" class="nav-btn" onclick="showPage('mehr')" data-page="mehr">
+            <div class="nav-icon">⚙️</div>
+            <span class="nav-label">Mehr</span>
+            <div class="nav-indicator"></div>
+        </a>
+        <a href="#" class="nav-btn" onclick="showTokenomics()" data-page="tokenomics">
+            <div class="nav-icon">💰</div>
+            <span class="nav-label">Tokenomics</span>
+            <div class="nav-indicator"></div>
+        </a>
+        <a href="#" class="nav-btn" onclick="showDevLoginPopup();" data-page="dev">
+            <div class="nav-icon">🔧</div>
+            <span class="nav-label">Dev</span>
+            <div class="nav-indicator"></div>
+        </a>
+    </nav>
 
-## ⚠️ RECOMMENDATIONS
+    <script>
+        // Control ad banner visibility based on current page
+        window.updateAdBannerVisibility = function() {
+            const adBanner = document.getElementById('ad-banner');
+            const currentPage = document.querySelector('.page.active');
+            
+            if (adBanner && currentPage) {
+                const isMobile = window.innerWidth <= 768;
+                const isStartseite = currentPage.id === 'startseite';
+                
+                if (isMobile) {
+                    // On mobile: only show on startseite
+                    if (isStartseite) {
+                        adBanner.style.display = 'flex';
+                    } else {
+                        adBanner.style.display = 'none';
+                    }
+                } else {
+                    // On desktop: always show
+                    adBanner.style.display = 'flex';
+                }
+                
+                console.log(`📱 Ad banner visibility updated: mobile=${isMobile}, startseite=${isStartseite}, display=${adBanner.style.display}`);
+            }
+        };
 
-### **1. Storage Rules verschärfen (Nach Testing):**
-```javascript
-// Nach Testing auf authentifizierte User beschränken
-allow read, write: if request.auth != null;
-```
+        // Initialize landing page logic
+        window.initializeLandingPage = function() {
+            console.log('🔄 Initializing landing page...');
+            
+            // Check if user is logged in
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            const userProfile = JSON.parse(localStorage.getItem('userProfile') || 'null');
+            
+            console.log('👤 Current user:', currentUser);
+            console.log('📋 User profile:', userProfile);
+            
+            // Also check Firebase auth state
+            if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+                console.log('🔥 Firebase auth user found:', firebase.auth().currentUser.email);
+                // User is logged in via Firebase - hide landing page, show user info
+                const landingContent = document.getElementById('landing-content');
+                const userInfo = document.getElementById('user-info');
+                
+                if (landingContent) {
+                    landingContent.style.display = 'none';
+                    landingContent.style.visibility = 'hidden';
+                    console.log('🚫 Landing page HIDDEN (Firebase)');
+                }
+                if (userInfo) {
+                    userInfo.style.display = 'block';
+                    userInfo.style.visibility = 'visible';
+                    console.log('👤 User info SHOWN (Firebase)');
+                }
+                
+                if (typeof updateUserDisplay === 'function') {
+                    updateUserDisplay();
+                }
+                return;
+            }
+            
+            if (currentUser && userProfile) {
+                console.log('✅ User is logged in - hiding landing page');
+                // User is logged in - hide landing page, show user info
+                const landingContent = document.getElementById('landing-content');
+                const userInfo = document.getElementById('user-info');
+                
+                if (landingContent) {
+                    landingContent.style.display = 'none';
+                    landingContent.style.visibility = 'hidden';
+                    console.log('🚫 Landing page HIDDEN');
+                }
+                if (userInfo) {
+                    userInfo.style.display = 'block';
+                    userInfo.style.visibility = 'visible';
+                    console.log('👤 User info SHOWN');
+                }
+                
+                if (typeof updateUserDisplay === 'function') {
+                    updateUserDisplay();
+                }
+            } else {
+                console.log('❌ User is not logged in - showing landing page');
+                // User is not logged in - show landing page, hide user info
+                const landingContent = document.getElementById('landing-content');
+                const userInfo = document.getElementById('user-info');
+                
+                if (landingContent) {
+                    landingContent.style.display = 'block';
+                    landingContent.style.visibility = 'visible';
+                    console.log('🌐 Landing page shown');
+                }
+                if (userInfo) {
+                    userInfo.style.display = 'none';
+                    userInfo.style.visibility = 'hidden';
+                    console.log('👤 User info hidden');
+                }
+            }
+        };
 
-### **2. Test-Dateien entfernen (Vor Production):**
-- `test-firebase-login.html`
-- `simple-login-test.html`
-- `test-registration.html`
+        // Show registration form
+        window.showRegistrationForm = function() {
+            // Scroll to the registration section
+            document.getElementById('registration-section').scrollIntoView({ behavior: 'smooth' });
+            
+            // Switch to registration mode
+            setTimeout(() => {
+                const isLogin = document.getElementById('form-title').textContent.includes('Anmelden');
+                
+                if (isLogin) {
+                    // Switch to registration mode
+                    document.getElementById('form-title').textContent = '🚀 Jetzt registrieren';
+                    document.getElementById('form-subtitle').textContent = 'Erstelle deinen Account und starte sofort!';
+                    document.getElementById('username-field').style.display = 'block';
+                    document.getElementById('referral-field').style.display = 'block'; // Show referral field for registration
+                    document.getElementById('main-button').innerHTML = '<i class="fas fa-user-plus mr-2"></i>Kostenlos registrieren';
+                    document.getElementById('main-button').onclick = registerFromLanding;
+                    document.getElementById('main-button').className = 'w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-green-700 hover:to-emerald-700 transition-all';
+                    document.querySelector('p.text-sm.text-gray-300.text-center').innerHTML = 'Bereits registriert? <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300">Hier anmelden</button>';
+                }
+            }, 500); // Wait for scroll to complete
+        };
 
-### **3. TODO-Items abarbeiten:**
-- Firebase Storage Rules verschärfen
-- User Drop Editing implementieren
-- Mining Time Berechnung
+        // Show login form
+        window.showLoginForm = function() {
+            // Scroll to the registration section (which contains both login and registration)
+            document.getElementById('registration-section').scrollIntoView({ behavior: 'smooth' });
+            
+            // Switch to login mode
+            setTimeout(() => {
+                const isLogin = document.getElementById('form-title').textContent.includes('Anmelden');
+                
+                if (!isLogin) {
+                    // Switch to login mode
+                    document.getElementById('form-title').textContent = '🔑 Anmelden';
+                    document.getElementById('form-subtitle').textContent = 'Willkommen zurück!';
+                    document.getElementById('username-field').style.display = 'none';
+                    document.getElementById('referral-field').style.display = 'none'; // Hide referral field for login
+                    document.getElementById('main-button').innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Anmelden';
+                    document.getElementById('main-button').onclick = loginFromLanding;
+                    document.getElementById('main-button').className = 'w-full bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-blue-700 hover:to-purple-700 transition-all';
+                    document.querySelector('p.text-sm.text-gray-300.text-center').innerHTML = 'Noch kein Account? <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300">Hier zur Registrierung</button>';
+                }
+            }, 500); // Wait for scroll to complete
+        };
 
----
+        // Handle Enter key press - check if we're in login or registration mode
+        window.handleEnterKey = function() {
+            const isLoginMode = document.getElementById('username-field').style.display === 'none';
+            
+            if (isLoginMode) {
+                // We're in login mode - call login function
+                console.log('🔑 Enter pressed in login mode - calling loginFromLanding()');
+                loginFromLanding();
+            } else {
+                // We're in registration mode - call register function
+                console.log('🚀 Enter pressed in registration mode - calling registerFromLanding()');
+                registerFromLanding();
+            }
+        };
 
-## 🔒 SECURITY FEATURES
+        // Toggle between registration and login
+        window.toggleForm = function() {
+            const isLogin = document.getElementById('form-title').textContent.includes('Anmelden');
+            
+            if (isLogin) {
+                // Switch to registration
+                document.getElementById('form-title').textContent = '🚀 Jetzt registrieren';
+                document.getElementById('form-subtitle').textContent = 'Erstelle deinen Account und starte sofort!';
+                document.getElementById('username-field').style.display = 'block';
+                document.getElementById('referral-field').style.display = 'block'; // Show referral field for registration
+                document.getElementById('main-button').innerHTML = '<i class="fas fa-user-plus mr-2"></i>Kostenlos registrieren';
+                document.getElementById('main-button').onclick = registerFromLanding;
+                document.getElementById('main-button').className = 'w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-green-700 hover:to-emerald-700 transition-all';
+                document.querySelector('p.text-sm.text-gray-300.text-center').innerHTML = 'Bereits registriert? <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300">Hier anmelden</button>';
+            } else {
+                // Switch to login
+                document.getElementById('form-title').textContent = '🔑 Anmelden';
+                document.getElementById('form-subtitle').textContent = 'Willkommen zurück!';
+                document.getElementById('username-field').style.display = 'none';
+                document.getElementById('referral-field').style.display = 'none'; // Hide referral field for login
+                // No referral field to hide
+                document.getElementById('main-button').innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Anmelden';
+                document.getElementById('main-button').onclick = loginFromLanding;
+                document.getElementById('main-button').className = 'w-full bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-blue-700 hover:to-purple-700 transition-all';
+                document.querySelector('p.text-sm.text-gray-300.text-center').innerHTML = 'Noch kein Account? <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300">Hier zur Registrierung</button>';
+            }
+        };
 
-### **Implementierte Sicherheitsmaßnahmen:**
+        // Scroll to features
+        window.scrollToFeatures = function() {
+            document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+        };
 
-#### **1. Authentication & Authorization:**
-- ✅ Firebase Authentication
-- ✅ User-spezifische Daten-Isolation
-- ✅ Authentifizierung für alle kritischen Operationen
+        // Go to app after successful registration
+        window.goToApp = function() {
+            // Hide landing content and show user info
+            document.getElementById('landing-content').style.display = 'none';
+            document.getElementById('user-info').style.display = 'block';
+            if (typeof updateUserDisplay === 'function') {
+                updateUserDisplay();
+            }
+        };
 
-#### **2. Bot Protection:**
-- ✅ Honeypot API Keys
-- ✅ Fake Keys zur Verwirrung von Scannern
-- ✅ Mehrschichtiger Bot-Schutz
+        // Registration function for landing page
+        window.registerFromLanding = async function() {
+            const username = document.getElementById('reg-username').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const referralId = '';
+            
+            // Check if we're in login mode (username field is hidden)
+            const isLoginMode = document.getElementById('username-field').style.display === 'none';
+            
+            if (isLoginMode) {
+                // We're in login mode, but user clicked register button - switch to register mode
+                toggleForm();
+                return;
+            }
+            
+            // Validation for registration
+            if (!username || !email || !password) {
+                alert('Bitte fülle alle Felder aus!');
+                return;
+            }
+            
+            if (password.length < 6) {
+                alert('Passwort muss mindestens 6 Zeichen haben!');
+                return;
+            }
+            
+            try {
+                console.log('🚀 Landing page registration attempt for:', email);
+                
+                // Check if Firebase auth is available
+                if (!window.auth) {
+                    console.error('❌ Firebase Auth not available');
+                    alert('Firebase Auth nicht verfügbar. Bitte Seite neu laden.');
+                    return;
+                }
+                
+                // Direct Firebase registration
+                const userCredential = await window.auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                console.log('✅ Firebase user created:', user.uid);
+                
+                // No referral system in landing page
+                let initialCoins = 100;
+                
+                // Create user profile
+                const userProfile = {
+                    email: email,
+                    username: username,
+                    level: 1,
+                    coins: initialCoins,
+                    drops: 0,
+                    boost: 1.0,
+                    ownedMachines: {},
+                    createdAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: window.firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                // No referral bonus in landing page
+                
+                // Save user profile to Firestore
+                await window.db.collection('users').doc(user.uid).set(userProfile);
+                
+                console.log('✅ User profile saved to Firestore:', user.uid);
+                alert('✅ Registrierung erfolgreich! Willkommen bei GeoDrop!');
+                
+                // No referral system to clear
+                
+                // Update UI
+                if (typeof updateUserDisplay === 'function') {
+                    updateUserDisplay();
+                }
+                
+                // Hide landing page and show user info
+                const landingContent = document.getElementById('landing-content');
+                const userInfo = document.getElementById('user-info');
+                
+                if (landingContent) {
+                    landingContent.style.display = 'none';
+                    landingContent.style.visibility = 'hidden';
+                    console.log('🚫 Landing page HIDDEN after registration');
+                }
+                if (userInfo) {
+                    userInfo.style.display = 'block';
+                    userInfo.style.visibility = 'visible';
+                    console.log('👤 User info SHOWN after registration');
+                }
+                
+                // Update navigation
+                setTimeout(() => {
+                    if (typeof window.updateNavigationDevStatus === 'function') {
+                        window.updateNavigationDevStatus();
+                    }
+                    if (typeof window.updateUserNavigation === 'function') {
+                        window.updateUserNavigation();
+                    }
+                    if (typeof window.updateAdBannerVisibility === 'function') {
+                        window.updateAdBannerVisibility();
+                    }
+                }, 500);
+                
+            } catch (error) {
+                console.error('❌ Landing page registration error:', error);
+                let errorMessage = 'Registrierung fehlgeschlagen';
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'E-Mail bereits registriert';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'Passwort zu schwach';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Ungültige E-Mail';
+                } else if (error.code === 'auth/network-request-failed') {
+                    errorMessage = 'Netzwerkfehler. Bitte Internetverbindung prüfen';
+                }
+                
+                alert(`❌ ${errorMessage}`);
+            }
+        };
 
-#### **3. Honeypot System:**
-- ✅ Smart Contract für Wallet-Drainage
-- ✅ Admin Panel für Management
-- ✅ Event-Monitoring und Alerts
+        // Login function for landing page
+        window.loginFromLanding = async function() {
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            
+            // Validation
+            if (!email || !password) {
+                alert('Bitte E-Mail und Passwort eingeben!');
+                return;
+            }
+            
+            try {
+                console.log('🔐 Landing page login attempt for:', email);
+                
+                // Check if Firebase auth is available
+                if (!window.auth) {
+                    console.error('❌ Firebase Auth not available');
+                    alert('Firebase Auth nicht verfügbar. Bitte Seite neu laden.');
+                    return;
+                }
+                
+                // Direct Firebase login without temporary fields
+                const userCredential = await window.auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                console.log('✅ Landing page login successful:', user.email);
+                alert('✅ Erfolgreich angemeldet!');
+                
+                // Update UI
+                if (typeof updateUserDisplay === 'function') {
+                    updateUserDisplay();
+                }
+                
+                // Hide landing page and show user info
+                const landingContent = document.getElementById('landing-content');
+                const userInfo = document.getElementById('user-info');
+                
+                if (landingContent) {
+                    landingContent.style.display = 'none';
+                    landingContent.style.visibility = 'hidden';
+                    console.log('🚫 Landing page HIDDEN after login');
+                }
+                if (userInfo) {
+                    userInfo.style.display = 'block';
+                    userInfo.style.visibility = 'visible';
+                    console.log('👤 User info SHOWN after login');
+                }
+                
+                // Update navigation
+                setTimeout(() => {
+                    if (typeof window.updateNavigationDevStatus === 'function') {
+                        window.updateNavigationDevStatus();
+                    }
+                    if (typeof window.updateUserNavigation === 'function') {
+                        window.updateUserNavigation();
+                    }
+                    if (typeof window.updateAdBannerVisibility === 'function') {
+                        window.updateAdBannerVisibility();
+                    }
+                }, 500);
+                
+            } catch (error) {
+                console.error('❌ Landing page login error:', error);
+                let errorMessage = 'Anmeldung fehlgeschlagen';
+                
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'Benutzer nicht gefunden';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Falsches Passwort';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Ungültige E-Mail';
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorMessage = 'Zu viele Versuche. Bitte später erneut versuchen';
+                } else if (error.code === 'auth/network-request-failed') {
+                    errorMessage = 'Netzwerkfehler. Bitte Internetverbindung prüfen';
+                } else if (error.code === 'auth/invalid-credential') {
+                    errorMessage = 'Ungültige Anmeldedaten';
+                }
+                
+                alert(`❌ ${errorMessage}`);
+            }
+        };
 
-#### **4. Data Protection:**
-- ✅ Sichere API Key Verwaltung
-- ✅ Keine hardcoded Secrets
-- ✅ Testnet-Adressen für Blockchain
+        // Manual function to hide landing page (for debugging)
+        window.hideLandingPage = function() {
+            console.log('🔧 Manually hiding landing page...');
+            const landingContent = document.getElementById('landing-content');
+            const userInfo = document.getElementById('user-info');
+            
+            if (landingContent) {
+                landingContent.style.display = 'none';
+                console.log('🚫 Landing content manually hidden');
+            }
+            if (userInfo) {
+                userInfo.style.display = 'block';
+                console.log('👤 User info manually shown');
+            }
+        };
+    </script>
+    
+    <div id="indirect-referrals-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">🔄 Indirekte Referrals</h3>
+                <button onclick="closeIndirectReferralsModal()" class="text-gray-400 hover:text-white text-2xl">
+                    ×
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-gray-300 text-sm">
+                    Diese Liste zeigt alle User, die von deinen direkten Referrals geworben wurden. 
+                    Du erhältst 1% von deren Käufen.
+                </p>
+            </div>
+            
+            <div id="indirect-referrals-list" class="space-y-3">
+                <div class="text-center text-gray-400 p-8">Lade indirekte Referrals...</div>
+            </div>
+        </div>
+    </div>
 
----
-
-## 📋 COMPLIANCE CHECKLIST
-
-- ✅ **Keine kritischen Vulnerabilities**
-- ✅ **Sichere API Key Verwaltung**
-- ✅ **Robuste Authentifizierung**
-- ✅ **User Data Isolation**
-- ✅ **Bot Protection aktiv**
-- ✅ **Honeypot System funktional**
-- ✅ **Sichere Dependencies**
-- ✅ **Sauberer Code**
-
----
-
-## 🎯 CONCLUSION
-
-**Das GeoDrop V1 System ist sehr sicher und gut implementiert!**
-
-### **Stärken:**
-- Exzellente Firebase Security Rules
-- Robuste Bot Protection
-- Sichere API Key Verwaltung
-- Vollständiges Honeypot-System
-- Sauberer, sicherer Code
-
-### **Verbesserungsmöglichkeiten:**
-- Storage Rules nach Testing verschärfen
-- Test-Dateien vor Production entfernen
-- TODO-Items abarbeiten
-
-### **Empfehlung:**
-**✅ BEREIT FÜR PRODUCTION** mit den empfohlenen Verbesserungen.
-
----
-
-## 📞 CONTACT
-
-**Audit durchgeführt von:** AI Assistant  
-**Datum:** 21. September 2025  
-**Nächster Audit:** Empfohlen nach 3 Monaten oder bei größeren Änderungen
-
----
-
-**🔒 SECURITY FIRST - GeoDrop V1 ist sicher!** ✅
+    <script src="config/aws-config.js"></script>
+    <script src="js/aws-rekognition.js"></script>
+</body>
+</html>

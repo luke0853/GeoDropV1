@@ -38,7 +38,7 @@ window.reloadAllDropLists = async function() {
 window.createAllAustrianStateDrops = async function() {
     console.log('🇦🇹 Creating 9 Austrian State Test Drops...');
     
-    if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+    if (!window.isDevLoggedIn && sessionStorage.getItem('devLoggedIn') !== 'true') {
         showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
@@ -515,7 +515,7 @@ window.checkUserDropCount = async function() {
 window.cleanupDuplicateUserDrops = async function() {
     console.log('🧹 Cleaning up duplicate User Drops...');
     
-    if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+    if (!window.isDevLoggedIn && sessionStorage.getItem('devLoggedIn') !== 'true') {
         showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
@@ -597,7 +597,7 @@ window.cleanupDuplicateUserDrops = async function() {
 window.createRemainingAustrianDrops = async function() {
     console.log('🇦🇹 Creating all remaining Austrian State Drops...');
     
-    if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+    if (!window.isDevLoggedIn && sessionStorage.getItem('devLoggedIn') !== 'true') {
         showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
@@ -654,7 +654,7 @@ window.createRemainingAustrianDrops = async function() {
 async function createSingleStateDrop(stateName, placeName, lat, lng, dropNumber) {
     console.log(`🏛️ Creating ${stateName} drop: ${placeName}...`);
     
-    if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+    if (!window.isDevLoggedIn && sessionStorage.getItem('devLoggedIn') !== 'true') {
         showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
@@ -851,7 +851,7 @@ window.fixDrop11Creator = async function() {
 window.devFixDropCreator = async function(dropNumber, newCreatorName) {
     console.log(`🔧 DEV: Fixing Drop ${dropNumber} creator to: ${newCreatorName}`);
     
-    if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+    if (!window.isDevLoggedIn && sessionStorage.getItem('devLoggedIn') !== 'true') {
         alert('❌ Dev-Zugang erforderlich!');
         return;
     }
@@ -1326,7 +1326,7 @@ window.fixAllDropsCreator = async function() {
 window.createTestMelkDrop = async function() {
     console.log('🏛️ Creating TEST Stift Melk Drop...');
     
-    if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+    if (!window.isDevLoggedIn && sessionStorage.getItem('devLoggedIn') !== 'true') {
         showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
@@ -1498,7 +1498,7 @@ window.showCreateUserDropModal = async function() {
         modal.style.display = 'block';
         
         // Check if user is Dev and show dev coordinates section
-        const isDevLoggedIn = window.isDevLoggedIn || localStorage.getItem('devLoggedIn') === 'true';
+        const isDevLoggedIn = window.isDevLoggedIn || sessionStorage.getItem('devLoggedIn') === 'true';
         const devSection = document.getElementById('dev-coordinates-section');
         if (devSection) {
             devSection.style.display = isDevLoggedIn ? 'block' : 'none';
@@ -1865,17 +1865,63 @@ window.loadDevDropsForUpload = async function() {
         }
         
         const db = window.firebase.firestore();
-        const devDropsSnapshot = await db.collection('devDrops').where('isAvailable', '==', true).get();
+        // Load all dev drops (both isAvailable and isActive)
+        const allDevDropsSnapshot = await db.collection('devDrops').get();
+        
+        // Filter for active/available drops and exclude claimed drops for today
+        const today = new Date().toDateString();
+        const currentUser = window.currentUser || window.auth?.currentUser;
+        
+        const devDropsSnapshot = {
+            docs: allDevDropsSnapshot.docs.filter(doc => {
+                const data = doc.data();
+                const isActive = data.isActive === true || data.isAvailable === true;
+                
+                // Check if claimed today by current user
+                const lastClaimDate = data.lastClaimDate ? data.lastClaimDate.toDate().toDateString() : null;
+                const isClaimedToday = lastClaimDate === today && data.claimedBy === currentUser?.uid;
+                
+                // Debug logging for drops 9 and 10
+                if (data.geodropNumber === '9' || data.geodropNumber === '10' || 
+                    (data.name && (data.name.includes('GeoDrop9') || data.name.includes('GeoDrop10')))) {
+                    console.log(`🔍 Debug Drop ${data.geodropNumber || data.name}:`, {
+                        isActive,
+                        isClaimedToday,
+                        lastClaimDate,
+                        claimedBy: data.claimedBy,
+                        currentUser: currentUser?.uid,
+                        today,
+                        willInclude: isActive && !isClaimedToday
+                    });
+                }
+                
+                // Only include drops that are active AND not claimed today
+                return isActive && !isClaimedToday;
+            }),
+            size: 0
+        };
+        devDropsSnapshot.size = devDropsSnapshot.docs.length;
         
         const devDrops = [];
-        devDropsSnapshot.forEach(doc => {
+        devDropsSnapshot.docs.forEach(doc => {
             devDrops.push({ id: doc.id, ...doc.data(), collection: 'devDrops' });
         });
         
-        // Sort drops by geodropNumber (1, 2, 3, ...)
+        // Sort drops by geodropNumber (extract number from name if needed)
         devDrops.sort((a, b) => {
-            const numA = parseInt(a.geodropNumber) || parseInt(a.id) || 0;
-            const numB = parseInt(b.geodropNumber) || parseInt(b.id) || 0;
+            let numA = parseInt(a.geodropNumber) || 0;
+            let numB = parseInt(b.geodropNumber) || 0;
+            
+            // If no geodropNumber, try to extract from name
+            if (numA === 0 && a.name && a.name.includes('GeoDrop')) {
+                const match = a.name.match(/GeoDrop(\d+)/);
+                if (match) numA = parseInt(match[1]);
+            }
+            if (numB === 0 && b.name && b.name.includes('GeoDrop')) {
+                const match = b.name.match(/GeoDrop(\d+)/);
+                if (match) numB = parseInt(match[1]);
+            }
+            
             return numA - numB;
         });
         
@@ -1886,7 +1932,15 @@ window.loadDevDropsForUpload = async function() {
             devDrops.forEach(drop => {
                 const option = document.createElement('option');
                 option.value = `devDrops:${drop.id}`;
-                option.textContent = `🎯 Dev GeoDrop${drop.geodropNumber || drop.id} - ${drop.reward || 100} PixelDrops`;
+                // Extract number from name for display
+                let displayNumber = drop.geodropNumber || drop.id;
+                if (drop.name && drop.name.includes('GeoDrop')) {
+                    const match = drop.name.match(/GeoDrop(\d+)/);
+                    if (match) {
+                        displayNumber = match[1]; // Just the number
+                    }
+                }
+                option.textContent = `🎯 Dev GeoDrop${displayNumber} - ${drop.reward || 100} PixelDrops`;
                 select.appendChild(option);
             });
         }
@@ -1920,10 +1974,45 @@ window.loadUserDropsForUpload = async function() {
         }
         
         const db = window.firebase.firestore();
-        const userDropsSnapshot = await db.collection('userDrops').where('isActive', '==', true).get();
+        // Load all user drops and filter out claimed ones
+        const allUserDropsSnapshot = await db.collection('userDrops').get();
+        
+        // Filter for active drops and exclude claimed drops for today
+        const today = new Date().toDateString();
+        const currentUser = window.currentUser || window.auth?.currentUser;
+        
+        const userDropsSnapshot = {
+            docs: allUserDropsSnapshot.docs.filter(doc => {
+                const data = doc.data();
+                const isActive = data.isActive === true;
+                
+                // Check if claimed today by current user
+                const lastClaimDate = data.lastClaimDate ? data.lastClaimDate.toDate().toDateString() : null;
+                const isClaimedToday = lastClaimDate === today && data.claimedBy === currentUser?.uid;
+                
+                // Debug logging for drops 9 and 10
+                if (data.geodropNumber === '9' || data.geodropNumber === '10' || 
+                    (data.name && (data.name.includes('UserDrop9') || data.name.includes('UserDrop10')))) {
+                    console.log(`🔍 Debug User Drop ${data.geodropNumber || data.name}:`, {
+                        isActive,
+                        isClaimedToday,
+                        lastClaimDate,
+                        claimedBy: data.claimedBy,
+                        currentUser: currentUser?.uid,
+                        today,
+                        willInclude: isActive && !isClaimedToday
+                    });
+                }
+                
+                // Only include drops that are active AND not claimed today
+                return isActive && !isClaimedToday;
+            }),
+            size: 0
+        };
+        userDropsSnapshot.size = userDropsSnapshot.docs.length;
         
         const userDrops = [];
-        userDropsSnapshot.forEach(doc => {
+        userDropsSnapshot.docs.forEach(doc => {
             userDrops.push({ id: doc.id, ...doc.data(), collection: 'userDrops' });
         });
         
@@ -1985,17 +2074,39 @@ window.loadDevGeoDrops = async function() {
         }
         
         const db = window.firebase.firestore();
-        const devDropsSnapshot = await db.collection('devDrops').where('isAvailable', '==', true).get();
+        // Load all dev drops (both isAvailable and isActive)
+        const allDevDropsSnapshot = await db.collection('devDrops').get();
+        
+        // Filter for active/available drops
+        const devDropsSnapshot = {
+            docs: allDevDropsSnapshot.docs.filter(doc => {
+                const data = doc.data();
+                return data.isActive === true || data.isAvailable === true;
+            }),
+            size: 0
+        };
+        devDropsSnapshot.size = devDropsSnapshot.docs.length;
         
         const devDrops = [];
-        devDropsSnapshot.forEach(doc => {
+        devDropsSnapshot.docs.forEach(doc => {
             devDrops.push({ id: doc.id, ...doc.data(), collection: 'devDrops' });
         });
         
-        // Sort drops by geodropNumber
+        // Sort drops by geodropNumber (extract number from name if needed)
         devDrops.sort((a, b) => {
-            const numA = parseInt(a.geodropNumber) || parseInt(a.id) || 0;
-            const numB = parseInt(b.geodropNumber) || parseInt(b.id) || 0;
+            let numA = parseInt(a.geodropNumber) || 0;
+            let numB = parseInt(b.geodropNumber) || 0;
+            
+            // If no geodropNumber, try to extract from name
+            if (numA === 0 && a.name && a.name.includes('GeoDrop')) {
+                const match = a.name.match(/GeoDrop(\d+)/);
+                if (match) numA = parseInt(match[1]);
+            }
+            if (numB === 0 && b.name && b.name.includes('GeoDrop')) {
+                const match = b.name.match(/GeoDrop(\d+)/);
+                if (match) numB = parseInt(match[1]);
+            }
+            
             return numA - numB;
         });
         
@@ -2011,7 +2122,7 @@ window.loadDevGeoDrops = async function() {
                 currentUser = window.firebase.auth().currentUser;
             }
             
-            let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-600"><th class="text-left p-2">Nr.</th><th class="text-left p-2">Reward</th><th class="text-left p-2">Status</th><th class="text-left p-2">Typ</th><th class="text-center p-2">Icon</th><th class="text-left p-2">Koordinaten</th></tr></thead><tbody>';
+            let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-600"><th class="text-left p-2">Nr.</th><th class="text-left p-2">Ersteller</th><th class="text-left p-2">Reward</th><th class="text-left p-2">Status</th><th class="text-left p-2">Typ</th><th class="text-center p-2">Icon</th><th class="text-left p-2">Koordinaten</th></tr></thead><tbody>';
             devDrops.forEach(drop => {
                 const coords = drop.lat && drop.lng ? `${drop.lat.toFixed(4)}, ${drop.lng.toFixed(4)}` : 'N/A';
                 // Check if claimed today with proper date comparison
@@ -2019,9 +2130,23 @@ window.loadDevGeoDrops = async function() {
                 const lastClaimDate = drop.lastClaimDate ? drop.lastClaimDate.toDate().toDateString() : null;
                 const isClaimedToday = lastClaimDate === today && drop.claimedBy === currentUser?.uid;
                 const statusText = isClaimedToday ? '⏰ Heute gesammelt' : '✅ Verfügbar';
-                const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-600' : 'border-b border-gray-700';
-                const textClass = isClaimedToday ? 'text-gray-400' : 'text-white';
-                tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${drop.geodropNumber || drop.id}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;
+                const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-800 opacity-60' : 'border-b border-gray-700';
+                const textClass = isClaimedToday ? 'text-gray-500' : 'text-white';
+                
+                // Creator name will be set below
+                
+                // Use geodropNumber for display, fallback to name, then id
+                let displayNumber = drop.geodropNumber || drop.id;
+                if (drop.name && drop.name.includes('GeoDrop')) {
+                    const match = drop.name.match(/GeoDrop(\d+)/);
+                    if (match) {
+                        displayNumber = match[1]; // Just the number
+                    }
+                }
+                // Get creator name for dev drops - all should be KryptoGuru
+                let creatorName = 'KryptoGuru';
+                
+                tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${displayNumber}</td><td class="p-2 ${textClass}">${creatorName}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;
             });
             tableHTML += '</tbody></table></div>';
             table.innerHTML = tableHTML;
@@ -2102,7 +2227,7 @@ window.loadAllUserDrops = async function() {
                 
                 // Get current user for permission check (already declared above)
                 
-                const isDev = window.isDevLoggedIn || localStorage.getItem('devLoggedIn') === 'true';
+                const isDev = window.isDevLoggedIn || sessionStorage.getItem('devLoggedIn') === 'true';
                 const isCreator = currentUser && drop.createdBy === currentUser.uid;
                 const canDelete = isDev || isCreator;
                 
@@ -2153,7 +2278,7 @@ window.loadAllUserDrops = async function() {
 window.createAustriaTouristDrops = async function() {
     console.log('🇦🇹 Creating Austria Tourist Drops...');
     
-    if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+    if (!window.isDevLoggedIn && sessionStorage.getItem('devLoggedIn') !== 'true') {
         showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
@@ -2327,7 +2452,7 @@ window.createAustriaTouristDrops = async function() {
 window.createTestAustriaDrop = async function() {
     console.log('🧪 Creating TEST Austria Tourist Drop...');
     
-    if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+    if (!window.isDevLoggedIn && sessionStorage.getItem('devLoggedIn') !== 'true') {
         showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
@@ -2568,11 +2693,10 @@ window.clearGPSCache = function() {
     
     // Clear all location-related data
     window.currentLocation = null;
-    localStorage.removeItem('lastLocation');
-    localStorage.removeItem('lastKnownLocation');
-    localStorage.removeItem('gpsCache');
-    localStorage.removeItem('locationCache');
-    localStorage.removeItem('cachedLocation');
+    sessionStorage.removeItem('lastLocation');
+    sessionStorage.removeItem('lastKnownLocation');
+    sessionStorage.removeItem('gpsCache');
+    sessionStorage.removeItem('locationCache');
     sessionStorage.removeItem('cachedLocation');
     
     // Clear map markers
@@ -2949,15 +3073,36 @@ window.loadGeoDrops = async function() {
         }
         
         const db = window.firebase.firestore();
-        const devDropsSnapshot = await db.collection('devDrops').where('isAvailable', '==', true).get();
+        console.log('🔍 Loading devDrops...');
+        // Load all dev drops (both isAvailable and isActive)
+        const allDevDropsSnapshot = await db.collection('devDrops').get();
+        console.log('🔍 All dev drops found:', allDevDropsSnapshot.size);
+        
+        // Filter for active/available drops
+        const devDropsSnapshot = {
+            docs: allDevDropsSnapshot.docs.filter(doc => {
+                const data = doc.data();
+                return data.isActive === true || data.isAvailable === true;
+            }),
+            size: 0
+        };
+        devDropsSnapshot.size = devDropsSnapshot.docs.length;
+        console.log('🔍 Active/Available dev drops found:', devDropsSnapshot.size);
+        
+        console.log('🔍 Loading userDrops...');
         const userDropsSnapshot = await db.collection('userDrops').where('isActive', '==', true).get();
+        console.log('🔍 User drops found:', userDropsSnapshot.size);
         
         const allDrops = [];
-        devDropsSnapshot.forEach(doc => {
-            allDrops.push({ id: doc.id, ...doc.data(), collection: 'devDrops' });
+        devDropsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            console.log('🔍 Dev drop:', doc.id, 'lat:', data.lat, 'lng:', data.lng);
+            allDrops.push({ id: doc.id, ...data, collection: 'devDrops' });
         });
         userDropsSnapshot.forEach(doc => {
-            allDrops.push({ id: doc.id, ...doc.data(), collection: 'userDrops' });
+            const data = doc.data();
+            console.log('🔍 User drop:', doc.id, 'lat:', data.lat, 'lng:', data.lng);
+            allDrops.push({ id: doc.id, ...data, collection: 'userDrops' });
         });
         
         // Sort drops by geodropNumber (starting with 1)
@@ -2970,7 +3115,11 @@ window.loadGeoDrops = async function() {
         // NOTE: Dropdown update removed - it was overwriting the upload dropdown
         // The upload dropdown is managed by loadDevDropsForUpload() and loadUserDropsForUpload()
         
+        console.log('🔍 Total drops to add to map:', allDrops.length);
+        console.log('🔍 All drops data:', allDrops);
+        
         // Add drop markers to map
+        console.log('🗺️ Calling addDropMarkersToMap...');
         addDropMarkersToMap(allDrops);
         
         console.log(`✅ Loaded ${allDrops.length} GeoDrops`);
@@ -3076,7 +3225,7 @@ window.addDropMarkersToMap = function(drops) {
             const statusText = isClaimedToday ? '⏰ Heute gesammelt' : '✅ Verfügbar';
             const dropTypeText = isDevDrop ? '🎯 Dev' : isUserDrop ? '👤 User' : '🌍 Normal';
             // Check if user can delete this drop
-            const isDev = window.isDevLoggedIn || localStorage.getItem('devLoggedIn') === 'true';
+            const isDev = window.isDevLoggedIn || sessionStorage.getItem('devLoggedIn') === 'true';
             const isCreator = currentUser && drop.createdBy === currentUser.uid;
             const canDelete = isDev || isCreator;
             
@@ -3526,10 +3675,10 @@ window.updateDevCoordsButton = function() {
     
     if (devCoordsBtn && adminStatus) {
         // Check Dev login status
-        const isDevLoggedIn = window.isDevLoggedIn || localStorage.getItem('devLoggedIn') === 'true';
+        const isDevLoggedIn = window.isDevLoggedIn || sessionStorage.getItem('devLoggedIn') === 'true';
         console.log('🔍 GeoCard Dev Status Check:', { 
             windowIsDevLoggedIn: window.isDevLoggedIn, 
-            localStorage: localStorage.getItem('devLoggedIn'),
+            sessionStorage: sessionStorage.getItem('devLoggedIn'),
             finalStatus: isDevLoggedIn 
         });
         
@@ -3658,7 +3807,7 @@ window.resetToCurrentLocation = function() {
 // Auto-activate admin mode when Dev is logged in
 window.autoActivateAdminMode = function() {
     // Check Dev login status
-    const isDevLoggedIn = window.isDevLoggedIn || localStorage.getItem('devLoggedIn') === 'true';
+    const isDevLoggedIn = window.isDevLoggedIn || sessionStorage.getItem('devLoggedIn') === 'true';
     
     const devCoordsSection = document.getElementById('dev-coordinates-section');
     if (devCoordsSection) {
@@ -3671,7 +3820,64 @@ window.autoActivateAdminMode = function() {
         }
     }
     
+    // Show/hide Dev image selection button
+    const devSelectImageBtn = document.getElementById('dev-select-image-btn');
+    if (devSelectImageBtn) {
+        if (isDevLoggedIn) {
+            devSelectImageBtn.style.display = 'block';
+            console.log('🔓 Dev image selection button SHOWN');
+        } else {
+            devSelectImageBtn.style.display = 'none';
+            console.log('🔒 Dev image selection button HIDDEN');
+        }
+    }
+    
     window.updateDevCoordsButton();
+};
+
+// Dev function: Select image from file system
+window.handleDevImageSelect = function() {
+    console.log('🖼️ Dev image selection requested');
+    
+    // Create a new file input for Dev users (without camera capture)
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    
+    fileInput.onchange = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            console.log('🖼️ Dev selected image:', file.name);
+            
+            // Update the photo input with the selected file
+            const photoInput = document.getElementById('photo-input');
+            if (photoInput) {
+                // Create a new FileList-like object
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                photoInput.files = dataTransfer.files;
+                
+                showMessage('🖼️ Bild ausgewählt: ' + file.name, false);
+                
+                // For Dev users: Set the captured photo file and start upload immediately
+                console.log('🚀 Dev mode: Setting captured photo file and starting upload...');
+                window.capturedPhotoFile = file; // Set the captured photo file for autoStartUpload
+                
+                if (typeof window.autoStartUpload === 'function') {
+                    window.autoStartUpload();
+                } else {
+                    console.error('❌ autoStartUpload function not found');
+                    showMessage('❌ Upload-Funktion nicht gefunden', true);
+                }
+            }
+        }
+    };
+    
+    // Trigger file selection
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    document.body.removeChild(fileInput);
 };
 
 // Initialize GeoCard when page loads
@@ -3684,7 +3890,13 @@ console.log('🗺️ GeoCard page loaded');
         if (typeof window.initGeoMap === 'function') {
             window.initGeoMap();
         }
-        // NOTE: loadGeoDrops() removed - it was overwriting the upload dropdown with all drops
+        // Load GeoDrops for map display (not for dropdowns)
+        setTimeout(() => {
+            if (typeof window.loadGeoDrops === 'function') {
+                console.log('🗺️ Loading GeoDrops for map display...');
+                window.loadGeoDrops();
+            }
+        }, 1000);
         
         // Set default list types
         window.currentListType = 'dev';
@@ -3943,7 +4155,7 @@ window.resetDailyClaims = async function() {
 window.updateDevSessionButton = function() {
     const devSessionSection = document.getElementById('dev-session-section');
     if (devSessionSection) {
-        const isDevLoggedIn = window.isDevLoggedIn || localStorage.getItem('devLoggedIn') === 'true';
+        const isDevLoggedIn = window.isDevLoggedIn || sessionStorage.getItem('devLoggedIn') === 'true';
         if (isDevLoggedIn) {
             devSessionSection.style.display = 'block';
         } else {
@@ -3963,17 +4175,39 @@ window.loadDevGeoDrops = async function() {
         }
         
         const db = window.firebase.firestore();
-        const devDropsSnapshot = await db.collection('devDrops').where('isAvailable', '==', true).get();
+        // Load all dev drops (both isAvailable and isActive)
+        const allDevDropsSnapshot = await db.collection('devDrops').get();
+        
+        // Filter for active/available drops
+        const devDropsSnapshot = {
+            docs: allDevDropsSnapshot.docs.filter(doc => {
+                const data = doc.data();
+                return data.isActive === true || data.isAvailable === true;
+            }),
+            size: 0
+        };
+        devDropsSnapshot.size = devDropsSnapshot.docs.length;
         
         const devDrops = [];
-        devDropsSnapshot.forEach(doc => {
+        devDropsSnapshot.docs.forEach(doc => {
             devDrops.push({ id: doc.id, ...doc.data(), collection: 'devDrops' });
         });
         
-        // Sort drops by geodropNumber
+        // Sort drops by geodropNumber (extract number from name if needed)
         devDrops.sort((a, b) => {
-            const numA = parseInt(a.geodropNumber) || parseInt(a.id) || 0;
-            const numB = parseInt(b.geodropNumber) || parseInt(b.id) || 0;
+            let numA = parseInt(a.geodropNumber) || 0;
+            let numB = parseInt(b.geodropNumber) || 0;
+            
+            // If no geodropNumber, try to extract from name
+            if (numA === 0 && a.name && a.name.includes('GeoDrop')) {
+                const match = a.name.match(/GeoDrop(\d+)/);
+                if (match) numA = parseInt(match[1]);
+            }
+            if (numB === 0 && b.name && b.name.includes('GeoDrop')) {
+                const match = b.name.match(/GeoDrop(\d+)/);
+                if (match) numB = parseInt(match[1]);
+            }
+            
             return numA - numB;
         });
         
@@ -3989,7 +4223,7 @@ window.loadDevGeoDrops = async function() {
                 currentUser = window.firebase.auth().currentUser;
             }
             
-            let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-600"><th class="text-left p-2">Nr.</th><th class="text-left p-2">Reward</th><th class="text-left p-2">Status</th><th class="text-left p-2">Typ</th><th class="text-center p-2">Icon</th><th class="text-left p-2">Koordinaten</th></tr></thead><tbody>';
+            let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-600"><th class="text-left p-2">Nr.</th><th class="text-left p-2">Ersteller</th><th class="text-left p-2">Reward</th><th class="text-left p-2">Status</th><th class="text-left p-2">Typ</th><th class="text-center p-2">Icon</th><th class="text-left p-2">Koordinaten</th></tr></thead><tbody>';
             devDrops.forEach(drop => {
                 const coords = drop.lat && drop.lng ? `${drop.lat.toFixed(4)}, ${drop.lng.toFixed(4)}` : 'N/A';
                 // Check if claimed today with proper date comparison
@@ -3997,9 +4231,23 @@ window.loadDevGeoDrops = async function() {
                 const lastClaimDate = drop.lastClaimDate ? drop.lastClaimDate.toDate().toDateString() : null;
                 const isClaimedToday = lastClaimDate === today && drop.claimedBy === currentUser?.uid;
                 const statusText = isClaimedToday ? '⏰ Heute gesammelt' : '✅ Verfügbar';
-                const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-600' : 'border-b border-gray-700';
-                const textClass = isClaimedToday ? 'text-gray-400' : 'text-white';
-                tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${drop.geodropNumber || drop.id}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;
+                const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-800 opacity-60' : 'border-b border-gray-700';
+                const textClass = isClaimedToday ? 'text-gray-500' : 'text-white';
+                
+                // Creator name will be set below
+                
+                // Use geodropNumber for display, fallback to name, then id
+                let displayNumber = drop.geodropNumber || drop.id;
+                if (drop.name && drop.name.includes('GeoDrop')) {
+                    const match = drop.name.match(/GeoDrop(\d+)/);
+                    if (match) {
+                        displayNumber = match[1]; // Just the number
+                    }
+                }
+                // Get creator name for dev drops - all should be KryptoGuru
+                let creatorName = 'KryptoGuru';
+                
+                tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${displayNumber}</td><td class="p-2 ${textClass}">${creatorName}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;
             });
             tableHTML += '</tbody></table></div>';
             table.innerHTML = tableHTML;
@@ -4105,7 +4353,7 @@ window.loadUserGeoDrops = async function() {
                 // Use the ersteller field from Firebase
                 creatorName = drop.ersteller || drop.createdByName || 'Unknown';
                 console.log(`✅ Using ${creatorName} for drop ${drop.name}`);
-                const isDev = window.isDevLoggedIn || localStorage.getItem('devLoggedIn') === 'true';
+                const isDev = window.isDevLoggedIn || sessionStorage.getItem('devLoggedIn') === 'true';
                 const isCreator = drop.createdBy === currentUser.uid;
                 const canDelete = isDev || isCreator;
                 

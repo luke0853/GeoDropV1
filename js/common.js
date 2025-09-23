@@ -1,10 +1,31 @@
 // Common Functions for GeoDrop App
 
+// SECURITY: HTML escaping function to prevent XSS attacks
+window.escapeHtml = function(unsafe) {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+};
+
+// SECURITY: Safe innerHTML function that escapes content
+window.setSafeInnerHTML = function(element, content) {
+    if (!element) return;
+    if (typeof content === 'string') {
+        element.innerHTML = window.escapeHtml(content);
+    } else {
+        element.innerHTML = content;
+    }
+};
+
 // Test function - Create only ONE Austria Tourist Drop (available everywhere)
 window.createTestAustriaDrop = async function() {
     console.log('🧪 Creating TEST Austria Tourist Drop...');
     
-    if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+    if (!window.isDevLoggedIn && sessionStorage.getItem('devLoggedIn') !== 'true') {
         showMessage('❌ Dev-Zugang erforderlich!', true);
         return;
     }
@@ -469,9 +490,16 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 GeoDrop App initialized');
     
     // Try to get current location
-    getCurrentLocation().catch(error => {
-        console.log('📍 GPS failed - no fallback location set');
-    });
+    if (typeof getCurrentLocation === 'function') {
+        const locationPromise = getCurrentLocation();
+        if (locationPromise && typeof locationPromise.catch === 'function') {
+            locationPromise.catch(error => {
+                console.log('📍 GPS failed - no fallback location set');
+            });
+        }
+    } else {
+        console.log('📍 getCurrentLocation function not available');
+    }
     
     // Warte auf Monetag SDK und lade dann Banner
     setTimeout(() => {

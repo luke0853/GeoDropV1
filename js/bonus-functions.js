@@ -1,6 +1,91 @@
 // Bonus Functions for GeoDrop App
 console.log('🎁 bonus-functions.js loaded successfully!');
 
+// Function to calculate locked PixelDrop (5% of total balance)
+window.calculateLockedBalance = function(totalBalance) {
+    if (!totalBalance || totalBalance <= 0) return 0;
+    return Math.floor(totalBalance * 0.05); // 5% gesperrt
+};
+
+// Function to update balance display on bonus page
+window.updateBalanceDisplay = function() {
+    console.log('💰 Updating balance display...');
+    
+    if (!window.userProfile) {
+        console.log('❌ No user profile available');
+        return;
+    }
+    
+    const totalBalance = window.userProfile.coins || 0;
+    const lockedBalance = window.calculateLockedBalance(totalBalance);
+    const availableBalance = totalBalance - lockedBalance;
+    
+    // Update locked balance (left card - 5% gesperrt)
+    const lockedBalanceElement = document.getElementById('locked-balance-display');
+    if (lockedBalanceElement) {
+        lockedBalanceElement.textContent = lockedBalance.toLocaleString();
+        console.log('✅ Locked balance updated:', lockedBalance);
+    }
+    
+    // Update available balance (right card - 95% verfügbar)
+    const availableBalanceElement = document.getElementById('available-balance');
+    if (availableBalanceElement) {
+        availableBalanceElement.textContent = availableBalance.toLocaleString();
+        console.log('✅ Available balance updated:', availableBalance);
+    }
+    
+    console.log('💰 Balance display updated - Total:', totalBalance, 'Locked:', lockedBalance, 'Available:', availableBalance);
+    
+    // Update unlock countdown
+    window.updateUnlockCountdown();
+};
+
+// Function to update unlock countdown for locked PixelDrop
+window.updateUnlockCountdown = function() {
+    console.log('⏰ Updating unlock countdown...');
+    
+    const unlockTimerElement = document.getElementById('unlock-timer');
+    if (!unlockTimerElement) {
+        console.log('❌ Unlock timer element not found');
+        return;
+    }
+    
+    // Calculate time until next unlock (30 days from last transaction)
+    const now = new Date();
+    const lastTransaction = window.userProfile?.lastTransaction || now;
+    const unlockDate = new Date(lastTransaction.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days
+    const timeLeft = unlockDate.getTime() - now.getTime();
+    
+    if (timeLeft <= 0) {
+        unlockTimerElement.textContent = 'Verfügbar!';
+        unlockTimerElement.className = 'text-green-400 font-bold';
+        return;
+    }
+    
+    // Format countdown
+    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+    
+    unlockTimerElement.textContent = `${days}d ${hours}h ${minutes}m`;
+    unlockTimerElement.className = 'text-orange-200';
+    
+    console.log('⏰ Unlock countdown updated:', unlockTimerElement.textContent);
+};
+
+// Start countdown timer for unlock display
+window.startUnlockCountdown = function() {
+    console.log('⏰ Starting unlock countdown timer...');
+    
+    // Update immediately
+    window.updateUnlockCountdown();
+    
+    // Update every minute
+    setInterval(() => {
+        window.updateUnlockCountdown();
+    }, 60000); // 60 seconds
+};
+
 // Main bonus claim function (from backup)
 window.claimBonus = async function() {
     console.log('🎁 claimBonus called');
@@ -50,6 +135,9 @@ window.claimBonus = async function() {
         
         // Update bonus display
         window.updateBonusDisplay();
+        
+        // Update balance display
+        window.updateBalanceDisplay();
         
         // Update statistics if function exists
         if (typeof window.updateAllStatistics === 'function') {
@@ -232,6 +320,9 @@ window.updateBonusDisplay = function() {
         updateBonusHistory();
         
         console.log('✅ Bonus display updated');
+        
+        // Also update balance display
+        window.updateBalanceDisplay();
     }, 1000);
 };
 

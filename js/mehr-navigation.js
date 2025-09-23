@@ -140,7 +140,7 @@ window.showMehrTab = function(tabId) {
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Auszuzahlende PixelDrop:</label>
                                 <div class="flex space-x-2">
-                                    <input type="number" id="payout-amount" placeholder="0" min="1" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none">
+                                    <input type="number" id="payout-amount" placeholder="0" min="1" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" oninput="calculatePayoutLocal()">
                                     <button onclick="setMaxWithdrawal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
                                         Max
                                     </button>
@@ -155,10 +155,7 @@ window.showMehrTab = function(tabId) {
                             </div>
                             
                             <div class="flex space-x-2">
-                                <button onclick="calculatePayout()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                    💰 Berechnen
-                                </button>
-                                <button onclick="executePayout()" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                <button onclick="executePayout()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                                     💸 Auszahlen
                                 </button>
                             </div>
@@ -522,13 +519,19 @@ function updateStatsTab() {
     
     console.log('🔄 Updating stats tab...');
     
+    // Calculate locked balance (5% of total)
+    const totalBalance = window.userProfile.coins || 0;
+    const lockedBalance = Math.floor(totalBalance * 0.05);
+    
     const elements = {
         'total-drops': window.userProfile.drops || 0,
         'total-earnings': window.userProfile.coins || 0,
         'user-level': 1, // TODO: Calculate actual level
         'mining-machines': calculateTotalMachines(),
         'bonus-claimed': calculateTotalBonus(),
-        'current-balance': window.userProfile.coins || 0,
+        'current-balance': window.userProfile.coins || 0, // Add current balance
+        'locked-balance': lockedBalance, // Show 5% locked balance
+        'locked-balance-stats': lockedBalance, // Show 5% locked balance in stats
         'first-login': window.userProfile.joinDate || 'Unknown',
         'last-activity': new Date().toLocaleDateString(),
         'total-referrals': window.userProfile.referrals || 0,
@@ -649,10 +652,10 @@ window.setMaxWithdrawal = function() {
             }
         }
         
-        // Set max amount to 95% of current balance (5% reserve)
-        const maxAmount = Math.round(currentBalance * 0.95); // 95% of current balance (5% reserve)
+        // Set max amount to 100% of current balance (no reserve here, reserve is handled in calculation)
+        const maxAmount = Math.round(currentBalance); // 100% of current balance
         amountInput.value = Math.max(maxAmount, 100); // Minimum 100
-        console.log('✅ Max withdrawal set to:', amountInput.value, 'from current balance:', currentBalance, '(5% reserve)');
+        console.log('✅ Max withdrawal set to:', amountInput.value, 'from current balance:', currentBalance, '(full amount)');
         
         // Also update the payout amount display
         const payoutAmountElement = document.getElementById('payout-tbnb-amount');
@@ -709,20 +712,11 @@ function calculatePayoutLocal() {
         return;
     }
     
-    // Calculate actual payout - if amount is already 95% of balance, no further reduction needed
-    // If amount is the full balance, then take 95% (5% reserve)
-    // If amount is already 95% of balance, then use the amount as-is
-    let actualPayout;
-    if (amount >= currentBalance * 0.95) {
-        // Amount is already 95% or more of balance, use as-is (no double reduction)
-        actualPayout = Math.max(amount, 100);
-    } else {
-        // Amount is less than 95% of balance, take 95% of the amount
-        actualPayout = Math.max(Math.round(amount * 0.95), 100);
-    }
+    // Calculate actual payout - always take 95% of the requested amount (5% reserve)
+    const actualPayout = Math.max(Math.round(amount * 0.95), 100);
     
     payoutAmount.textContent = `${actualPayout} PixelDrop`;
-    console.log('💰 Payout calculated:', actualPayout, 'from requested:', amount, 'balance:', currentBalance, '(5% reserve)');
+    console.log('💰 Payout calculated:', actualPayout, 'from requested:', amount, 'balance:', currentBalance, '(5% reserve applied)');
 }
 
 // Execute payout function for mehr-navigation

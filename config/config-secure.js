@@ -50,6 +50,45 @@ const CONFIG = {
                 region: 'eu-central-1',
                 // accessKeyId: "YOUR_AWS_ACCESS_KEY" // Wird aus config-secrets.js geladen
                 // secretAccessKey: "YOUR_AWS_SECRET_KEY" // Wird aus config-secrets.js geladen
+                
+                // AWS Rekognition Service
+                rekognition: {
+                    endpoint: 'https://rekognition.eu-central-1.amazonaws.com',
+                    apiVersion: '2016-06-27',
+                    limits: {
+                        maxImages: 5000,
+                        maxLabels: 5000,
+                        maxFaces: 5000,
+                        maxCompareFaces: 1000
+                    }
+                },
+                
+                // Image validation settings
+                validation: {
+                    minConfidence: 80,
+                    maxFileSize: 5 * 1024 * 1024,
+                    supportedFormats: ['image/jpeg', 'image/png', 'image/webp'],
+                    minWidth: 400,
+                    minHeight: 400,
+                    maxWidth: 4096,
+                    maxHeight: 4096
+                },
+                
+                // Face detection settings - DISABLED for GeoDrops
+                faceDetection: {
+                    enabled: false,  // Disabled for landscapes/buildings
+                    minConfidence: 70,
+                    maxFaces: 1,
+                    attributes: ['ALL']
+                },
+                
+                // Object detection settings
+                objectDetection: {
+                    enabled: true,
+                    minConfidence: 60,
+                    maxLabels: 10,
+                    minInstances: 1
+                }
             }
     },
     
@@ -113,7 +152,8 @@ const CONFIG = {
             // Google Configuration
             google: {
                 // placesApiKey: "YOUR_GOOGLE_PLACES_API_KEY" // Wird aus config-secrets.js geladen
-            }
+            },
+            
 };
 
 // Export für Node.js (falls benötigt)

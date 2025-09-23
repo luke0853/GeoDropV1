@@ -1,5 +1,6 @@
 // Firebase Configuration and Initialization
 // Konfiguration wird aus config/config-secure.js und config-secrets.js geladen
+// SECURITY WARNING: API Key is public - this is normal for Firebase client apps
 
 const firebaseConfig = {
     apiKey: "AIzaSyBbaHV1OY9C_MUt4o3WTkHCGlRVt7ll9UA",
@@ -12,7 +13,7 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let app, db, storage, auth;
+let app, db, storage, auth, analytics;
 
 // Wait for Firebase to be available
 window.initializeFirebase = function() {
@@ -32,17 +33,29 @@ window.initializeFirebase = function() {
         db = firebase.firestore();
         storage = firebase.storage();
         auth = firebase.auth();
+        analytics = firebase.analytics();
         
         // Make Firebase services globally available
         window.auth = auth;
         window.db = db;
         window.storage = storage;
+        window.analytics = analytics;
         window.firebase = firebase;
         
         // Set current user if already logged in
         if (auth.currentUser) {
             window.currentUser = auth.currentUser;
             console.log('👤 Current user set:', auth.currentUser.email);
+            
+            // Set user ID for Firebase Analytics cross-device tracking
+            if (analytics) {
+                analytics.setUserId(auth.currentUser.uid);
+                analytics.setUserProperties({
+                    email: auth.currentUser.email,
+                    platform: 'web'
+                });
+                console.log('📈 Analytics User-ID set for cross-device tracking:', auth.currentUser.uid);
+            }
         }
         
         // Initialize auth state listener
@@ -66,21 +79,34 @@ window.initializeFirebase = function() {
         db = firebase.firestore();
         storage = firebase.storage();
         auth = firebase.auth();
+        analytics = firebase.analytics();
         
         console.log("✅ Firebase initialized successfully");
         console.log("📊 Auth object:", auth);
         console.log("🗄️ DB object:", db);
+        console.log("📈 Analytics object:", analytics);
         
         // Make Firebase services globally available
         window.auth = auth;
         window.db = db;
         window.storage = storage;
+        window.analytics = analytics;
         window.firebase = firebase;
         
         // Set current user if already logged in
         if (auth.currentUser) {
             window.currentUser = auth.currentUser;
             console.log('👤 Current user set:', auth.currentUser.email);
+            
+            // Set user ID for Firebase Analytics cross-device tracking
+            if (analytics) {
+                analytics.setUserId(auth.currentUser.uid);
+                analytics.setUserProperties({
+                    email: auth.currentUser.email,
+                    platform: 'web'
+                });
+                console.log('📈 Analytics User-ID set for cross-device tracking:', auth.currentUser.uid);
+            }
         } else {
             console.log('👤 No current user found');
         }
@@ -238,6 +264,16 @@ function setupAuthListener() {
             // Set global currentUser for other functions
             window.currentUser = user;
             
+            // Set user ID for Firebase Analytics cross-device tracking
+            if (window.analytics) {
+                window.analytics.setUserId(user.uid);
+                window.analytics.setUserProperties({
+                    email: user.email,
+                    platform: 'web'
+                });
+                console.log('📈 Analytics User-ID set for cross-device tracking:', user.uid);
+            }
+            
             // Update UI - hide landing page when logged in
             setTimeout(() => {
                 const landingContent = document.getElementById('landing-content');
@@ -291,6 +327,12 @@ function setupAuthListener() {
             console.log('👤 User signed out');
             // Clear global currentUser
             window.currentUser = null;
+            
+            // Clear user ID from Firebase Analytics
+            if (window.analytics) {
+                window.analytics.setUserId(null);
+                console.log('📈 Analytics User-ID cleared on logout');
+            }
             
             // Show landing page for login after logout
             setTimeout(() => {
@@ -375,7 +417,7 @@ window.login = async function() {
     const password = document.getElementById('startseite-auth-password')?.value || document.getElementById('auth-password')?.value;
     
     console.log('📧 Email found:', email ? 'Yes' : 'No');
-    console.log('🔑 Password found:', password ? 'Yes' : 'No');
+    // SECURITY: Password logging removed
     console.log('🔥 Auth object:', auth ? 'Available' : 'Not available');
     
     // Store login attempt timestamp
@@ -523,11 +565,11 @@ window.register = async function() {
             lastLogin: firebase.firestore.FieldValue.serverTimestamp()
         };
         
-        // Apply referral bonus (always use referral code - either from URL or default)
+        // Apply referral bonus and tracking (always use referral code - either from URL or default)
         userProfile.referredBy = referralCode;
-        userProfile.referralBonus = 50;
-        userProfile.coins = initialCoins + 50; // Bonus coins
-        console.log('🎯 Applying referral bonus for:', referralCode);
+        userProfile.referralBonus = referralCode !== '2b2MBGHgaDTcSOaMzepTnGK2JVz1' ? 50 : 0;
+        userProfile.coins = initialCoins + (referralCode !== '2b2MBGHgaDTcSOaMzepTnGK2JVz1' ? 50 : 0); // Bonus coins only for non-default referrals
+        console.log('🎯 Applying referral tracking for:', referralCode);
         
         // Clear referral code from localStorage (if it was stored)
         localStorage.removeItem('referralCode');
@@ -784,6 +826,19 @@ window.updateUserProfile = async function() {
     try {
         await db.collection('users').doc(auth.currentUser.uid).set(window.userProfile, { merge: true });
         console.log('✅ User profile updated in Firebase');
+        
+        // Update Firebase Analytics user properties
+        if (window.analytics) {
+            window.analytics.setUserProperties({
+                email: auth.currentUser.email,
+                platform: 'web',
+                username: window.userProfile.username || auth.currentUser.email?.split('@')[0],
+                level: window.userProfile.level || 1,
+                coins: window.userProfile.coins || 0,
+                drops: window.userProfile.drops || 0
+            });
+            console.log('📈 Analytics user properties updated');
+        }
     } catch (error) {
         console.error('❌ Error updating user profile:', error);
     }

@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SECURITY: Content Security Policy - temporarily relaxed for development -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https: blob:; connect-src 'self' https: wss:; font-src 'self' https:;">
     <title>GeoDrop App V2</title>
     
     <link rel="icon" type="image/png" sizes="32x32" href="images/logo3.1-removebg-preview.png">
@@ -48,12 +50,55 @@
             if (clickedBtn) {
                 clickedBtn.classList.add('active');
             }
+            
+            // Update filename display when switching to upload tab
+            if (tabName === 'dev-upload') {
+                console.log('🔄 Upload tab opened, updating filename display...');
+                setTimeout(() => {
+                    if (typeof updateNextFilenameDisplay === 'function') {
+                        console.log('✅ updateNextFilenameDisplay function found, calling it...');
+                        updateNextFilenameDisplay();
+                    } else {
+                        console.log('❌ updateNextFilenameDisplay function not found!');
+                        // Fallback: Direct count and update
+                        if (typeof getDevDropsCount === 'function') {
+                            getDevDropsCount().then(count => {
+                                const nextNumber = count + 1;
+                                const nextFilename = `GeoDrop${nextNumber}`;
+                                console.log(`📝 Fallback: Found ${count} drops, next filename: ${nextFilename}`);
+                                
+                                const displayElement = document.getElementById('next-filename-display');
+                                if (displayElement) {
+                                    displayElement.textContent = nextFilename;
+                                    console.log(`✅ Fallback: Updated display to ${nextFilename}`);
+                                }
+                                
+                                const filenameInput = document.getElementById('dev-filename');
+                                if (filenameInput) {
+                                    filenameInput.value = nextFilename;
+                                    console.log(`✅ Fallback: Updated input to ${nextFilename}`);
+                                }
+                            });
+                        }
+                    }
+                }, 100);
+            }
         };
         
         
         
         
         console.log('🔧 Early debug functions loaded');
+        
+        // Force update filename display after page load
+        setTimeout(() => {
+            console.log('🔄 Force updating filename display after page load...');
+            if (typeof updateNextFilenameDisplay === 'function') {
+                updateNextFilenameDisplay();
+            } else {
+                console.log('❌ updateNextFilenameDisplay function not found');
+            }
+        }, 2000);
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -65,6 +110,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
     
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1490.0.min.js"></script>
     
@@ -685,30 +731,30 @@
             </div>
             
             <div class="flex-1 p-4 space-y-2">
-                <a href="#" class="nav-btn active w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('startseite')">
-                    <span class="mr-3">🏠</span> Start
-                </a>
-                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('geocard')">
-                    <span class="mr-3">🗺️</span> GeoCard
-                </a>
-                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('geoboard')">
-                    <span class="mr-3">📊</span> GeoBoard
-                </a>
-                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('machines')">
-                    <span class="mr-3">⛏️</span> Mining
-                </a>
-                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('bonus')">
-                    <span class="mr-3">🎁</span> Bonus
-                </a>
-                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('geochat')">
-                    <span class="mr-3">💬</span> GeoChat
-                </a>
-                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('trading')">
-                    <span class="mr-3">📈</span> Trading
-                </a>
-                <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('mehr')">
-                    <span class="mr-3">⚙️</span> Mehr
-                </a>
+                  <a href="#" class="nav-btn active w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('startseite')">
+                      <span class="mr-3">🏠</span> <span data-translate="startseite">Home</span>
+                  </a>
+                  <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('geocard')">
+                      <span class="mr-3">🗺️</span> <span data-translate="geocard">GeoCard</span>
+                  </a>
+                  <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('geoboard')">
+                      <span class="mr-3">📊</span> <span data-translate="geoboard">GeoBoard</span>
+                  </a>
+                  <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('machines')">
+                      <span class="mr-3">⛏️</span> <span data-translate="machines">Mining</span>
+                  </a>
+                  <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('bonus')">
+                      <span class="mr-3">🎁</span> <span data-translate="bonus">Bonus</span>
+                  </a>
+                  <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('geochat')">
+                      <span class="mr-3">💬</span> <span data-translate="geochat">GeoChat</span>
+                  </a>
+                  <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('trading')">
+                      <span class="mr-3">📈</span> <span data-translate="trading">Trading</span>
+                  </a>
+                  <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showPage('mehr')">
+                      <span class="mr-3">⚙️</span> <span data-translate="mehr">More</span>
+                  </a>
                 <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showDevLoginPopup();">
                     <span class="mr-3">🔧</span> Dev
                 </a>
@@ -728,43 +774,55 @@
         
         <!-- Page Container -->
         <div id="page-container">
+            <!-- Language Switcher for Main Pages -->
+            <div class="fixed top-4 right-4 z-50">
+                <div class="bg-gray-800 bg-opacity-90 backdrop-blur-md border border-gray-600 rounded-lg p-1 flex shadow-lg">
+                    <button onclick="switchLanguage('de')" id="main-lang-de-btn" class="px-3 py-1 rounded text-white font-semibold hover:bg-gray-700 transition-all text-sm bg-gray-700">
+                        🇩🇪
+                    </button>
+                    <button onclick="switchLanguage('en')" id="main-lang-en-btn" class="px-3 py-1 rounded text-white font-semibold hover:bg-gray-700 transition-all text-sm">
+                        🇺🇸
+                    </button>
+                </div>
+            </div>
+            
             <div class="page" id="startseite" style="display: block;">
                 <div id="geodrop-section" class="bg-gray-800 bg-opacity-70 rounded-lg p-4 mb-6 backdrop-blur-sm text-center" style="max-width: 500px; width: fit-content; margin: 0 auto 1.5rem auto;">
-                    <h1 class="text-4xl font-bold text-white mb-2">🌍 GeoDrop</h1>
-                    <p class="text-gray-300 text-lg">Willkommen bei der Zukunft des Geo-Minings</p>
+                    <h1 class="text-4xl font-bold text-white mb-2" data-translate="geodrop-title">🌍 GeoDrop</h1>
+                    <p class="text-gray-300 text-lg" data-translate="geodrop-subtitle">Welcome to the Future of Geo-Mining</p>
                 </div>
                 
                 <div id="user-info" class="bg-gray-800 bg-opacity-70 rounded-lg p-4 mb-6 backdrop-blur-sm" style="display: none; max-width: 400px; width: fit-content; margin: 0 auto 1.5rem auto;">
-                    <h3 class="text-xl font-semibold text-white mb-4">👤 Benutzerinfo</h3>
+                    <h3 class="text-xl font-semibold text-white mb-4" data-translate="user-info">👤 User Info</h3>
                     <div class="space-y-2">
-                        <p><strong>E-Mail:</strong> <span id="user-email">-</span></p>
-                        <p><strong>Benutzername:</strong> <span id="user-username">-</span></p>
-                        <p><strong>Level:</strong> <span id="user-level">-</span></p>
-                        <p><strong>Coins:</strong> <span id="user-coins">-</span></p>
-                        <p><strong>Drops:</strong> <span id="user-drops">-</span></p>
-                        <p><strong>Boost:</strong> <span id="user-boost">-</span></p>
+                        <p><strong data-translate="email">E-Mail:</strong> <span id="user-email">-</span></p>
+                        <p><strong data-translate="username">Username:</strong> <span id="user-username">-</span></p>
+                        <p><strong data-translate="level">Level:</strong> <span id="user-level">-</span></p>
+                        <p><strong data-translate="coins">Coins:</strong> <span id="user-coins">-</span></p>
+                        <p><strong data-translate="drops">Drops:</strong> <span id="user-drops">-</span></p>
+                        <p><strong data-translate="boost">Boost:</strong> <span id="user-boost">-</span></p>
                     </div>
                     
                     <div id="referral-info" class="mt-4 p-3 bg-green-600 bg-opacity-20 rounded border border-green-500 hidden">
                         <p class="text-green-300 text-sm">
                             🎉 <strong>Referral Bonus!</strong><br>
-                            Du wurdest von <span id="referral-user">-</span> eingeladen!<br>
-                            Du erhältst 50 PixelDrop Startbonus!
+                            You were invited by <span id="referral-user">-</span>!<br>
+                            You get 50 PixelDrop start bonus!
                         </p>
                     </div>
                     
-                    <button onclick="logout()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Abmelden</button>
+                    <button onclick="logout()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Logout</button>
                 </div>
                 
                 <div id="whitepaper-section" class="bg-gray-800 bg-opacity-70 rounded-lg p-4 mb-6 mt-24 backdrop-blur-sm" style="max-width: 500px; width: fit-content; margin: 6rem auto 1.5rem auto;">
                     <h3 class="text-xl font-semibold text-white mb-4">📄 Whitepaper</h3>
-                    <p class="text-gray-300 mb-4">Erfahre mehr über das GeoDrop Konzept und die Technologie dahinter.</p>
+                    <p class="text-gray-300 mb-4">Learn more about the GeoDrop concept and the technology behind it.</p>
                     <div class="flex flex-wrap gap-3 justify-center">
                         <button onclick="showWhitepaper()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            📄 Whitepaper lesen
+                            📄 Read Whitepaper
                         </button>
                         <button onclick="showRoadmap()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                            🗺️ Roadmap anzeigen
+                            🗺️ Show Roadmap
                         </button>
                         <button onclick="showTokenomics()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                             💰 Tokenomics
@@ -776,11 +834,22 @@
                     <div class="min-h-screen flex items-center relative overflow-hidden" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
                         <div class="absolute inset-0 bg-black/20"></div>
                         
-                        <div class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20">
+                        <div class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 flex gap-2">
+                            <!-- Language Switcher -->
+                            <div class="bg-white/20 backdrop-blur-md border border-white/30 rounded-lg p-1 flex">
+                                <button onclick="switchLanguage('de')" id="lang-de-btn" class="px-3 py-1 rounded text-white font-semibold hover:bg-white/30 transition-all text-sm bg-white/30">
+                                    🇩🇪
+                                </button>
+                                <button onclick="switchLanguage('en')" id="lang-en-btn" class="px-3 py-1 rounded text-white font-semibold hover:bg-white/30 transition-all text-sm">
+                                    🇺🇸
+                                </button>
+                            </div>
+                            
+                            <!-- Login Button -->
                             <button onclick="showLoginForm()" class="bg-white/20 backdrop-blur-md border border-white/30 px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-white font-semibold hover:bg-white/30 transition-all shadow-lg text-sm sm:text-base">
                                 <i class="fas fa-sign-in-alt mr-1 sm:mr-2"></i>
-                                <span class="hidden sm:inline">Anmelden</span>
-                                <span class="sm:hidden">Login</span>
+                                <span class="hidden sm:inline" data-translate="login">Login</span>
+                                <span class="sm:hidden" data-translate="login">Login</span>
                             </button>
                         </div>
                         
@@ -789,24 +858,24 @@
                                 <div class="space-y-8">
                         <div class="space-y-4">
                                         <h1 class="text-5xl lg:text-7xl font-bold leading-tight">
-                                            Die Zukunft des
-                                            <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                                                Geo-Minings
+                                            <span data-translate="future-title">The Future of</span>
+                                            <span class="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent" data-translate="future-subtitle">
+                                                Geo-Mining
                                             </span>
                                         </h1>
-                                        <p class="text-xl text-gray-300 leading-relaxed">
-                                            Verdiene Kryptowährungen durch Geocaching! Entdecke virtuelle Drops an realen Orten und sammle Belohnungen mit der innovativen Blockchain-Technologie.
+                                        <p class="text-xl text-gray-300 leading-relaxed" data-translate="landing-description">
+                                            Earn cryptocurrencies through geocaching! Discover virtual drops at real locations and collect rewards with innovative blockchain technology.
                                         </p>
                             </div>
                     
                                     <div class="flex flex-col sm:flex-row gap-4">
                                         <button onclick="showRegistrationForm()" class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 rounded-lg text-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all pulse-glow text-center">
                                             <i class="fas fa-user-plus mr-2"></i>
-                                            Kostenlos registrieren
+                                            <span data-translate="register-free">Register for free</span>
                                         </button>
                                         <button onclick="scrollToFeatures()" class="border-2 border-white/20 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white/10 transition-all text-center">
                                             <i class="fas fa-play mr-2"></i>
-                                            Mehr erfahren
+                                            <span data-translate="learn-more">Learn more</span>
                                         </button>
                                     </div>
                                     
@@ -845,7 +914,7 @@
                                                         <i class="fas fa-coins text-white"></i>
                                                     </div>
                                                     <div>
-                                                        <div class="font-semibold">Täglicher Bonus</div>
+                                                        <div class="font-semibold">Daily Bonus</div>
                                                         <div class="text-sm text-gray-300">+50 PixelDrop</div>
                                                     </div>
                                                 </div>
@@ -856,7 +925,7 @@
                                                     </div>
                                                     <div>
                                                         <div class="font-semibold">Referral Bonus</div>
-                                                        <div class="text-sm text-gray-300">+5% von Käufen</div>
+                                                        <div class="text-sm text-gray-300">+5% from purchases</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -870,8 +939,8 @@
                     <section id="features" class="py-20 bg-gray-800">
                         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div class="text-center mb-16">
-                                <h2 class="text-4xl font-bold mb-4">Was kann GeoDrop?</h2>
-                                <p class="text-xl text-gray-400">Entdecke die revolutionären Features der Geo-Mining App</p>
+                                <h2 class="text-4xl font-bold mb-4">What can GeoDrop do?</h2>
+                                <p class="text-xl text-gray-400">Discover the revolutionary features of the Geo-Mining App</p>
                             </div>
                             
                             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -879,8 +948,8 @@
                                     <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-6">
                                         <i class="fas fa-map-marked-alt text-2xl text-white"></i>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">GPS-basiertes Mining</h3>
-                                    <p class="text-gray-300">Finde virtuelle Drops an realen Orten und verdiene Kryptowährungen durch Geocaching-Aktivitäten.</p>
+                                    <h3 class="text-xl font-semibold mb-4">GPS-based Mining</h3>
+                                    <p class="text-gray-300">Find virtual drops at real locations and earn cryptocurrencies through geocaching activities.</p>
                                 </div>
                                 
                                 <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
@@ -888,7 +957,7 @@
                                         <i class="fas fa-coins text-2xl text-white"></i>
                                     </div>
                                     <h3 class="text-xl font-semibold mb-4">Mining Machines</h3>
-                                    <p class="text-gray-300">4 verschiedene Maschinentypen für passive Einnahmen. Von Basic bis Mega Miner mit unterschiedlichen Boosts.</p>
+                                    <p class="text-gray-300">4 different machine types for passive income. From Basic to Mega Miner with different boosts.</p>
                                 </div>
                                 
                                 <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
@@ -896,15 +965,15 @@
                                         <i class="fas fa-exchange-alt text-2xl text-white"></i>
                                     </div>
                                     <h3 class="text-xl font-semibold mb-4">DeFi Trading</h3>
-                                    <p class="text-gray-300">Handel PixelDrop ↔ tBNB direkt in der App. Vollständiges DeFi-Trading mit Smart Contracts.</p>
+                                    <p class="text-gray-300">Trade PixelDrop ↔ tBNB directly in the app. Complete DeFi trading with smart contracts.</p>
                                 </div>
                                 
                                 <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
                                     <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center mb-6">
                                         <i class="fas fa-gift text-2xl text-white"></i>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">Tägliche Boni</h3>
-                                    <p class="text-gray-300">Sammle täglich 50 PixelDrop als Login-Bonus. Spezielle Effekte und Animationen inklusive.</p>
+                                    <h3 class="text-xl font-semibold mb-4">Daily Bonuses</h3>
+                                    <p class="text-gray-300">Collect 50 PixelDrop daily as login bonus. Special effects and animations included.</p>
                                 </div>
                                 
                                 <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
@@ -912,7 +981,7 @@
                                         <i class="fas fa-users text-2xl text-white"></i>
                                     </div>
                                     <h3 class="text-xl font-semibold mb-4">Referral System</h3>
-                                    <p class="text-gray-300">Lade Freunde ein und verdiene 5% ihrer Einnahmen. 2. Ebene: 1% zusätzlich.</p>
+                                    <p class="text-gray-300">Invite friends and earn 5% of their income. 2nd level: 1% additional.</p>
                                 </div>
                                 
                                 <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
@@ -920,7 +989,7 @@
                                         <i class="fas fa-mobile-alt text-2xl text-white"></i>
                                     </div>
                                     <h3 class="text-xl font-semibold mb-4">PWA Support</h3>
-                                    <p class="text-gray-300">Installierbare Web-App für mobile Geräte. Funktioniert offline und wie eine native App.</p>
+                                    <p class="text-gray-300">Installable web app for mobile devices. Works offline and like a native app.</p>
                                 </div>
                             </div>
                         </div>
@@ -929,8 +998,8 @@
                     <section id="how-it-works" class="py-20 bg-gray-900">
                         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div class="text-center mb-16">
-                                <h2 class="text-4xl font-bold mb-4">So funktioniert's</h2>
-                                <p class="text-xl text-gray-400">In 4 einfachen Schritten zu deinen ersten Kryptowährungen</p>
+                                <h2 class="text-4xl font-bold mb-4">How it works</h2>
+                                <p class="text-xl text-gray-400">In 4 simple steps to your first cryptocurrencies</p>
                             </div>
                             
                             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -946,16 +1015,16 @@
                                     <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                                         <span class="text-2xl font-bold">2</span>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">Drops finden</h3>
-                                    <p class="text-gray-400">Nutze die Karte um GeoDrops in deiner Nähe zu entdecken.</p>
+                                    <h3 class="text-xl font-semibold mb-4">Find Drops</h3>
+                                    <p class="text-gray-400">Use the map to discover GeoDrops near you.</p>
                                 </div>
                                 
                                 <div class="text-center">
                                     <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
                                         <span class="text-2xl font-bold">3</span>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">Fotos machen</h3>
-                                    <p class="text-gray-400">Mache ein Foto vom Standort und bestätige deine Anwesenheit.</p>
+                                    <h3 class="text-xl font-semibold mb-4">Take Photos</h3>
+                                    <p class="text-gray-400">Take a photo of the location and confirm your presence.</p>
                                 </div>
                                 
                                 <div class="text-center">
@@ -973,7 +1042,7 @@
                         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div class="text-center mb-16">
                                 <h2 class="text-4xl font-bold mb-4">Referral System</h2>
-                                <p class="text-xl text-gray-300">Verdiene mit jedem Freund, den du einlädst</p>
+                                <p class="text-xl text-gray-300">Earn with every friend you invite</p>
                             </div>
                             
                             <div class="grid lg:grid-cols-2 gap-12 items-center">
@@ -1064,18 +1133,18 @@
 
                     <section class="py-20 bg-gray-800">
                         <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-                            <h2 class="text-4xl font-bold mb-6">Bereit für die Zukunft des Geo-Minings?</h2>
+                            <h2 class="text-4xl font-bold mb-6">Ready for the future of Geo-Mining?</h2>
                             <p class="text-xl text-gray-400 mb-8">
-                                Schließe dich tausenden von Usern an und verdiene Kryptowährungen durch Geocaching!
+                                Join thousands of users and earn cryptocurrencies through geocaching!
                             </p>
                             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                                 <button onclick="showRegistrationForm()" class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 rounded-lg text-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all">
                                     <i class="fas fa-user-plus mr-2"></i>
-                                    Kostenlos registrieren
+                                    Register for free
                                 </button>
                                 <button onclick="scrollToFeatures()" class="border-2 border-white/20 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white/10 transition-all">
                                     <i class="fas fa-info-circle mr-2"></i>
-                                    Mehr erfahren
+                                    Learn more
                                 </button>
                             </div>
                         </div>
@@ -1109,7 +1178,7 @@
                                     <div id="referral-field" style="background: red !important; padding: 15px !important; margin: 15px 0 !important; border: 3px solid yellow !important; display: block !important; visibility: visible !important;">
                                         <label class="block text-sm font-medium text-white mb-2" style="color: white !important; font-weight: bold !important;">🔗 REFERRAL-CODE (OPTIONAL)</label>
                                         <input type="text" id="reg-referral" placeholder="REFERRAL-CODE EINGEBEN" class="w-full px-4 py-3 bg-white text-black rounded-lg border border-red-500 focus:border-blue-500 focus:outline-none" style="background: white !important; color: black !important; border: 3px solid red !important;">
-                                        <p class="text-xs text-white mt-1" style="color: white !important;">Du erhältst 50 PixelDrop Bonus wenn du über einen Referral-Link kommst!</p>
+                                        <p class="text-xs text-white mt-1" style="color: white !important;">You get 50 PixelDrop bonus if you come via a referral link!</p>
                                     </div>
                                     
                                     
@@ -1125,11 +1194,11 @@
                                 
                                 <div id="registration-success" class="hidden text-center">
                                     <div class="text-6xl mb-4">🎉</div>
-                                    <h4 class="text-2xl font-bold text-green-400 mb-2">Registrierung erfolgreich!</h4>
-                                    <p class="text-gray-300 mb-4">Du erhältst 100 PixelDrop Startbonus!</p>
+                                    <h4 class="text-2xl font-bold text-green-400 mb-2">Registration successful!</h4>
+                                    <p class="text-gray-300 mb-4">You get 100 PixelDrop start bonus!</p>
                                     <button onclick="goToApp()" class="inline-block bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all">
                                         <i class="fas fa-rocket mr-2"></i>
-                                        Zur App
+                                        Go to App
                                     </button>
                                 </div>
                             </div>
@@ -1183,7 +1252,7 @@
                         <button class="mehr-tab-btn px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors border border-gray-500" data-tab="impressum" onclick="showMehrTab('impressum')">
                             ℹ️ Impressum
                         </button>
-                        <button class="mehr-tab-btn px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors border border-gray-500" data-tab="dev" onclick="showPage('dev')">
+                        <button class="mehr-tab-btn px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors border border-gray-500" data-tab="dev" onclick="showDevLoginPopup()">
                             🔧 Dev
                         </button>
                     </div>
@@ -1211,19 +1280,52 @@
         </div>
     </div>
 
-    <div id="dev-login-popup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none;">
-        <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
-            <div style="background: #374151; border-radius: 8px; max-width: 400px; width: 100%; padding: 24px;">
-                <h2 style="color: white; font-size: 24px; font-weight: bold; margin-bottom: 16px; text-align: center;">🔐 Dev-Zugang</h2>
-                <div style="margin-bottom: 16px;">
-                    <input type="password" id="dev-password" placeholder="Dev-Passwort eingeben" style="width: 100%; padding: 8px 12px; border-radius: 6px; background: #4B5563; color: white; border: 1px solid #6B7280; outline: none;" onkeypress="if(event.key === 'Enter') loginDev()">
+    <!-- Modern Dev Login Popup -->
+    <div id="dev-login-popup" class="fixed inset-0 bg-black bg-opacity-80 z-50 hidden">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-8 border border-gray-700">
+                <!-- Header -->
+                <div class="text-center mb-8">
+                    <div class="text-4xl mb-4">🔐</div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Dev-Zugang</h2>
+                    <p class="text-gray-400 text-sm">Nur für autorisierte Entwickler</p>
                         </div>
-                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                    <button onclick="loginDev()" style="flex: 1; padding: 8px 16px; background: #2563EB; color: white; border-radius: 6px; border: none; cursor: pointer;">Anmelden</button>
-                    <button onclick="closeDevLoginPopup()" style="flex: 1; padding: 8px 16px; background: #6B7280; color: white; border-radius: 6px; border: none; cursor: pointer;">Abbrechen</button>
+                
+                <!-- Password Input -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Dev-Passwort</label>
+                    <input 
+                        type="password" 
+                        id="dev-password" 
+                        placeholder="Passwort eingeben..." 
+                        class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        onkeypress="if(event.key === 'Enter') loginDev()"
+                        autocomplete="off"
+                    >
                                         </div>
-                <div style="color: #9CA3AF; font-size: 12px; text-align: center;">
-                    💡 Nur für Entwickler mit entsprechenden Berechtigungen
+                
+                <!-- Buttons -->
+                <div class="flex gap-3 mb-6">
+                    <button 
+                        onclick="loginDev()" 
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    >
+                        🔓 Anmelden
+                    </button>
+                    <button 
+                        onclick="closeDevLoginPopup()" 
+                        class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500/20"
+                    >
+                        ❌ Abbrechen
+                    </button>
+                </div>
+                
+                <!-- Security Notice -->
+                <div class="text-center">
+                    <div class="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-3">
+                        <p class="text-yellow-400 text-sm font-medium">⚠️ Sicherheitshinweis</p>
+                        <p class="text-yellow-300/80 text-xs mt-1">Nur autorisierte Entwickler haben Zugang zu diesem Bereich</p>
+                    </div>
                                         </div>
                                         </div>
                                         </div>
@@ -1231,7 +1333,11 @@
 
     <script src="config/config-secure.js"></script>
     <script src="config/config-secrets.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1490.0.min.js"></script>
+    <script src="config/aws-config.js"></script>
+    <script src="js/aws-rekognition.js"></script>
     <script src="js/firebase.js"></script>
+    <script src="js/analytics-backup.js"></script>
     <script src="js/common.js"></script>
     <script src="js/navigation.js"></script>
     <script src="js/geochat.js"></script>
@@ -1283,9 +1389,23 @@
         // Direct Dev Login Function (fallback)
         function showDevLoginPopup() {
             console.log('🔐 showDevLoginPopup called directly');
+            
+            // Check if already logged in
+            if (window.isDevLoggedIn) {
+                console.log('🔓 Already logged in, switching to dev page...');
+                if (typeof showPage === 'function') {
+                    showPage('dev');
+                } else if (typeof window.showPage === 'function') {
+                    window.showPage('dev');
+                } else {
+                    window.location.href = 'pages/dev.html';
+                }
+                return;
+            }
+            
             const popup = document.getElementById('dev-login-popup');
             if (popup) {
-                popup.style.display = 'block';
+                popup.classList.remove('hidden');
                 document.getElementById('dev-password').focus();
                 console.log('🔐 Dev login popup shown');
             } else {
@@ -1325,14 +1445,8 @@
                     // Remove the login popup onclick and make it go directly to dev page
                     link.onclick = function(e) {
                         e.preventDefault();
-                        console.log('🔧 Dev-Tab geklickt - öffne Dev-Seite');
-                        if (typeof showPage === 'function') {
-                            showPage('dev');
-                        } else if (typeof window.showPage === 'function') {
-                            window.showPage('dev');
-                        } else {
-                            window.location.href = 'pages/dev.html';
-                        }
+                        console.log('🔧 Dev-Tab geklickt - öffne Dev-Login');
+                        showDevLoginPopup();
                         return false;
                     };
                     
@@ -1370,14 +1484,8 @@
                     button.style.color = 'white';
                     button.onclick = function(e) {
                         e.preventDefault();
-                        console.log('🔧 Dev-Button geklickt - öffne Dev-Seite');
-                        if (typeof showPage === 'function') {
-                            showPage('dev');
-                        } else if (typeof window.showPage === 'function') {
-                            window.showPage('dev');
-                        } else {
-                            window.location.href = 'pages/dev.html';
-                        }
+                        console.log('🔧 Dev-Button geklickt - öffne Dev-Login');
+                        showDevLoginPopup();
                         return false;
                     };
                     button.style.cursor = 'pointer';
@@ -1403,7 +1511,8 @@
         function closeDevLoginPopup() {
             const popup = document.getElementById('dev-login-popup');
             if (popup) {
-                popup.style.display = 'none';
+                popup.classList.add('hidden');
+                document.getElementById('dev-password').value = '';
             }
         }
 
@@ -1518,10 +1627,10 @@
                         </div>
                     
                     <div class="mb-6 p-4 bg-gray-700 rounded-lg">
-                        <h3 class="text-lg font-semibold text-blue-400 mb-3">📖 Vollständige Whitepaper anzeigen</h3>
+                        <h3 class="text-lg font-semibold text-blue-400 mb-3">📖 Show complete Whitepaper</h3>
                         <div class="flex flex-wrap gap-3">
                             <a href="whitepaper.html" target="_blank" class="px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition-all transform hover:scale-105 font-semibold text-sm min-h-[44px] flex items-center justify-center">
-                                📄 Haupt-Whitepaper
+                                📄 Main Whitepaper
                             </a>
                             <a href="whitepaper_alt.html" target="_blank" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 font-semibold text-sm min-h-[44px] flex items-center justify-center">
                                 📋 Alternative Version
@@ -1539,37 +1648,37 @@
                         </div>
                         </div>
                     <div class="prose prose-invert max-w-none">
-                        <h3 class="text-xl font-semibold text-white mb-4">🎯 Was ist GeoDrop?</h3>
+                        <h3 class="text-xl font-semibold text-white mb-4">🎯 What is GeoDrop?</h3>
                         <p class="text-gray-300 mb-4">
-                            GeoDrop ist eine innovative Blockchain-basierte App, die Geocaching mit Kryptowährungen verbindet. 
-                            User können virtuelle "Drops" an realen Orten platzieren und durch das Lösen von Aufgaben Belohnungen verdienen.
+                            GeoDrop is an innovative blockchain-based app that connects geocaching with cryptocurrencies. 
+                            Users can place virtual "drops" at real locations and earn rewards by completing tasks.
                         </p>
                         
-                        <h3 class="text-xl font-semibold text-white mb-4">🔧 Technologie (Stand: September 2025)</h3>
+                        <h3 class="text-xl font-semibold text-white mb-4">🔧 Technology (Status: September 2025)</h3>
                         <ul class="text-gray-300 mb-4 list-disc list-inside">
                             <li><strong>Blockchain:</strong> tBNB-basierte Smart Contracts mit PixelDrop Token</li>
-                            <li><strong>Trading System:</strong> Vollständiges DeFi-Trading zwischen PixelDrop ↔ tBNB</li>
-                            <li><strong>Mining Machines:</strong> 4 verschiedene Maschinentypen mit Boost-System</li>
-                            <li><strong>GPS:</strong> Präzise Standortbestimmung mit 20m Genauigkeit</li>
+                            <li><strong>Trading System:</strong> Complete DeFi trading between PixelDrop ↔ tBNB</li>
+                            <li><strong>Mining-Maschinen:</strong> 4 verschiedene Maschinentypen mit Boost-System</li>
+                            <li><strong>GPS:</strong> Precise location determination with 20m accuracy</li>
                             <li><strong>Firebase:</strong> Echtzeitdatenbank für Drops und User-Interaktionen</li>
                             <li><strong>Dev Area:</strong> Erweiterte Admin-Tools und Drop-Management</li>
-                            <li><strong>Bonus System:</strong> Tägliche Belohnungen mit Special Effects</li>
-                            <li><strong>PWA Support:</strong> Installierbare Web-App für mobile Geräte</li>
-                            <li><strong>Real-time Updates:</strong> Live-Updates für alle App-Funktionen</li>
+                            <li><strong>Bonus System:</strong> Daily rewards with special effects</li>
+                            <li><strong>PWA-Unterstützung:</strong> Installierbare Web-App für mobile Geräte</li>
+                            <li><strong>Echtzeit-Updates:</strong> Live-Updates für alle App-Funktionen</li>
                         </ul>
                         
                         <h3 class="text-xl font-semibold text-white mb-4">🎮 Gameplay</h3>
                         <p class="text-gray-300 mb-4">
-                            User navigieren zu GeoDrops, machen Fotos vom Standort und erhalten Belohnungen in Form von 
-                            Kryptowährungen. Das System verhindert Betrug durch GPS-Validierung und Bildanalyse.
+                            Users navigate to GeoDrops, take photos of the location and receive rewards in the form of 
+                            cryptocurrencies. The system prevents fraud through GPS validation and image analysis.
                         </p>
                         
-                        <h3 class="text-xl font-semibold text-white mb-4">🔒 Sicherheit</h3>
+                        <h3 class="text-xl font-semibold text-white mb-4">🔒 Security</h3>
                         <ul class="text-gray-300 mb-4 list-disc list-inside">
                             <li>Dezentrale Blockchain-Architektur</li>
                             <li>Smart Contract-basierte Belohnungen</li>
                             <li>Anti-Cheat-Systeme</li>
-                            <li>Verschlüsselte Datenübertragung</li>
+                            <li>Encrypted data transmission</li>
                         </ul>
                                         </div>
                                         </div>
@@ -1589,10 +1698,10 @@
                         <div class="border-l-4 border-green-500 pl-4">
                             <h3 class="text-lg font-semibold text-green-400">✅ Phase 1 - Foundation (August 2025)</h3>
                             <ul class="text-gray-300 mt-2 list-disc list-inside">
-                                <li>Grundlegende GeoDrop-Funktionalität</li>
-                                <li>User-Registrierung und Authentifizierung</li>
-                                <li>GPS-basierte Standortbestimmung</li>
-                                <li>Bildupload und Validierung</li>
+                                <li>Basic GeoDrop functionality</li>
+                                <li>User registration and authentication</li>
+                                <li>GPS-based location determination</li>
+                                <li>Image upload and validation</li>
                                 <li>GeoChat System</li>
                             </ul>
                                         </div>
@@ -1600,10 +1709,10 @@
                         <div class="border-l-4 border-green-500 pl-4">
                             <h3 class="text-lg font-semibold text-green-400">✅ Phase 2 - Blockchain Integration (September 2025)</h3>
                             <ul class="text-gray-300 mt-2 list-disc list-inside">
-                                <li>Vollständige tBNB Integration</li>
+                                <li>Complete tBNB integration</li>
                                 <li>PixelDrop Token System</li>
                                 <li>Trading System (PixelDrop ↔ tBNB)</li>
-                                <li>Mining Machines (4 Typen)</li>
+                                <li>Mining Machines (4 types)</li>
                                 <li>MetaMask Wallet Integration</li>
                             </ul>
                                         </div>
@@ -1611,25 +1720,25 @@
                         <div class="border-l-4 border-green-500 pl-4">
                             <h3 class="text-lg font-semibold text-green-400">✅ Phase 3 - Advanced Features (September 2025)</h3>
                             <ul class="text-gray-300 mt-2 list-disc list-inside">
-                                <li>Dev Area mit Admin-Tools</li>
-                                <li>Drop Nummerierung System</li>
-                                <li>Konsistenz-Checks</li>
-                                <li>Performance Optimierung</li>
+                                <li>Dev Area with admin tools</li>
+                                <li>Drop numbering system</li>
+                                <li>Consistency checks</li>
+                                <li>Performance optimization</li>
                                 <li>Mobile Responsiveness</li>
-                                <li>Bonus System mit Special Effects</li>
-                                <li>PWA Installation Support</li>
-                                <li>Real-time Location Updates</li>
+                                <li>Bonus system with special effects</li>
+                                <li>PWA installation support</li>
+                                <li>Real-time location updates</li>
                             </ul>
                                     </div>
                         
                         <div class="border-l-4 border-yellow-500 pl-4">
                             <h3 class="text-lg font-semibold text-yellow-400">⏳ Phase 4 - Future Development (Q4 2025)</h3>
                             <ul class="text-gray-300 mt-2 list-disc list-inside">
-                                <li>Enhanced Security Features</li>
+                                <li>Enhanced security features</li>
                                 <li>Advanced Trading Analytics</li>
-                                <li>Multi-Chain Support (Ethereum, Polygon)</li>
+                                <li>Multi-chain support (Ethereum, Polygon)</li>
                                 <li>Improved UX/UI</li>
-                                <li>NFT Integration für GeoDrops</li>
+                                <li>NFT integration for GeoDrops</li>
                                 <li>Social Features & Leaderboards</li>
                                 <li>Advanced Mining Algorithms</li>
                             </ul>
@@ -1641,7 +1750,7 @@
                                 <li>AI-Powered GeoDrop Recommendations</li>
                                 <li>AR/VR-Integration für immersive Erlebnisse</li>
                                 <li>Cross-Platform Expansion (iOS/Android Apps)</li>
-                                <li>Advanced Analytics & Machine Learning</li>
+                                <li>Erweiterte Analytics & Machine Learning</li>
                                 <li>Metaverse Integration</li>
                                 <li>Global Community Events</li>
                                 <li>Enterprise Solutions</li>
@@ -1663,53 +1772,53 @@
                                     </div>
                     <div class="grid md:grid-cols-2 gap-6">
                                     <div>
-                            <h3 class="text-xl font-semibold text-white mb-4">🪙 Token-Verteilung</h3>
+                            <h3 class="text-xl font-semibold text-white mb-4">🪙 Token distribution</h3>
                             <div class="space-y-3">
                                 <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
-                                    <span class="text-gray-300">Community Rewards</span>
+                                    <span class="text-gray-300">Community rewards</span>
                                     <span class="text-green-400 font-bold">40%</span>
                                         </div>
                                 <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
-                                    <span class="text-gray-300">Development Team</span>
+                                    <span class="text-gray-300">Development team</span>
                                     <span class="text-blue-400 font-bold">20%</span>
                                     </div>
                                 <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
-                                    <span class="text-gray-300">Liquidity Pool</span>
+                                    <span class="text-gray-300">Liquidity pool</span>
                                     <span class="text-purple-400 font-bold">15%</span>
                                         </div>
                                 <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
-                                    <span class="text-gray-300">Marketing & Partnerships</span>
+                                    <span class="text-gray-300">Marketing & partnerships</span>
                                     <span class="text-yellow-400 font-bold">15%</span>
                                     </div>
                                 <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
-                                    <span class="text-gray-300">Reserve Fund</span>
+                                    <span class="text-gray-300">Reserve fund</span>
                                     <span class="text-red-400 font-bold">10%</span>
                                 </div>
                             </div>
                                     </div>
                                     
                         <div>
-                            <h3 class="text-xl font-semibold text-white mb-4">💎 Belohnungssystem</h3>
+                            <h3 class="text-xl font-semibold text-white mb-4">💎 Reward system</h3>
                             <div class="space-y-3">
                                 <div class="p-3 bg-gray-700 rounded">
-                                    <h4 class="text-white font-semibold">GeoDrop sammeln</h4>
-                                    <p class="text-gray-300 text-sm">100 PixelDrops pro Drop (max)</p>
+                                    <h4 class="text-white font-semibold">Collect GeoDrops</h4>
+                                    <p class="text-gray-300 text-sm">100 PixelDrops per drop (max)</p>
                                     </div>
                                 <div class="p-3 bg-gray-700 rounded">
-                                    <h4 class="text-white font-semibold">Täglicher Bonus</h4>
-                                    <p class="text-gray-300 text-sm">50 PixelDrops täglich</p>
+                                    <h4 class="text-white font-semibold">Daily bonus</h4>
+                                    <p class="text-gray-300 text-sm">50 PixelDrops daily</p>
                                 </div>
                                 <div class="p-3 bg-gray-700 rounded">
-                                    <h4 class="text-white font-semibold">Mining Machines</h4>
-                                    <p class="text-gray-300 text-sm">Passive Einnahmen durch 4 Maschinentypen</p>
+                                    <h4 class="text-white font-semibold">Mining machines</h4>
+                                    <p class="text-gray-300 text-sm">Passive income through 4 machine types</p>
                             </div>
                                 <div class="p-3 bg-gray-700 rounded">
-                                    <h4 class="text-white font-semibold">Referral-Programm</h4>
-                                    <p class="text-gray-300 text-sm">5% der Einnahmen deiner Referrals</p>
+                                    <h4 class="text-white font-semibold">Referral program</h4>
+                                    <p class="text-gray-300 text-sm">5% of your referrals' income</p>
                         </div>
                                 <div class="p-3 bg-gray-700 rounded">
-                                    <h4 class="text-white font-semibold">Trading Rewards</h4>
-                                    <p class="text-gray-300 text-sm">Belohnungen für aktives Trading</p>
+                                    <h4 class="text-white font-semibold">Trading rewards</h4>
+                                    <p class="text-gray-300 text-sm">Rewards for active trading</p>
                         </div>
                             </div>
                         </div>
@@ -1740,7 +1849,7 @@
                             <div class="grid md:grid-cols-2 gap-4 text-sm">
                                 <div>
                                     <p class="text-gray-300">✅ Live Trading System</p>
-                                    <p class="text-gray-300">✅ 4 Mining Machine Types</p>
+                                    <p class="text-gray-300">✅ 4 Mining-Maschinen-Typen</p>
                                     <p class="text-gray-300">✅ Daily Bonus System</p>
                                 </div>
                                 <div>
@@ -2257,7 +2366,8 @@
                 
                 console.log('✅ Firebase user created:', user.uid);
                 
-                // No referral system in landing page
+                // Check for referral code from localStorage
+                const referralCode = localStorage.getItem('referralCode') || '2b2MBGHgaDTcSOaMzepTnGK2JVz1';
                 let initialCoins = 100;
                 
                 // Create user profile
@@ -2273,7 +2383,11 @@
                     lastLogin: window.firebase.firestore.FieldValue.serverTimestamp()
                 };
                 
-                // No referral bonus in landing page
+                // Apply referral tracking (always track referrer, but bonus only for non-default)
+                userProfile.referredBy = referralCode;
+                userProfile.referralBonus = referralCode !== '2b2MBGHgaDTcSOaMzepTnGK2JVz1' ? 50 : 0;
+                userProfile.coins = initialCoins + (referralCode !== '2b2MBGHgaDTcSOaMzepTnGK2JVz1' ? 50 : 0); // Bonus coins only for non-default referrals
+                console.log('🎯 Applying referral tracking for:', referralCode);
                 
                 // Save user profile to Firestore
                 await window.db.collection('users').doc(user.uid).set(userProfile);
@@ -2281,7 +2395,9 @@
                 console.log('✅ User profile saved to Firestore:', user.uid);
                 alert('✅ Registrierung erfolgreich! Willkommen bei GeoDrop!');
                 
-                // No referral system to clear
+                // Clear referral code from localStorage after successful registration
+                localStorage.removeItem('referralCode');
+                localStorage.removeItem('referralTimestamp');
                 
                 // Update UI
                 if (typeof updateUserDisplay === 'function') {
@@ -2456,7 +2572,363 @@
         </div>
     </div>
 
-    <script src="config/aws-config.js"></script>
-    <script src="js/aws-rekognition.js"></script>
+    
+    <!-- Language Switcher Script -->
+    <script>
+        // Language switcher functionality
+        function switchLanguage(lang) {
+            // Save language preference
+            localStorage.setItem('selectedLanguage', lang);
+            
+            // Update language switcher buttons on landing page
+            const deBtn = document.getElementById('lang-de-btn');
+            const enBtn = document.getElementById('lang-en-btn');
+            
+            if (deBtn && enBtn) {
+                if (lang === 'de') {
+                    deBtn.classList.add('bg-white/30');
+                    enBtn.classList.remove('bg-white/30');
+                } else if (lang === 'en') {
+                    deBtn.classList.remove('bg-white/30');
+                    enBtn.classList.add('bg-white/30');
+                }
+            }
+            
+            // Update language switcher buttons on main pages
+            const mainDeBtn = document.getElementById('main-lang-de-btn');
+            const mainEnBtn = document.getElementById('main-lang-en-btn');
+            
+            if (mainDeBtn && mainEnBtn) {
+                if (lang === 'de') {
+                    mainDeBtn.classList.add('bg-gray-700');
+                    mainDeBtn.classList.remove('hover:bg-gray-700');
+                    mainEnBtn.classList.remove('bg-gray-700');
+                    mainEnBtn.classList.add('hover:bg-gray-700');
+                } else if (lang === 'en') {
+                    mainDeBtn.classList.remove('bg-gray-700');
+                    mainDeBtn.classList.add('hover:bg-gray-700');
+                    mainEnBtn.classList.add('bg-gray-700');
+                    mainEnBtn.classList.remove('hover:bg-gray-700');
+                }
+            }
+            
+            // Update radio buttons in settings if they exist
+            const deRadio = document.getElementById('lang-de');
+            const enRadio = document.getElementById('lang-en');
+            
+            if (deRadio && enRadio) {
+                if (lang === 'de') {
+                    deRadio.checked = true;
+                    enRadio.checked = false;
+                } else if (lang === 'en') {
+                    deRadio.checked = false;
+                    enRadio.checked = true;
+                }
+            }
+            
+            // Update language display in settings
+            const currentLanguageDisplay = document.getElementById('settings-current-language-display');
+            if (currentLanguageDisplay) {
+                currentLanguageDisplay.textContent = lang === 'de' ? 'Deutsch' : 'English';
+            }
+            
+            // Force update all language switchers using global function
+            if (window.syncAllLanguageSwitchers) {
+                window.syncAllLanguageSwitchers(lang);
+            }
+            
+            // Here you could add actual language switching logic
+            console.log('Language switched to:', lang);
+        }
+        
+        // Initialize language switcher on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentLanguage = localStorage.getItem('selectedLanguage') || 'de';
+            
+            // Initialize landing page buttons
+            const deBtn = document.getElementById('lang-de-btn');
+            const enBtn = document.getElementById('lang-en-btn');
+            
+            if (deBtn && enBtn) {
+                if (currentLanguage === 'de') {
+                    deBtn.classList.add('bg-white/30');
+                    enBtn.classList.remove('bg-white/30');
+                } else if (currentLanguage === 'en') {
+                    deBtn.classList.remove('bg-white/30');
+                    enBtn.classList.add('bg-white/30');
+                }
+            }
+            
+            // Initialize main page buttons
+            const mainDeBtn = document.getElementById('main-lang-de-btn');
+            const mainEnBtn = document.getElementById('main-lang-en-btn');
+            
+            if (mainDeBtn && mainEnBtn) {
+                if (currentLanguage === 'de') {
+                    mainDeBtn.classList.add('bg-gray-700');
+                    mainDeBtn.classList.remove('hover:bg-gray-700');
+                    mainEnBtn.classList.remove('bg-gray-700');
+                    mainEnBtn.classList.add('hover:bg-gray-700');
+                } else if (currentLanguage === 'en') {
+                    mainDeBtn.classList.remove('bg-gray-700');
+                    mainDeBtn.classList.add('hover:bg-gray-700');
+                    mainEnBtn.classList.add('bg-gray-700');
+                    mainEnBtn.classList.remove('hover:bg-gray-700');
+                }
+            }
+            
+            // Initialize radio buttons in settings
+            const deRadio = document.getElementById('lang-de');
+            const enRadio = document.getElementById('lang-en');
+            
+            if (deRadio && enRadio) {
+                if (currentLanguage === 'de') {
+                    deRadio.checked = true;
+                    enRadio.checked = false;
+                } else if (currentLanguage === 'en') {
+                    deRadio.checked = false;
+                    enRadio.checked = true;
+                }
+            }
+            
+            // Initialize language display in settings
+            const currentLanguageDisplay = document.getElementById('settings-current-language-display');
+            if (currentLanguageDisplay) {
+                currentLanguageDisplay.textContent = currentLanguage === 'de' ? 'Deutsch' : 'English';
+            }
+            
+            // Initialize translation
+            translateText(currentLanguage);
+        });
+        
+        // Translation dictionary
+        const translations = {
+            de: {
+                // Navigation
+                'startseite': 'Startseite',
+                'geocard': 'GeoCard',
+                'geoboard': 'GeoBoard',
+                'machines': 'Mining',
+                'bonus': 'Bonus',
+                'geochat': 'GeoChat',
+                'trading': 'Trading',
+                'mehr': 'Mehr',
+                'dev': 'Dev',
+                
+                // Main content
+                'geodrop-title': '🌍 GeoDrop',
+                'geodrop-subtitle': 'Willkommen bei der Zukunft des Geo-Minings',
+                'user-info': '👤 Benutzerinfo',
+                'email': 'E-Mail:',
+                'username': 'Benutzername:',
+                'level': 'Level:',
+                'coins': 'Coins:',
+                'drops': 'Drops:',
+                'boost': 'Boost:',
+                
+                // Landing page
+                'future-title': 'Die Zukunft des',
+                'future-subtitle': 'Geo-Minings',
+                'landing-description': 'Verdiene Kryptowährungen durch Geocaching! Entdecke virtuelle Drops an realen Orten und sammle Belohnungen mit der innovativen Blockchain-Technologie.',
+                'register-free': 'Kostenlos registrieren',
+                'learn-more': 'Mehr erfahren',
+                'active-users': 'Aktive User',
+                'geodrops': 'GeoDrops',
+                'paid-out': 'Ausgezahlt',
+                
+                // Features
+                'geodrop-found': 'GeoDrop gefunden!',
+                'daily-bonus': 'Täglicher Bonus',
+                'referral-bonus': 'Referral Bonus',
+                'referral-percentage': '+5% von Käufen',
+                'pixeldrop-reward': '+150 PixelDrop',
+                'daily-pixeldrop': '+50 PixelDrop',
+                
+                // Feature descriptions
+                'what-can-geodrop': 'Was kann GeoDrop?',
+                'discover-features': 'Entdecke die revolutionären Features der Geo-Mining App',
+                'gps-mining': 'GPS-basiertes Mining',
+                'gps-mining-desc': 'Finde virtuelle Drops an realen Orten und verdiene Kryptowährungen durch Geocaching-Aktivitäten.',
+                'mining-machines': 'Mining-Maschinen',
+                'mining-machines-desc': '4 verschiedene Maschinentypen für passive Einnahmen. Von Basic bis Mega Miner mit unterschiedlichen Boosts.',
+                'defi-trading': 'DeFi Trading',
+                'defi-trading-desc': 'Handel PixelDrop ↔ tBNB direkt in der App. Vollständiges DeFi-Trading mit Smart Contracts.',
+                'daily-bonuses': 'Tägliche Boni',
+                'daily-bonuses-desc': 'Sammle täglich 50 PixelDrop als Login-Bonus. Spezielle Effekte und Animationen inklusive.',
+                'referral-system': 'Referral System',
+                'referral-system-desc': 'Lade Freunde ein und verdiene 5% ihrer Einnahmen. 2. Ebene: 1% zusätzlich.',
+                'pwa-support': 'PWA-Unterstützung',
+                'pwa-support-desc': 'Installierbare Web-App für mobile Geräte. Funktioniert offline und wie eine native App.',
+                
+                // How it works
+                'how-it-works': 'So funktioniert\'s',
+                'how-it-works-subtitle': 'In 4 einfachen Schritten zu deinen ersten Kryptowährungen',
+                
+                // Buttons
+                'login': 'Anmelden',
+                'register': 'Registrieren',
+                'logout': 'Abmelden',
+                'save': 'Speichern',
+                'cancel': 'Abbrechen',
+                'close': 'Schließen',
+                
+                // Settings
+                'settings': 'Einstellungen',
+                'profile': 'Profil',
+                'dashboard': 'Dashboard',
+                'statistics': 'Statistiken',
+                'language': 'Sprache',
+                'notifications': 'Benachrichtigungen',
+                'current-language': 'Deutsch'
+            },
+            en: {
+                // Navigation
+                'startseite': 'Home',
+                'geocard': 'GeoCard',
+                'geoboard': 'GeoBoard',
+                'machines': 'Mining',
+                'bonus': 'Bonus',
+                'geochat': 'GeoChat',
+                'trading': 'Trading',
+                'mehr': 'More',
+                'dev': 'Dev',
+                
+                // Main content
+                'geodrop-title': '🌍 GeoDrop',
+                'geodrop-subtitle': 'Welcome to the future of Geo-Mining',
+                'user-info': '👤 User Info',
+                'email': 'Email:',
+                'username': 'Username:',
+                'level': 'Level:',
+                'coins': 'Coins:',
+                'drops': 'Drops:',
+                'boost': 'Boost:',
+                
+                // Landing page
+                'future-title': 'The Future of',
+                'future-subtitle': 'Geo-Mining',
+                'landing-description': 'Earn cryptocurrencies through geocaching! Discover virtual drops at real locations and collect rewards with innovative blockchain technology.',
+                'register-free': 'Register for free',
+                'learn-more': 'Learn more',
+                'active-users': 'Active Users',
+                'geodrops': 'GeoDrops',
+                'paid-out': 'Paid Out',
+                
+                // Features
+                'geodrop-found': 'GeoDrop found!',
+                'daily-bonus': 'Daily Bonus',
+                'referral-bonus': 'Referral Bonus',
+                'referral-percentage': '+5% from purchases',
+                'pixeldrop-reward': '+150 PixelDrop',
+                'daily-pixeldrop': '+50 PixelDrop',
+                
+                // Feature descriptions
+                'what-can-geodrop': 'What can GeoDrop do?',
+                'discover-features': 'Discover the revolutionary features of the Geo-Mining App',
+                'gps-mining': 'GPS-based Mining',
+                'gps-mining-desc': 'Find virtual drops at real locations and earn cryptocurrencies through geocaching activities.',
+                'mining-machines': 'Mining Machines',
+                'mining-machines-desc': '4 different machine types for passive income. From Basic to Mega Miner with different boosts.',
+                'defi-trading': 'DeFi Trading',
+                'defi-trading-desc': 'Trade PixelDrop ↔ tBNB directly in the app. Complete DeFi trading with smart contracts.',
+                'daily-bonuses': 'Daily Bonuses',
+                'daily-bonuses-desc': 'Collect 50 PixelDrop daily as login bonus. Special effects and animations included.',
+                'referral-system': 'Referral System',
+                'referral-system-desc': 'Invite friends and earn 5% of their income. 2nd level: 1% additional.',
+                'pwa-support': 'PWA Support',
+                'pwa-support-desc': 'Installable web app for mobile devices. Works offline and like a native app.',
+                
+                // How it works
+                'how-it-works': 'How it works',
+                'how-it-works-subtitle': 'In 4 simple steps to your first cryptocurrencies',
+                
+                // Buttons
+                'login': 'Login',
+                'register': 'Register',
+                'logout': 'Logout',
+                'save': 'Save',
+                'cancel': 'Cancel',
+                'close': 'Close',
+                
+                // Settings
+                'settings': 'Settings',
+                'profile': 'Profile',
+                'dashboard': 'Dashboard',
+                'statistics': 'Statistics',
+                'language': 'Language',
+                'notifications': 'Notifications',
+                'current-language': 'English'
+            }
+        };
+        
+        // Translation function
+        function translateText(lang) {
+            const elements = document.querySelectorAll('[data-translate]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[lang] && translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+        }
+        
+        // Global language synchronization function
+        window.syncAllLanguageSwitchers = function(lang) {
+            // Update landing page buttons
+            const deBtn = document.getElementById('lang-de-btn');
+            const enBtn = document.getElementById('lang-en-btn');
+            
+            if (deBtn && enBtn) {
+                if (lang === 'de') {
+                    deBtn.classList.add('bg-white/30');
+                    enBtn.classList.remove('bg-white/30');
+                } else if (lang === 'en') {
+                    deBtn.classList.remove('bg-white/30');
+                    enBtn.classList.add('bg-white/30');
+                }
+            }
+            
+            // Update main page buttons
+            const mainDeBtn = document.getElementById('main-lang-de-btn');
+            const mainEnBtn = document.getElementById('main-lang-en-btn');
+            
+            if (mainDeBtn && mainEnBtn) {
+                if (lang === 'de') {
+                    mainDeBtn.classList.add('bg-gray-700');
+                    mainDeBtn.classList.remove('hover:bg-gray-700');
+                    mainEnBtn.classList.remove('bg-gray-700');
+                    mainEnBtn.classList.add('hover:bg-gray-700');
+                } else if (lang === 'en') {
+                    mainDeBtn.classList.remove('bg-gray-700');
+                    mainDeBtn.classList.add('hover:bg-gray-700');
+                    mainEnBtn.classList.add('bg-gray-700');
+                    mainEnBtn.classList.remove('hover:bg-gray-700');
+                }
+            }
+            
+            // Update radio buttons in settings
+            const deRadio = document.getElementById('lang-de');
+            const enRadio = document.getElementById('lang-en');
+            
+            if (deRadio && enRadio) {
+                if (lang === 'de') {
+                    deRadio.checked = true;
+                    enRadio.checked = false;
+                } else if (lang === 'en') {
+                    deRadio.checked = false;
+                    enRadio.checked = true;
+                }
+            }
+            
+            // Update language display in settings
+            const currentLanguageDisplay = document.getElementById('settings-current-language-display');
+            if (currentLanguageDisplay) {
+                currentLanguageDisplay.textContent = lang === 'de' ? 'Deutsch' : 'English';
+            }
+            
+            // Translate all text elements
+            translateText(lang);
+        };
+    </script>
 </body>
 </html>

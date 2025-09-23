@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Test - GeoDrop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #10b981; }
+        .error { background: #ef4444; }
+        .info { background: #3b82f6; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Firebase Analytics Test</h1>
+    
+    <div class="test-section">
+        <h2>📊 Analytics Status</h2>
+        <div id="analytics-status" class="status info">Prüfe Analytics-Status...</div>
+        <button onclick="checkAnalyticsStatus()">Status prüfen</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>📈 Event Tests</h2>
+        <button onclick="testPageView()">Page View testen</button>
+        <button onclick="testUserAction()">User Action testen</button>
+        <button onclick="testFeatureUsage()">Feature Usage testen</button>
+        <button onclick="testPageNavigation()">Page Navigation testen</button>
+        <button onclick="testErrorTracking()">Error Tracking testen</button>
+        <button onclick="testMultipleEvents()" style="background: #f59e0b;">Multiple Events testen</button>
+        <button onclick="runFullDiagnostic()" style="background: #ef4444;">Vollständige Diagnose</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎯 Custom Events</h2>
+        <button onclick="testCustomEvent()">Custom Event testen</button>
+        <button onclick="testScrollTracking()">Scroll Tracking testen</button>
+        <button onclick="testTimeTracking()">Time Tracking testen</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>📱 GeoDrop Features</h2>
+        <button onclick="testDropClaim()">Drop Claim testen</button>
+        <button onclick="testMachinePurchase()">Machine Purchase testen</button>
+        <button onclick="testLogin()">Login testen</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>📋 Test Log</h2>
+        <div id="test-log" style="background: #1a1a1a; padding: 10px; border-radius: 5px; height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+        <button onclick="clearLog()">Log löschen</button>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBbaHV1OY9C_MUt4o3WTkHCGlRVt7ll9UA",
+            authDomain: "geodrop-f3ee1.firebaseapp.com",
+            projectId: "geodrop-f3ee1",
+            storageBucket: "geodrop-f3ee1.firebasestorage.app",
+            messagingSenderId: "1054615552034",
+            appId: "1:1054615552034:web:8d61c64b5296f4e0cc4a7b",
+            measurementId: "G-RBEJES6HX1"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const analytics = firebase.analytics();
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // Make globally available
+        window.analytics = analytics;
+        window.auth = auth;
+        window.db = db;
+        window.firebase = firebase;
+        
+        // Test functions
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6';
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(logEntry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function checkAnalyticsStatus() {
+            const statusDiv = document.getElementById('analytics-status');
+            
+            if (analytics) {
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ Analytics ist verfügbar und funktionsfähig';
+                log('Analytics Status: Verfügbar', 'success');
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Analytics ist nicht verfügbar';
+                log('Analytics Status: Nicht verfügbar', 'error');
+            }
+        }
+        
+        function testPageView() {
+            if (!analytics) {
+                log('Analytics nicht verfügbar für Page View Test', 'error');
+                return;
+            }
+            
+            // Test multiple events to ensure they're being sent
+            analytics.logEvent('page_view', {
+                page_title: 'Analytics Test Page',
+                page_location: window.location.href,
+                page_path: '/test-analytics'
+            });
+            
+            // Also test the standard Firebase Analytics event
+            analytics.logEvent('page_view');
+            
+            // Test with minimal parameters
+            analytics.logEvent('test_event', {
+                test: 'value'
+            });
+            
+            log('Page View Events gesendet (3 verschiedene)', 'success');
+            log('Prüfe Firebase Console → Analytics → Real-time', 'info');
+        }
+        
+        function testUserAction() {
+            if (!analytics) {
+                log('Analytics nicht verfügbar für User Action Test', 'error');
+                return;
+            }
+            
+            analytics.logEvent('user_action', {
+                action: 'test_button_click',
+                timestamp: new Date().toISOString(),
+                user_id: 'test_user'
+            });
+            
+            log('User Action Event gesendet', 'success');
+        }
+        
+        function testFeatureUsage() {
+            if (!analytics) {
+                log('Analytics nicht verfügbar für Feature Usage Test', 'error');
+                return;
+            }
+            
+            analytics.logEvent('feature_usage', {
+                feature: 'analytics_test',
+                user_id: 'test_user',
+                test_type: 'manual'
+            });
+            
+            log('Feature Usage Event gesendet', 'success');
+        }
+        
+        function testPageNavigation() {
+            if (!analytics) {
+                log('Analytics nicht verfügbar für Page Navigation Test', 'error');
+                return;
+            }
+            
+            analytics.logEvent('page_navigation', {
+                from_page: 'test_page',
+                to_page: 'analytics_test',
+                navigation_time: new Date().toISOString()
+            });
+            
+            log('Page Navigation Event gesendet', 'success');
+        }
+        
+        function testErrorTracking() {
+            if (!analytics) {
+                log('Analytics nicht verfügbar für Error Tracking Test', 'error');
+                return;
+            }
+            
+            analytics.logEvent('error_occurred', {
+                error_message: 'Test error for analytics',
+                error_stack: 'Test stack trace',
+                context: 'analytics_test_page',
+                user_id: 'test_user',
+                timestamp: new Date().toISOString()
+            });
+            
+            log('Error Tracking Event gesendet', 'success');
+        }
+        
+        function testCustomEvent() {
+            if (!analytics) {
+                log('Analytics nicht verfügbar für Custom Event Test', 'error');
+                return;
+            }
+            
+            analytics.logEvent('custom_test_event', {
+                test_parameter: 'test_value',
+                timestamp: new Date().toISOString(),
+                user_id: 'test_user'
+            });
+            
+            log('Custom Event gesendet', 'success');
+        }
+        
+        function testScrollTracking() {
+            if (!analytics) {
+                log('Analytics nicht verfügbar für Scroll Tracking Test', 'error');
+                return;
+            }
+            
+            analytics.logEvent('scroll', {
+                percent_scrolled: 50
+            });
+            
+            log('Scroll Tracking Event gesendet', 'success');
+        }
+        
+        function testTimeTracking() {
+            if (!analytics) {
+                log('Analytics nicht verfügbar für Time Tracking Test', 'error');
+                return;
+            }
+            
+            analytics.logEvent('time_on_page', {
+                time_seconds: 30
+            });
+            
+            log('Time Tracking Event gesendet', 'success');
+        }
+        
+        function testDropClaim() {
+            if (!analytics) {
+                log('Analytics nicht verfügbar für Drop Claim Test', 'error');
+                return;
+            }
+            
+            analytics.logEvent('feature_usage', {
+                feature: 'drop_claim',
+                drop_id: 'test_drop_123',
+                reward: 100,
+                distance: 5.2,
+                location: {
+                    lat: 52.5200,
+                    lng: 13.4050
+                }
+            });
+            
+            log('Drop Claim Event gesendet', 'success');
+        }
+        
+        function testMachinePurchase() {
+            if (!analytics) {
+                log('Analytics nicht verfügbar für Machine Purchase Test', 'error');
+                return;
+            }
+            
+            analytics.logEvent('feature_usage', {
+                feature: 'machine_purchase',
+                machine_type: 2,
+                cost: 0.005,
+                transaction_hash: '0x1234567890abcdef'
+            });
+            
+            log('Machine Purchase Event gesendet', 'success');
+        }
+        
+        function testLogin() {
+            if (!analytics) {
+                log('Analytics nicht verfügbar für Login Test', 'error');
+                return;
+            }
+            
+            analytics.logEvent('user_action', {
+                action: 'login_success',
+                user_id: 'test_user_123',
+                email: 'test@example.com'
+            });
+            
+            log('Login Event gesendet', 'success');
+        }
+        
+        function clearLog() {
+            document.getElementById('test-log').innerHTML = '';
+        }
+        
+        // Advanced diagnostics
+        function runFullDiagnostic() {
+            log('🔍 Starte vollständige Analytics-Diagnose...', 'info');
+            
+            // Check Firebase app
+            log(`Firebase App: ${firebase.apps.length > 0 ? 'Initialisiert' : 'Nicht initialisiert'}`, firebase.apps.length > 0 ? 'success' : 'error');
+            
+            // Check Analytics
+            log(`Analytics: ${analytics ? 'Verfügbar' : 'Nicht verfügbar'}`, analytics ? 'success' : 'error');
+            
+            // Check Measurement ID
+            const config = firebase.app().options;
+            log(`Measurement ID: ${config.measurementId || 'Nicht gefunden'}`, config.measurementId ? 'success' : 'error');
+            
+            // Check if Analytics is enabled
+            if (analytics) {
+                try {
+                    // Force send a test event
+                    analytics.logEvent('diagnostic_test', {
+                        timestamp: Date.now(),
+                        user_agent: navigator.userAgent,
+                        url: window.location.href
+                    });
+                    log('Diagnostic Event gesendet', 'success');
+                } catch (error) {
+                    log(`Analytics Error: ${error.message}`, 'error');
+                }
+            }
+            
+            // Check network requests
+            log('Prüfe Network Tab für Firebase-Requests...', 'info');
+            log('Erwarte Requests an: google-analytics.com, googletagmanager.com', 'info');
+        }
+        
+        function testMultipleEvents() {
+            if (!analytics) {
+                log('Analytics nicht verfügbar', 'error');
+                return;
+            }
+            
+            const events = [
+                'test_event_1',
+                'test_event_2', 
+                'test_event_3',
+                'page_view',
+                'user_action',
+                'feature_usage'
+            ];
+            
+            events.forEach((eventName, index) => {
+                setTimeout(() => {
+                    analytics.logEvent(eventName, {
+                        test_number: index + 1,
+                        timestamp: Date.now()
+                    });
+                    log(`Event ${index + 1}: ${eventName} gesendet`, 'success');
+                }, index * 500); // Send every 500ms
+            });
+            
+            log('6 Events werden über 3 Sekunden gesendet...', 'info');
+        }
+        
+        // Auto-check status on load
+        window.addEventListener('load', () => {
+            setTimeout(checkAnalyticsStatus, 1000);
+        });
+    </script>
+</body>
+</html>

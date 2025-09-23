@@ -119,7 +119,7 @@
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">Auszuzahlende PixelDrop:</label>
                                 <div class="flex space-x-2">
-                                    <input type="number" id="payout-amount" placeholder="0" min="1" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none">
+                                    <input type="number" id="payout-amount" placeholder="0" min="1" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" oninput="calculatePayout()">
                                     <button onclick="setMaxWithdrawal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
                                         Max
                                     </button>
@@ -134,10 +134,7 @@
                             </div>
                             
                             <div class="flex space-x-2">
-                                <button onclick="calculatePayout()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                    💰 Berechnen
-                                </button>
-                                <button onclick="executePayout()" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                <button onclick="executePayout()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                                     💸 Auszahlen
                                 </button>
                             </div>
@@ -204,18 +201,32 @@
         function setMaxWithdrawal() {
             const amountInput = document.getElementById('payout-amount');
             if (amountInput) {
-                amountInput.value = '1000'; // Example max amount
-                console.log('✅ Max withdrawal set');
+                // Get current balance from userProfile or UI
+                let currentBalance = 0;
+                if (window.userProfile) {
+                    currentBalance = window.userProfile.coins || 0;
+                }
+                
+                // Set to full balance (no reserve here, reserve is handled in calculation)
+                amountInput.value = Math.max(currentBalance, 100);
+                console.log('✅ Max withdrawal set to:', amountInput.value);
+                
+                // Trigger calculation
+                calculatePayout();
             }
         }
 
         function calculatePayout() {
-            const amount = document.getElementById('payout-amount').value;
+            const amountInput = document.getElementById('payout-amount');
             const payoutAmount = document.getElementById('payout-tbnb-amount');
-            if (payoutAmount) {
-                payoutAmount.textContent = `${amount} PixelDrop`;
+            
+            if (amountInput && payoutAmount) {
+                const amount = parseFloat(amountInput.value) || 0;
+                // Calculate actual payout - 95% of requested amount (5% reserve)
+                const actualPayout = Math.max(Math.round(amount * 0.95), 100);
+                payoutAmount.textContent = `${actualPayout} PixelDrop`;
+                console.log('💰 Payout calculated:', actualPayout, 'from requested:', amount);
             }
-            console.log('💰 Payout calculated:', amount);
         }
 
         function executePayout() {

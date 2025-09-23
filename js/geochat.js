@@ -1,11 +1,53 @@
 // GeoChat Functions for GeoDrop App
 
+// Function to format message text and make URLs clickable - XSS SECURE
+window.formatMessageText = function(text) {
+    if (!text) return '';
+    
+    // SECURITY: Escape HTML to prevent XSS attacks
+    const escapeHtml = (unsafe) => {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    };
+    
+    // Escape the text first
+    const escapedText = escapeHtml(text);
+    
+    // Regular expression to match URLs
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    
+    // Replace URLs with clickable links (URLs are already escaped)
+    return escapedText.replace(urlRegex, function(url) {
+        // Double-check URL is safe (basic validation)
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 underline">${escapeHtml(url)}</a>`;
+        }
+        return escapeHtml(url);
+    });
+};
+
 // GeoChat functions - global functions
 window.sendMessage = async function() {
     const input = document.getElementById('chat-input');
     const message = input.value.trim();
     
     if (!message) return;
+    
+    // SECURITY: Validate message length and content
+    if (message.length > 500) {
+        alert('❌ Nachricht zu lang! Maximal 500 Zeichen erlaubt.');
+        return;
+    }
+    
+    // SECURITY: Basic XSS prevention
+    if (message.includes('<script') || message.includes('javascript:')) {
+        alert('❌ Ungültige Zeichen in der Nachricht!');
+        return;
+    }
     
     const user = auth.currentUser;
     if (!user) {
@@ -101,7 +143,7 @@ window.loadChatMessages = function() {
                             <span class="text-xs font-semibold text-gray-300">${displayUsername}</span>
                             <span class="text-xs text-gray-400">${timeStr}</span>
                         </div>
-                        <p class="text-white">${data.text}</p>
+                        <p class="text-white">${formatMessageText(data.text)}</p>
                     </div>
                 </div>
             `;

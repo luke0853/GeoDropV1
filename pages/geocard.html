@@ -24,7 +24,6 @@
             
             // Check multiple dev login indicators
             const isDevLoggedIn = window.isDevLoggedIn || 
-                                 localStorage.getItem('devLoggedIn') === 'true' || 
                                  sessionStorage.getItem('devLoggedIn') === 'true' ||
                                  window.isAdmin === true;
             
@@ -146,7 +145,7 @@
         window.createTestMelkDrop = async function() {
             console.log('🏛️ Creating TEST Stift Melk Drop...');
             
-            if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+            if (!window.isDevLoggedIn && sessionStorage.getItem('devLoggedIn') !== 'true') {
                 showMessage('❌ Dev-Zugang erforderlich!', true);
                 return;
             }
@@ -310,7 +309,7 @@
         window.createTestAustriaDrop = async function() {
             console.log('🧪 Creating TEST Austria Tourist Drop...');
             
-            if (!window.isDevLoggedIn && localStorage.getItem('devLoggedIn') !== 'true') {
+            if (!window.isDevLoggedIn && sessionStorage.getItem('devLoggedIn') !== 'true') {
                 showMessage('❌ Dev-Zugang erforderlich!', true);
                 return;
             }
@@ -563,6 +562,11 @@
                     📸 Foto aufnehmen
                 </button>
                 
+                <!-- Dev-only: Bild auswählen Button -->
+                <button id="dev-select-image-btn" onclick="handleDevImageSelect()" class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors mb-4" style="display: none;">
+                    🖼️ Bild auswählen (Dev)
+                </button>
+                
                 <!-- Debug Button -->
                 <button onclick="debugUploadProcess()" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors mb-4">
                     🔍 Upload Debug
@@ -611,7 +615,7 @@
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-semibold text-white">📋 GeoDrops Übersicht</h3>
                 <div class="flex gap-2">
-                    <button onclick="loadGeoDrops()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    <button onclick="reloadAllDropLists()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                         🔄 Drops neu laden
                     </button>
                 </div>
@@ -857,9 +861,9 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🗺️ GeoCard page loaded, initializing...');
             
-            // Check Dev status from localStorage first
-            const savedDevStatus = localStorage.getItem('devLoggedIn');
-            const savedDevTimestamp = localStorage.getItem('devLoginTimestamp');
+            // Check Dev status from sessionStorage first
+            const savedDevStatus = sessionStorage.getItem('devLoggedIn');
+            const savedDevTimestamp = sessionStorage.getItem('devLoginTimestamp');
             const currentTime = Date.now();
             const sessionTimeout = 2 * 60 * 60 * 1000; // 2 hours
             
@@ -1465,7 +1469,28 @@
                 const db = window.firebase.firestore();
                 console.log('🔍 DB object:', db);
                 
-                const devDropsSnapshot = await db.collection('devDrops').where('isAvailable', '==', true).get();
+                // Load all dev drops and filter out claimed ones
+                const allDevDropsSnapshot = await db.collection('devDrops').get();
+                
+                // Filter for available drops and exclude claimed drops for today
+                const today = new Date().toDateString();
+                const currentUser = window.currentUser || window.auth?.currentUser;
+                
+                const devDropsSnapshot = {
+                    docs: allDevDropsSnapshot.docs.filter(doc => {
+                        const data = doc.data();
+                        const isAvailable = data.isAvailable === true;
+                        
+                        // Check if claimed today by current user
+                        const lastClaimDate = data.lastClaimDate ? data.lastClaimDate.toDate().toDateString() : null;
+                        const isClaimedToday = lastClaimDate === today && data.claimedBy === currentUser?.uid;
+                        
+                        // Only include drops that are available AND not claimed today
+                        return isAvailable && !isClaimedToday;
+                    }),
+                    size: 0
+                };
+                devDropsSnapshot.size = devDropsSnapshot.docs.length;
                 console.log('📊 Dev drops snapshot:', devDropsSnapshot.size, 'drops found');
                 
                 const devDrops = [];
@@ -1522,7 +1547,28 @@
                 }
                 
                 const db = window.firebase.firestore();
-                const userDropsSnapshot = await db.collection('userDrops').where('isActive', '==', true).get();
+                // Load all user drops and filter out claimed ones
+                const allUserDropsSnapshot = await db.collection('userDrops').get();
+                
+                // Filter for active drops and exclude claimed drops for today
+                const today = new Date().toDateString();
+                const currentUser = window.currentUser || window.auth?.currentUser;
+                
+                const userDropsSnapshot = {
+                    docs: allUserDropsSnapshot.docs.filter(doc => {
+                        const data = doc.data();
+                        const isActive = data.isActive === true;
+                        
+                        // Check if claimed today by current user
+                        const lastClaimDate = data.lastClaimDate ? data.lastClaimDate.toDate().toDateString() : null;
+                        const isClaimedToday = lastClaimDate === today && data.claimedBy === currentUser?.uid;
+                        
+                        // Only include drops that are active AND not claimed today
+                        return isActive && !isClaimedToday;
+                    }),
+                    size: 0
+                };
+                userDropsSnapshot.size = userDropsSnapshot.docs.length;
                 
                 const userDrops = [];
                 userDropsSnapshot.forEach(doc => {
@@ -1599,8 +1645,8 @@
                         const lastClaimDate = drop.lastClaimDate ? drop.lastClaimDate.toDate().toDateString() : null;
                         const isClaimedToday = lastClaimDate === today && drop.claimedBy === currentUser?.uid;
                         const statusText = isClaimedToday ? '⏰ Heute gesammelt' : '✅ Verfügbar';
-                        const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-600' : 'border-b border-gray-700';
-                        const textClass = isClaimedToday ? 'text-gray-400' : 'text-white';
+                        const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-800 opacity-60' : 'border-b border-gray-700';
+                        const textClass = isClaimedToday ? 'text-gray-500' : 'text-white';
                         tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${drop.geodropNumber || drop.id}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;
                     });
                     tableHTML += '</tbody></table></div>';
@@ -2050,7 +2096,7 @@
                 modal.style.display = 'block';
                 
                 // Check if user is Dev and show dev coordinates section
-                const isDevLoggedIn = window.isDevLoggedIn || localStorage.getItem('devLoggedIn') === 'true';
+                const isDevLoggedIn = window.isDevLoggedIn || sessionStorage.getItem('devLoggedIn') === 'true';
                 const devSection = document.getElementById('dev-coordinates-section');
                 if (devSection) {
                     devSection.style.display = isDevLoggedIn ? 'block' : 'none';
@@ -2101,7 +2147,7 @@
                     modal.style.display = 'block';
                     
                     // Check if user is Dev and show dev coordinates section
-                    const isDevLoggedIn = window.isDevLoggedIn || localStorage.getItem('devLoggedIn') === 'true';
+                    const isDevLoggedIn = window.isDevLoggedIn || sessionStorage.getItem('devLoggedIn') === 'true';
                     const devSection = document.getElementById('dev-coordinates-section');
                     if (devSection) {
                         devSection.style.display = isDevLoggedIn ? 'block' : 'none';

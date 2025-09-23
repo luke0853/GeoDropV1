@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoDrop App V2</title>
+    
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo3.1-removebg-preview.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/logo3.1-removebg-preview.png">
+    <link rel="shortcut icon" href="images/logo3.1-removebg-preview.png">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GeoDrop">
+    <link rel="apple-touch-icon" href="images/logo3.1-removebg-preview.png">
+
+    <script>
+        // Debug System - Disabled for Production
+        let debugWindowVisible = false;
+        
+        // Dev Tab Functions - Load Early
+        window.showDevTab = function(tabName) {
+            console.log('🔧 Switching to dev tab:', tabName);
+            
+            // Hide all dev tabs
+            document.querySelectorAll('.dev-tab').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Show the selected tab
+            const tabElement = document.getElementById(tabName);
+            if (tabElement) {
+                tabElement.style.display = 'block';
+            }
+        };
+
+        // UI Functions - Load Early
+        window.toggleDebug = function() {
+            debugWindowVisible = !debugWindowVisible;
+            document.getElementById('debug-window').classList.toggle('hidden', !debugWindowVisible);
+            console.log('🐞 Debug window visibility:', debugWindowVisible);
+        };
+
+        window.openDirectReferralsModal = function() {
+            console.log('🔗 Opening direct referrals modal');
+            document.getElementById('direct-referrals-modal').classList.remove('hidden');
+        };
+
+        window.closeDirectReferralsModal = function() {
+            console.log('🔗 Closing direct referrals modal');
+            document.getElementById('direct-referrals-modal').classList.add('hidden');
+        };
+
+        window.openIndirectReferralsModal = function() {
+            console.log('🔄 Opening indirect referrals modal');
+            document.getElementById('indirect-referrals-modal').classList.remove('hidden');
+        };
+
+        window.closeIndirectReferralsModal = function() {
+            console.log('🔄 Closing indirect referrals modal');
+            document.getElementById('indirect-referrals-modal').classList.add('hidden');
+        };
+
+        window.copyReferralLink = function() {
+            const linkElement = document.getElementById('referral-link-input');
+            linkElement.select();
+            linkElement.setSelectionRange(0, 99999); // For mobile devices
+            try {
+                const successful = document.execCommand('copy');
+                const msg = successful ? 'successful' : 'unsuccessful';
+                console.log('📋 Copying link was ' + msg);
+                const tooltip = document.getElementById('copy-tooltip');
+                tooltip.textContent = successful ? 'Copied!' : 'Copy failed!';
+                tooltip.classList.remove('hidden');
+                setTimeout(() => {
+                    tooltip.classList.add('hidden');
+                    tooltip.textContent = 'Copy';
+                }, 2000);
+            } catch (err) {
+                console.error('📋 Unable to copy text', err);
+                const tooltip = document.getElementById('copy-tooltip');
+                tooltip.textContent = 'Copy failed!';
+                tooltip.classList.remove('hidden');
+                setTimeout(() => {
+                    tooltip.classList.add('hidden');
+                    tooltip.textContent = 'Copy';
+                }, 2000);
+            }
+        };
+        
+        // This function now works directly in the file
+        window.hideLoginAndShowUserInfo = function() {
+            const landingContent = document.getElementById('landing-content');
+            const userInfo = document.getElementById('user-info');
+            if (landingContent) {
+                landingContent.style.display = 'none';
+                console.log('🚫 Landing content manually hidden');
+            }
+            if (userInfo) {
+                userInfo.style.display = 'block';
+                console.log('👤 User info manually shown');
+            }
+        };
+
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117;
+            color: #e6edf3;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        .login-card {
+            background-color: #161b22;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+        }
+        .user-card {
+            background-color: #161b22;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            display: grid;
+            gap: 1.5rem;
+        }
+        .referral-card {
+            background-color: #011d24;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid #14353b;
+        }
+        .link-input {
+            background-color: #0e1217;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+        }
+        .btn-primary {
+            background-color: #216e39;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+        }
+        .btn-secondary {
+            background-color: #30363d;
+            color: #c9d1d9;
+        }
+        .modal-card {
+            background-color: #161b22;
+        }
+        .copy-tooltip {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #3b82f6;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .copy-tooltip.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <div class="container mx-auto p-4 md:p-8">
+
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-50 mb-2">GeoDrop App V2</h1>
+            <p class="text-lg md:text-xl text-gray-400">Welcome to GeoDrop, your interactive health platform.</p>
+        </header>
+
+        <!-- Landing/Login Section -->
+        <section id="landing-content" class="login-card shadow-lg">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-50">Login</h2>
+            <button id="login-button" onclick="hideLoginAndShowUserInfo()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition-colors duration-300 transform hover:scale-105">
+                Connect Wallet
+            </button>
+        </section>
+
+        <!-- User Info Section -->
+        <section id="user-info" class="user-card shadow-lg hidden">
+            <h2 class="text-2xl md:text-3xl font-bold mb-4 text-gray-50">👋 Welcome back</h2>
+            
+            <div class="referral-card">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-sm md:text-base font-semibold text-gray-300">Your Wallet Balance:</p>
+                    <p id="balance-display" class="text-lg md:text-xl font-bold text-emerald-400">0.00 GDT</p>
+                </div>
+                <div class="flex justify-center mt-4">
+                    <button class="bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-6 rounded-full text-sm transition-colors duration-300">
+                        Open your Wallet
+                    </button>
+                </div>
+            </div>
+
+            <div class="referral-card">
+                <p class="text-sm md:text-base font-semibold text-gray-300 mb-2">Your Personal Referral Link:</p>
+                <div class="relative flex items-center">
+                    <input type="text" id="referral-link-input" readonly value="https://geodrop.me/referral/123456789" class="link-input w-full p-2 rounded-lg text-sm truncate">
+                    <div class="absolute right-0 top-0 bottom-0 flex items-center mr-2">
+                        <button onclick="copyReferralLink()" class="relative bg-emerald-600 hover:bg-emerald-700 text-white py-1 px-3 rounded-md text-xs transition-colors duration-300">
+                            Copy Link
+                            <span id="copy-tooltip" class="copy-tooltip hidden">Copied!</span>
+                        </button>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Please copy the link manually if copying does not work.</p>
+            </div>
+
+            <div class="referral-card">
+                <p class="text-sm md:text-base font-semibold text-gray-300 mb-2">Direct Referrals (Users you've referred):</p>
+                <div id="direct-referrals-count" class="flex items-center justify-between mb-4">
+                    <span class="text-lg md:text-xl font-bold text-gray-50">0 Users</span>
+                    <button onclick="openDirectReferralsModal()" class="btn-secondary py-1 px-4 rounded-full text-xs transition-colors duration-300">
+                        Show all
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500">You receive 2% of their purchases.</p>
+            </div>
+
+            <div class="referral-card">
+                <p class="text-sm md:text-base font-semibold text-gray-300 mb-2">Indirect Referrals (Users referred by your direct referrals):</p>
+                <div id="indirect-referrals-count" class="flex items-center justify-between mb-4">
+                    <span class="text-lg md:text-xl font-bold text-gray-50">0 Users</span>
+                    <button onclick="openIndirectReferralsModal()" class="btn-secondary py-1 px-4 rounded-full text-xs transition-colors duration-300">
+                        Show all
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500">You receive 1% of their purchases.</p>
+            </div>
+        </section>
+
+    </div>
+
+    <div id="direct-referrals-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">🔗 Direct Referrals</h3>
+                <button onclick="closeDirectReferralsModal()" class="text-gray-400 hover:text-white text-2xl">
+                    ×
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-gray-300 text-sm">
+                    This list shows all users who were directly referred by you. 
+                    You receive 2% of their purchases.
+                </p>
+            </div>
+            
+            <div id="direct-referrals-list" class="space-y-3">
+                <div class="text-center text-gray-400 p-8">Loading direct referrals...</div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="indirect-referrals-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">🔄 Indirect Referrals</h3>
+                <button onclick="closeIndirectReferralsModal()" class="text-gray-400 hover:text-white text-2xl">
+                    ×
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-gray-300 text-sm">
+                    This list shows all users who were referred by your direct referrals. 
+                    You receive 1% of their purchases.
+                </p>
+            </div>
+            
+            <div id="indirect-referrals-list" class="space-y-3">
+                <div class="text-center text-gray-400 p-8">Loading indirect referrals...</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

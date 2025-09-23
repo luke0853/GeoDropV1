@@ -1,46 +1,219 @@
-<h3 class="text-2xl font-bold text-white mb-8 bg-black px-4 py-2 rounded-lg">🔧 Dev-Bereich</h3>
+<h3 class="text-2xl font-bold text-white mb-8">🔧 Dev-Bereich</h3>
 
-<div class="bg-gray-700 rounded-lg p-6">
-    <h3 class="text-xl font-semibold text-white mb-4">🔧 Entwickler-Bereich</h3>
-    <div class="space-y-4 text-gray-300">
-        <p class="text-yellow-400 font-bold">⚠️ Nur für Entwickler zugänglich!</p>
-        
-        <div class="bg-gray-600 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-blue-400 mb-2">🔐 Dev-Zugang</h4>
-            <div class="space-y-2">
-                <input type="password" id="dev-password" placeholder="Dev-Passwort" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none">
-                <button onclick="testDevLogin()" class="w-full px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
-                    🔐 Dev-Zugang testen
+<!-- Tab Navigation -->
+<div class="bg-gray-800 p-4 rounded-lg mb-8">
+    <div class="flex space-x-4">
+        <button onclick="showDevTab('dev-tools')" id="dev-tools-tab" class="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
+            🔧 Dev Tools
+        </button>
+        <button onclick="showDevTab('test-tools')" id="test-tools-tab" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700">
+            🧪 Test Tools
+        </button>
+        <button onclick="showDevTab('debug-tools')" id="debug-tools-tab" class="bg-gray-600 px-4 py-2 rounded hover:bg-gray-700">
+            🐛 Debug Tools
+        </button>
+    </div>
+</div>
+
+<!-- Dev Tools Tab -->
+<div id="dev-tools-content" class="dev-tab">
+    <h2 class="text-3xl font-bold mb-8">🔧 Dev Tools</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Dev Drop Creation -->
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold mb-4">🎯 Dev Drops erstellen</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Drop Name:</label>
+                    <input type="text" id="dev-drop-name" placeholder="z.B. Test Drop" 
+                           class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Belohnung:</label>
+                    <input type="number" id="dev-drop-reward" placeholder="100" min="1" 
+                           class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Beschreibung:</label>
+                    <textarea id="dev-drop-description" placeholder="Beschreibung..." 
+                              class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 h-20"></textarea>
+                </div>
+                <button onclick="createDevDrop()" class="w-full bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700">
+                    🎯 Dev Drop erstellen
                 </button>
             </div>
         </div>
 
-        <div class="bg-gray-600 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-green-400 mb-2">🛠️ Dev-Tools</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button onclick="clearAllData()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-                    🗑️ Alle Daten löschen
+        <!-- Bild-Upload & Drop-Erstellung -->
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold mb-4">📸 Bild-Upload & Drop-Erstellung</h3>
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Bild auswählen:</label>
+                        <input type="file" id="dev-image-file" accept="image/*" class="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Dateiname:</label>
+                        <input type="text" id="dev-filename" placeholder="GeoDrop" class="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600">
+                        <div id="next-filename-display" class="text-xs text-gray-400 mt-1">Nächster: GeoDrop1</div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Breitengrad (Lat):</label>
+                        <input type="number" id="upload-lat" step="0.000001" placeholder="48.1984878" class="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Längengrad (Lng):</label>
+                        <input type="number" id="upload-lng" step="0.000001" placeholder="15.2122524" class="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button onclick="uploadDevImageWithDrop()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                        📸 Bild + Drop erstellen
+                    </button>
+                    <button onclick="uploadDevImageDirect()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        📸 Nur Bild hochladen
+                    </button>
+                    <button onclick="createDevDrop()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                        🎯 Nur Drop erstellen
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Management -->
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold mb-4">👥 User Management</h3>
+            <div class="space-y-4">
+                <button onclick="loadAllUsers()" class="w-full bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700">
+                    📊 Alle User laden
                 </button>
-                <button onclick="resetUserProgress()" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">
-                    🔄 Fortschritt zurücksetzen
+                <button onclick="resetUserData()" class="w-full bg-yellow-600 px-4 py-2 rounded-lg hover:bg-yellow-700">
+                    🔄 User-Daten zurücksetzen
                 </button>
-                <button onclick="addTestCoins()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
-                    💰 Test-Coins hinzufügen
+                <button onclick="deleteAllUsers()" class="w-full bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700">
+                    🗑️ Alle User löschen
                 </button>
-                <button onclick="exportUserData()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                    📤 Daten exportieren
+            </div>
+        </div>
+    </div>
+
+    <!-- Dev Drop List -->
+    <div class="bg-gray-800 p-6 rounded-lg mt-8">
+        <h3 class="text-xl font-semibold mb-4">📋 Dev Drops Liste</h3>
+        <div id="dev-drops-list" class="space-y-3">
+            <div class="text-center text-gray-400 py-8">
+                <div class="text-6xl mb-4">📋</div>
+                <p>Lade Dev Drops...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Test Tools Tab -->
+<div id="test-tools-content" class="dev-tab hidden">
+    <h2 class="text-3xl font-bold mb-8">🧪 Test Tools</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- System Tests -->
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold mb-4">🔍 System Tests</h3>
+            <div class="space-y-4">
+                <button onclick="testFirebaseConnection()" class="w-full bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700">
+                    🔥 Firebase Test
+                </button>
+                <button onclick="testWalletConnection()" class="w-full bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700">
+                    💰 Wallet Test
+                </button>
+                <button onclick="testBlockchainConnection()" class="w-full bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700">
+                    ⛓️ Blockchain Test
+                </button>
+                <button onclick="testImageUpload()" class="w-full bg-orange-600 px-4 py-2 rounded-lg hover:bg-orange-700">
+                    📸 Upload Test
                 </button>
             </div>
         </div>
 
-        <div class="bg-gray-600 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-cyan-400 mb-2">📊 Debug-Informationen</h4>
-            <div class="space-y-2">
-                <p><strong>User ID:</strong> <span id="debug-user-id">-</span></p>
-                <p><strong>Session:</strong> <span id="debug-session">-</span></p>
-                <p><strong>Version:</strong> <span id="debug-version">1.0.0</span></p>
-                <p><strong>Last Update:</strong> <span id="debug-last-update">-</span></p>
+        <!-- Performance Tests -->
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold mb-4">⚡ Performance Tests</h3>
+            <div class="space-y-4">
+                <button onclick="testPageLoadSpeed()" class="w-full bg-yellow-600 px-4 py-2 rounded-lg hover:bg-yellow-700">
+                    🚀 Ladezeit Test
+                </button>
+                <button onclick="testMemoryUsage()" class="w-full bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700">
+                    💾 Speicher Test
+                </button>
+                <button onclick="testDatabasePerformance()" class="w-full bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-700">
+                    🗄️ DB Performance
+                </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Test Results -->
+    <div class="bg-gray-800 p-6 rounded-lg mt-8">
+        <h3 class="text-xl font-semibold mb-4">📊 Test Ergebnisse</h3>
+        <div id="test-results" class="space-y-3">
+            <div class="text-center text-gray-400 py-8">
+                <div class="text-6xl mb-4">🧪</div>
+                <p>Führe Tests aus um Ergebnisse zu sehen</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Debug Tools Tab -->
+<div id="debug-tools-content" class="dev-tab hidden">
+    <h2 class="text-3xl font-bold mb-8">🐛 Debug Tools</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Debug Information -->
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold mb-4">🔍 Debug Information</h3>
+            <div class="space-y-4">
+                <button onclick="showSystemInfo()" class="w-full bg-blue-600 px-4 py-2 rounded-lg hover:bg-blue-700">
+                    💻 System Info
+                </button>
+                <button onclick="showUserInfo()" class="w-full bg-green-600 px-4 py-2 rounded-lg hover:bg-green-700">
+                    👤 User Info
+                </button>
+                <button onclick="showFirebaseInfo()" class="w-full bg-orange-600 px-4 py-2 rounded-lg hover:bg-orange-700">
+                    🔥 Firebase Info
+                </button>
+                <button onclick="showWalletInfo()" class="w-full bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-700">
+                    💰 Wallet Info
+                </button>
+            </div>
+        </div>
+
+        <!-- Debug Actions -->
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-semibold mb-4">🔧 Debug Actions</h3>
+            <div class="space-y-4">
+                <button onclick="clearLocalStorage()" class="w-full bg-yellow-600 px-4 py-2 rounded-lg hover:bg-yellow-700">
+                    🗑️ LocalStorage leeren
+                </button>
+                <button onclick="resetAppState()" class="w-full bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700">
+                    🔄 App State zurücksetzen
+                </button>
+                <button onclick="exportDebugData()" class="w-full bg-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-700">
+                    📤 Debug Data exportieren
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Output -->
+    <div class="bg-gray-800 p-6 rounded-lg mt-8">
+        <h3 class="text-xl font-semibold mb-4">📋 Debug Output</h3>
+        <div id="debug-output" class="bg-gray-900 p-4 rounded-lg font-mono text-sm max-h-96 overflow-y-auto">
+            <div class="text-gray-400">Debug-Informationen werden hier angezeigt...</div>
         </div>
     </div>
 </div>

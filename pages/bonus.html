@@ -329,6 +329,16 @@
                                 if (typeof window.updateBonusDisplay === 'function') {
                                     window.updateBonusDisplay();
                                 }
+                                
+                                // Update balance display
+                                if (typeof window.updateBalanceDisplay === 'function') {
+                                    window.updateBalanceDisplay();
+                                }
+                                
+                                // Start unlock countdown timer
+                                if (typeof window.startUnlockCountdown === 'function') {
+                                    window.startUnlockCountdown();
+                                }
                             } else {
                                 console.log('❌ User profile not found in Firestore');
                             }

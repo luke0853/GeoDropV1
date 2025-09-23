@@ -261,10 +261,7 @@ function generateDashboardContent() {
                             </div>
                             
                             <div class="flex space-x-2">
-                                <button onclick="calculatePayout()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                    💰 Berechnen
-                                </button>
-                                <button onclick="executePayout()" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                <button onclick="executePayout()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
                                     💸 Auszahlen
                                 </button>
                             </div>
@@ -1374,6 +1371,15 @@ window.updateAllStatistics = function() {
             console.log('✅ Bonus claimed updated:', totalBonusClaimed, 'from', bonusHistory.length, 'bonus entries');
         }
         
+        // Update locked balance (5% of total balance)
+        const lockedBalanceStats = document.getElementById('locked-balance-stats');
+        if (lockedBalanceStats) {
+            const totalBalance = window.userProfile.coins || 0;
+            const lockedBalance = Math.floor(totalBalance * 0.05);
+            lockedBalanceStats.textContent = lockedBalance;
+            console.log('✅ Locked balance stats updated:', lockedBalance, '(5% of', totalBalance, ')');
+        }
+        
         // Aktivitätsstatistiken
         const firstLogin = document.getElementById('first-login');
         if (firstLogin && window.userProfile.createdAt) {
@@ -1637,60 +1643,6 @@ window.repairBonusStatistics = function() {
     }
 };
 
-// Function to request withdrawal from statistics page
-window.requestWithdrawal = function() {
-    const amountInput = document.getElementById('withdrawal-amount');
-    if (!amountInput) {
-        alert('❌ Auszahlungsbetrag-Input nicht gefunden');
-        return;
-    }
-    
-    const amount = parseFloat(amountInput.value);
-    if (!amount || amount < 100) {
-        alert('❌ Mindestbetrag: 100 PixelDrop');
-        return;
-    }
-    
-    if (!window.currentUser) {
-        alert('❌ Bitte zuerst anmelden');
-        return;
-    }
-    
-    // Check if user has enough balance
-    const currentBalance = window.userProfile ? window.userProfile.coins : 0;
-    if (amount > currentBalance) {
-        alert(`❌ Nicht genügend Guthaben!\n\nVerfügbar: ${currentBalance} PixelDrop\nGewünscht: ${amount} PixelDrop`);
-        return;
-    }
-    
-    // Ask for wallet address
-    const walletAddress = prompt('💳 Wallet-Adresse eingeben (0x...):');
-    if (!walletAddress || !walletAddress.startsWith('0x') || walletAddress.length !== 42) {
-        alert('❌ Ungültige Wallet-Adresse! Muss mit 0x beginnen und 42 Zeichen lang sein.');
-        return;
-    }
-    
-    // Confirm withdrawal
-    const confirmMessage = `💸 Auszahlung bestätigen:\n\nBetrag: ${amount} PixelDrop\nWallet: ${walletAddress.substring(0, 10)}...${walletAddress.substring(38)}\n\nFortfahren?`;
-    if (!confirm(confirmMessage)) {
-        return;
-    }
-    
-    // Execute withdrawal using existing function
-    if (typeof window.executePayout === 'function') {
-        // Set the payout amount and wallet in the dashboard
-        const payoutAmountInput = document.getElementById('payout-amount');
-        const payoutWalletInput = document.getElementById('payout-wallet-input');
-        
-        if (payoutAmountInput) payoutAmountInput.value = amount;
-        if (payoutWalletInput) payoutWalletInput.value = walletAddress;
-        
-        // Execute the payout
-        window.executePayout();
-    } else {
-        alert('❌ Auszahlungsfunktion nicht verfügbar. Bitte verwende das Dashboard.');
-    }
-};
 
 // Function to load and display profile information
 window.loadProfileInfo = function() {

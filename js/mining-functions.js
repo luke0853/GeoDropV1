@@ -196,6 +196,31 @@ window.updateMiningExpiryCountdown = function() {
         return;
     }
 
+    // FORCE RESET ONLY BASIC MINER (package_1) TO 7 DAYS - FIX FOR 32d BUG
+    console.log('🔧 EMERGENCY RESET: Setting ONLY Basic Miner to 7-day expiry...');
+    const resetDate = new Date();
+    resetDate.setDate(resetDate.getDate() + 7);
+    
+    // Only reset Basic Miner (machineId = 1)
+    const basicMinerCount = ownedMachines[1] || ownedMachines['machine1'] || 0;
+    if (basicMinerCount > 0) {
+        const packageKey = 'package_1';
+        userProfile[packageKey] = {
+            count: basicMinerCount,
+            expiry: resetDate.toISOString()
+        };
+        console.log(`🔧 RESET Basic Miner to 7 days: ${resetDate.toISOString()}`);
+        
+        // Save to Firebase
+        if (typeof window.updateUserProfile === 'function') {
+            window.updateUserProfile().then(() => {
+                console.log('✅ EMERGENCY RESET: Basic Miner set to 7 days and saved to Firebase');
+            }).catch(error => {
+                console.error('❌ Failed to save emergency reset:', error);
+            });
+        }
+    }
+
     // If no individual packages, set expiry for all existing packages (7 days from now)
     if (!earliestExpiry) {
         console.log('⏰ No expiry dates found, setting 7-day expiry for all packages...');

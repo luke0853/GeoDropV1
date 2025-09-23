@@ -2,9 +2,31 @@
     <h2 class="text-3xl font-bold text-white mb-8 text-center animate-pulse">🎁 Bonus System</h2>
     
     <div class="space-y-6">
+        <!-- Guthaben Übersicht -->
+        <div class="bg-gradient-to-r from-blue-900 to-purple-900 rounded-lg p-6 shadow-lg border border-blue-500">
+            <h3 class="text-xl font-semibold text-white mb-4 text-center">💎 Guthaben Übersicht</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg p-4 text-center">
+                    <div class="text-3xl mb-2">💎</div>
+                    <h4 class="text-lg font-semibold text-white mb-2">Gesperrte PixelDrop</h4>
+                    <div class="text-2xl font-bold text-green-200" id="locked-balance-display">119</div>
+                    <p class="text-green-100 text-sm">5% des Gesamtguthabens</p>
+                </div>
+                <div class="bg-gradient-to-r from-orange-600 to-red-600 rounded-lg p-4 text-center">
+                    <div class="text-3xl mb-2">💰</div>
+                    <h4 class="text-lg font-semibold text-white mb-2">Verfügbares Guthaben</h4>
+                    <div class="text-2xl font-bold text-orange-200" id="available-balance">2261</div>
+                    <p class="text-orange-100 text-sm">95% verfügbar</p>
+                    <div class="mt-2 text-xs text-orange-200" id="unlock-countdown">
+                        Freigabe in: <span id="unlock-timer">--:--:--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Bonus Status -->
         <div class="bg-gradient-to-r from-gray-700 to-gray-600 rounded-lg p-6 shadow-lg border border-gray-500">
-            <h3 class="text-xl font-semibold text-white mb-4 text-center">Tägliche Belohnungen</h3>
+            <h3 class="text-xl font-semibold text-white mb-4 text-center">🎁 Tägliche Belohnungen</h3>
             <p class="text-gray-300 mb-4 text-center">Logge dich täglich ein und erhalte Bonus-Coins!</p>
             
             <div id="bonus-available" style="display: none;">

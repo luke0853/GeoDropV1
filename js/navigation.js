@@ -109,14 +109,35 @@ window.loadPageContent = function(pageId, container) {
                         
                         // Load GeoDrops after map is initialized
                         setTimeout(() => {
+                            console.log('🔍 Checking loadGeoDrops function availability...');
+                            console.log('🔍 typeof loadGeoDrops:', typeof loadGeoDrops);
+                            console.log('🔍 typeof window.loadGeoDrops:', typeof window.loadGeoDrops);
+                            
                             if (typeof loadGeoDrops === 'function') {
                                 console.log('🎯 Loading GeoDrops...');
-                                loadGeoDrops();
+                                loadGeoDrops().catch(error => {
+                                    console.error('❌ Error in loadGeoDrops:', error);
+                                });
+                            } else if (typeof window.loadGeoDrops === 'function') {
+                                console.log('🎯 Loading GeoDrops via window...');
+                                window.loadGeoDrops().catch(error => {
+                                    console.error('❌ Error in window.loadGeoDrops:', error);
+                                });
                             } else {
                                 console.log('⏳ Waiting for loadGeoDrops function...');
                                 setTimeout(() => {
                                     if (typeof loadGeoDrops === 'function') {
-                                        loadGeoDrops();
+                                        console.log('🎯 Loading GeoDrops (delayed)...');
+                                        loadGeoDrops().catch(error => {
+                                            console.error('❌ Error in delayed loadGeoDrops:', error);
+                                        });
+                                    } else if (typeof window.loadGeoDrops === 'function') {
+                                        console.log('🎯 Loading GeoDrops via window (delayed)...');
+                                        window.loadGeoDrops().catch(error => {
+                                            console.error('❌ Error in delayed window.loadGeoDrops:', error);
+                                        });
+                                    } else {
+                                        console.error('❌ loadGeoDrops function still not available after delay');
                                     }
                                 }, 1000);
                             }
@@ -151,6 +172,18 @@ window.loadPageContent = function(pageId, container) {
                             }
                             
                             console.log('✅ All drop lists loaded on GeoCard page load');
+                            
+                            // CRITICAL: Load GeoDrops for map after all lists are loaded
+                            setTimeout(() => {
+                                console.log('🗺️ Loading GeoDrops for map after all lists loaded...');
+                                if (typeof window.loadGeoDrops === 'function') {
+                                    window.loadGeoDrops().catch(error => {
+                                        console.error('❌ Error loading GeoDrops for map:', error);
+                                    });
+                                } else {
+                                    console.error('❌ window.loadGeoDrops not available');
+                                }
+                            }, 1000);
                         }, 3000);
                         
                         // CRITICAL: Also reload all drop lists when switching to GeoCard
@@ -402,6 +435,13 @@ window.loadPageContent = function(pageId, container) {
                         window.initializePoolWallet();
                     }
                     
+                    // Update filename display
+                    if (typeof window.updateNextFilenameDisplay === 'function') {
+                        setTimeout(() => {
+                            window.updateNextFilenameDisplay();
+                        }, 500);
+                    }
+                    
                 }, 100);
             }
             
@@ -561,189 +601,112 @@ window.switchToReferrals = function() {
     const referralsContent = document.getElementById('referrals-content');
     
     if (geoboardTab && colloseumTab && referralsTab && geoboardContent && colloseumContent && referralsContent) {
-        // Remove active class from all buttons
-        document.querySelectorAll('.mehr-tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
+        // Remove active from all tabs
+        geoboardTab.classList.remove('text-white', 'border-blue-500', 'bg-gray-800');
+        geoboardTab.classList.add('text-gray-400', 'border-transparent');
         
-        // Add active class to clicked button
-        referralsTab.classList.add('active');
+        colloseumTab.classList.remove('text-white', 'border-blue-500', 'bg-gray-800');
+        colloseumTab.classList.add('text-gray-400', 'border-transparent');
         
+        // Add active to referrals tab
+        referralsTab.classList.add('text-white', 'border-blue-500', 'bg-gray-800');
+        referralsTab.classList.remove('text-gray-400', 'border-transparent');
+        
+        // Show referrals content, hide others
         referralsContent.classList.remove('hidden');
         geoboardContent.classList.add('hidden');
         colloseumContent.classList.add('hidden');
         
-        console.log('✅ Switched to Referrals tab');
+        console.log('✅ Switched to Referrals');
         
-        // Load referrals data when switching to this tab
+        // Load referrals data
         if (typeof window.loadReferralsData === 'function') {
+            console.log('🔄 Calling loadReferralsData...');
             window.loadReferralsData();
+        } else {
+            console.log('❌ loadReferralsData function not found');
         }
+        
+        // FORCE LOAD REFERRALS AFTER 1 SECOND
+        setTimeout(() => {
+            console.log('🔄 FORCE LOADING REFERRALS AFTER DELAY...');
+            if (typeof window.loadReferralsData === 'function') {
+                window.loadReferralsData();
+            }
+        }, 1000);
     } else {
         console.error('❌ Elements not found for Referrals switch');
+        console.log('Available elements:', {
+            geoboardTab: !!geoboardTab,
+            colloseumTab: !!colloseumTab,
+            referralsTab: !!referralsTab,
+            geoboardContent: !!geoboardContent,
+            colloseumContent: !!colloseumContent,
+            referralsContent: !!referralsContent
+        });
     }
 };
 
-// Load referrals data function
+// Load referrals data function - EINFACH UND DIREKT
 window.loadReferralsData = async function() {
-    console.log('👥 Loading referrals data...');
+    console.log('🔍 LADE REFERRALS FÜR USER:', window.currentUser?.uid);
     
-    // Check if we're on the geoboard page or referrals tab is visible
-    const referralsContent = document.getElementById('referrals-content');
-    if (!referralsContent || referralsContent.classList.contains('hidden')) {
-        console.log('⏭️ Referrals tab not active, skipping data load');
-        return;
-    }
+    const db = window.firebase.firestore();
+    const allUsers = await db.collection('users').get();
     
-    try {
-        const currentUser = window.currentUser || window.auth?.currentUser;
-        if (!currentUser) {
-            console.log('❌ No user logged in');
-            return;
-        }
-
-        console.log('👤 Current user:', currentUser);
-        console.log('🔥 Firebase available:', !!window.firebase);
-        console.log('🔥 Firestore available:', !!window.firebase?.firestore);
-
-        const db = window.firebase.firestore();
-        
-        // Load direct referrals - check both UID and email/username
-        const userProfile = window.userProfile || {};
-        const userEmail = currentUser.email;
-        const username = userProfile.username;
-        
-        console.log('🔍 User profile:', userProfile);
-        console.log('📧 User email:', userEmail);
-        console.log('👤 Username:', username);
-        console.log('🆔 User UID:', currentUser.uid);
-        
-        // Try to find referrals by different methods
-        let referralsSnapshot;
-        
-        // First try by UID
-        console.log('🔍 Searching referrals by UID:', currentUser.uid);
-        referralsSnapshot = await db.collection('users')
-            .where('referredBy', '==', currentUser.uid)
-            .get();
-        
-        console.log('📊 Referrals found by UID:', referralsSnapshot.size);
-        
-        // Debug: Let's also check what users exist in the database
-        console.log('🔍 DEBUG: Checking all users in database...');
-        const allUsersSnapshot = await db.collection('users').limit(10).get();
-        console.log('📊 Total users in database:', allUsersSnapshot.size);
-        
-        allUsersSnapshot.forEach(doc => {
-            const userData = doc.data();
-            console.log('👤 User:', doc.id, 'referredBy:', userData.referredBy, 'username:', userData.username, 'email:', userData.email);
-        });
-            
-        // If no results, try by email
-        if (referralsSnapshot.empty && userEmail) {
-            console.log('🔍 Searching referrals by email:', userEmail);
-            referralsSnapshot = await db.collection('users')
-                .where('referredBy', '==', userEmail)
-                .get();
-            console.log('📊 Referrals found by email:', referralsSnapshot.size);
-        }
-        
-        // If still no results, try by username
-        if (referralsSnapshot.empty && username) {
-            console.log('🔍 Searching referrals by username:', username);
-            referralsSnapshot = await db.collection('users')
-                .where('referredBy', '==', username)
-                .get();
-            console.log('📊 Referrals found by username:', referralsSnapshot.size);
-        }
-        
-        // If still no results, let's try a broader search to see if there are any referrals at all
-        if (referralsSnapshot.empty) {
-            console.log('🔍 DEBUG: Searching for ANY referrals in the database...');
-            const anyReferralsSnapshot = await db.collection('users')
-                .where('referredBy', '!=', null)
-                .limit(10)
-                .get();
-            console.log('📊 Users with referrals found:', anyReferralsSnapshot.size);
-            
-            anyReferralsSnapshot.forEach(doc => {
-                const userData = doc.data();
-                console.log('👤 User with referral:', doc.id, 'referredBy:', userData.referredBy, 'username:', userData.username);
+    const referrals = [];
+    allUsers.forEach(doc => {
+        const userData = doc.data();
+        if (userData.referredBy === window.currentUser.uid) {
+            referrals.push({
+                id: doc.id,
+                username: userData.username,
+                email: userData.email,
+                createdAt: userData.createdAt
             });
         }
-
-        const referrals = [];
-        referralsSnapshot.forEach(doc => {
-            referrals.push({ id: doc.id, ...doc.data() });
+    });
+    
+    console.log('📊 GEFUNDENE REFERRALS:', referrals.length);
+    
+    // UI aktualisieren - mit Null-Checks
+    const directReferralsCount = document.getElementById('direct-referrals-count');
+    const userReferralCode = document.getElementById('user-referral-code');
+    
+    if (directReferralsCount) {
+        directReferralsCount.textContent = referrals.length;
+    }
+    if (userReferralCode && window.currentUser) {
+        userReferralCode.textContent = window.currentUser.uid;
+    }
+    
+    // Liste anzeigen
+    const list = document.getElementById('referrals-list');
+    if (referrals.length === 0) {
+        list.innerHTML = '<div class="text-center text-gray-400 p-8">Keine Referrals gefunden</div>';
+    } else {
+        let html = '';
+        referrals.forEach(ref => {
+            html += `
+                <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold">${(ref.username || 'U').charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-medium">${ref.username || 'Unbekannt'}</h3>
+                            <p class="text-gray-400 text-sm">ID: ${ref.id}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
         });
-
-        console.log('👥 Total referrals found:', referrals.length);
-        console.log('👥 Referrals data:', referrals);
-
-        // Update statistics
-        const directReferralsCount = document.getElementById('direct-referrals-count');
-        if (directReferralsCount) {
-            directReferralsCount.textContent = referrals.length;
-            console.log('✅ Updated direct referrals count:', referrals.length);
-        } else {
-            console.log('❌ direct-referrals-count element not found');
-        }
-        
-        // Count active referrals (users who have made at least one drop)
-        let activeCount = 0;
-        let totalEarnings = 0;
-        
-        for (const referral of referrals) {
-            // Check if user has made any drops
-            const userDropsSnapshot = await db.collection('userDrops')
-                .where('userId', '==', referral.id)
-                .get();
-            
-            if (!userDropsSnapshot.empty) {
-                activeCount++;
-            }
-            
-               // Calculate earnings from this referral (in tBNB, not PixelDrop)
-               const referralEarnings = referral.referralEarnings || 0;
-               totalEarnings += referralEarnings;
-        }
-        
-        const activeReferralsCount = document.getElementById('active-referrals-count');
-        if (activeReferralsCount) {
-            activeReferralsCount.textContent = activeCount;
-        }
-        
-               const referralEarnings = document.getElementById('referral-earnings');
-               if (referralEarnings) {
-                   referralEarnings.textContent = `${totalEarnings.toFixed(4)} tBNB`;
-               }
-        
-        // Update referral code - use only the User ID
-        const referralCode = currentUser.uid;
-        const userReferralCode = document.getElementById('user-referral-code');
-        if (userReferralCode) {
-            userReferralCode.textContent = referralCode;
-        }
-        
-        // Update referral link
-        const referralLink = `https://geodrop-f3ee1.web.app/#/ref/${referralCode}`;
-        const referralLinkDisplay = document.getElementById('referral-link-display');
-        if (referralLinkDisplay) {
-            referralLinkDisplay.value = referralLink;
-        }
-        
-        // Update referrals list
-        console.log('🔄 Calling updateReferralsList with:', referrals.length, 'referrals');
-        updateReferralsList(referrals);
-        
-    } catch (error) {
-        console.error('❌ Error loading referrals data:', error);
-        console.error('❌ Error details:', error.message, error.stack);
+        list.innerHTML = html;
     }
 };
 
 // Update referrals list function
-function updateReferralsList(referrals) {
+window.updateReferralsList = function(referrals) {
     console.log('🔄 updateReferralsList called with:', referrals.length, 'referrals');
     const referralsList = document.getElementById('referrals-list');
     console.log('🔍 referrals-list element found:', !!referralsList);
@@ -806,7 +769,7 @@ function updateReferralsList(referrals) {
     console.log('📝 Final referrals HTML length:', referralsHTML.length);
     referralsList.innerHTML = referralsHTML;
     console.log('✅ Referrals list updated successfully');
-}
+};
 
 // Fix Firebase referral relationships for real users
 window.fixFirebaseReferrals = async function() {
@@ -891,6 +854,98 @@ window.testReferrals = function() {
         window.loadReferralsData();
     } else {
         console.log('❌ loadReferralsData function not found');
+    }
+};
+
+// MANUAL TEST FUNCTION - Call this in console
+window.forceLoadReferrals = async function() {
+    console.log('🚀 MANUAL FORCE LOADING REFERRALS...');
+    
+    try {
+        const currentUser = window.currentUser || window.auth?.currentUser;
+        if (!currentUser) {
+            console.log('❌ No user logged in');
+            return;
+        }
+
+        console.log('👤 Current user UID:', currentUser.uid);
+        const db = window.firebase.firestore();
+        
+        // Load all users
+        const allUsersSnapshot = await db.collection('users').get();
+        console.log('📊 Total users in database:', allUsersSnapshot.size);
+        
+        const referrals = [];
+        allUsersSnapshot.forEach(doc => {
+            const userData = doc.data();
+            console.log('👤 User:', doc.id, 'referredBy:', userData.referredBy, 'username:', userData.username);
+            
+            if (userData.referredBy === currentUser.uid) {
+                console.log('🎯 FOUND REFERRAL:', doc.id, userData.username);
+                referrals.push({ 
+                    id: doc.id, 
+                    username: userData.username || 'Unbekannt',
+                    email: userData.email || 'Keine Email',
+                    createdAt: userData.createdAt || new Date(),
+                    referralEarnings: userData.referralEarnings || 0,
+                    ...userData 
+                });
+            }
+        });
+        
+        console.log('🎯 TOTAL REFERRALS FOUND:', referrals.length);
+        console.log('🎯 REFERRALS:', referrals);
+
+        // Force update the UI
+        const directReferralsCount = document.getElementById('direct-referrals-count');
+        if (directReferralsCount) {
+            directReferralsCount.textContent = referrals.length;
+            console.log('✅ Updated direct referrals count to:', referrals.length);
+        }
+        
+        // Force update the list
+        const referralsList = document.getElementById('referrals-list');
+        if (referralsList) {
+            let html = '';
+            referrals.forEach((referral, index) => {
+                console.log(`📝 Creating HTML for referral ${index + 1}:`, referral);
+                const joinDate = referral.createdAt ? 
+                    (referral.createdAt.toDate ? referral.createdAt.toDate() : new Date(referral.createdAt)) : 
+                    new Date();
+                
+                html += `
+                    <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold">${(referral.username || referral.email || 'User').charAt(0).toUpperCase()}</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-white font-medium">${referral.username || referral.email || 'Unbekannter User'}</h3>
+                                    <p class="text-gray-400 text-sm">Beigetreten: ${joinDate.toLocaleDateString('de-DE')}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-400">
+                                        Inaktiv
+                                    </span>
+                                </div>
+                                <div class="text-sm text-gray-400 mt-1">
+                                    Verdient: <span class="text-green-400 font-bold">${(referral.referralEarnings || 0).toFixed(4)} tBNB</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            referralsList.innerHTML = html;
+            console.log('✅ Referrals list updated with', referrals.length, 'referrals');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error in manual referrals loading:', error);
     }
 };
 

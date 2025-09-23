@@ -1,0 +1,46 @@
+<h3 class="text-2xl font-bold text-white mb-8 bg-black px-4 py-2 rounded-lg">🔧 Dev-Bereich</h3>
+
+<div class="bg-gray-700 rounded-lg p-6">
+    <h3 class="text-xl font-semibold text-white mb-4">🔧 Entwickler-Bereich</h3>
+    <div class="space-y-4 text-gray-300">
+        <p class="text-yellow-400 font-bold">⚠️ Nur für Entwickler zugänglich!</p>
+        
+        <div class="bg-gray-600 rounded-lg p-4">
+            <h4 class="text-lg font-semibold text-blue-400 mb-2">🔐 Dev-Zugang</h4>
+            <div class="space-y-2">
+                <input type="password" id="dev-password" placeholder="Dev-Passwort" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none">
+                <button onclick="testDevLogin()" class="w-full px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
+                    🔐 Dev-Zugang testen
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-gray-600 rounded-lg p-4">
+            <h4 class="text-lg font-semibold text-green-400 mb-2">🛠️ Dev-Tools</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="clearAllData()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                    🗑️ Alle Daten löschen
+                </button>
+                <button onclick="resetUserProgress()" class="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">
+                    🔄 Fortschritt zurücksetzen
+                </button>
+                <button onclick="addTestCoins()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                    💰 Test-Coins hinzufügen
+                </button>
+                <button onclick="exportUserData()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                    📤 Daten exportieren
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-gray-600 rounded-lg p-4">
+            <h4 class="text-lg font-semibold text-cyan-400 mb-2">📊 Debug-Informationen</h4>
+            <div class="space-y-2">
+                <p><strong>User ID:</strong> <span id="debug-user-id">-</span></p>
+                <p><strong>Session:</strong> <span id="debug-session">-</span></p>
+                <p><strong>Version:</strong> <span id="debug-version">1.0.0</span></p>
+                <p><strong>Last Update:</strong> <span id="debug-last-update">-</span></p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -780,7 +780,7 @@
                             <button onclick="showLoginForm()" class="bg-white/20 backdrop-blur-md border border-white/30 px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-white font-semibold hover:bg-white/30 transition-all shadow-lg text-sm sm:text-base">
                                 <i class="fas fa-sign-in-alt mr-1 sm:mr-2"></i>
                                 <span class="hidden sm:inline">Anmelden</span>
-                                <span class="sm:hidden">Login</span>
+                                <span class="sm:hidden">Anmelden</span>
                             </button>
                         </div>
                         
@@ -887,7 +887,7 @@
                                     <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-6">
                                         <i class="fas fa-coins text-2xl text-white"></i>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">Mining Machines</h3>
+                                    <h3 class="text-xl font-semibold mb-4">Mining-Maschinen</h3>
                                     <p class="text-gray-300">4 verschiedene Maschinentypen für passive Einnahmen. Von Basic bis Mega Miner mit unterschiedlichen Boosts.</p>
                                 </div>
                                 
@@ -919,7 +919,7 @@
                                     <div class="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center mb-6">
                                         <i class="fas fa-mobile-alt text-2xl text-white"></i>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">PWA Support</h3>
+                                    <h3 class="text-xl font-semibold mb-4">PWA-Unterstützung</h3>
                                     <p class="text-gray-300">Installierbare Web-App für mobile Geräte. Funktioniert offline und wie eine native App.</p>
                                 </div>
                             </div>
@@ -1549,13 +1549,13 @@
                         <ul class="text-gray-300 mb-4 list-disc list-inside">
                             <li><strong>Blockchain:</strong> tBNB-basierte Smart Contracts mit PixelDrop Token</li>
                             <li><strong>Trading System:</strong> Vollständiges DeFi-Trading zwischen PixelDrop ↔ tBNB</li>
-                            <li><strong>Mining Machines:</strong> 4 verschiedene Maschinentypen mit Boost-System</li>
+                            <li><strong>Mining-Maschinen:</strong> 4 verschiedene Maschinentypen mit Boost-System</li>
                             <li><strong>GPS:</strong> Präzise Standortbestimmung mit 20m Genauigkeit</li>
                             <li><strong>Firebase:</strong> Echtzeitdatenbank für Drops und User-Interaktionen</li>
                             <li><strong>Dev Area:</strong> Erweiterte Admin-Tools und Drop-Management</li>
                             <li><strong>Bonus System:</strong> Tägliche Belohnungen mit Special Effects</li>
-                            <li><strong>PWA Support:</strong> Installierbare Web-App für mobile Geräte</li>
-                            <li><strong>Real-time Updates:</strong> Live-Updates für alle App-Funktionen</li>
+                            <li><strong>PWA-Unterstützung:</strong> Installierbare Web-App für mobile Geräte</li>
+                            <li><strong>Echtzeit-Updates:</strong> Live-Updates für alle App-Funktionen</li>
                         </ul>
                         
                         <h3 class="text-xl font-semibold text-white mb-4">🎮 Gameplay</h3>
@@ -1603,7 +1603,7 @@
                                 <li>Vollständige tBNB Integration</li>
                                 <li>PixelDrop Token System</li>
                                 <li>Trading System (PixelDrop ↔ tBNB)</li>
-                                <li>Mining Machines (4 Typen)</li>
+                                <li>Mining-Maschinen (4 Typen)</li>
                                 <li>MetaMask Wallet Integration</li>
                             </ul>
                                         </div>
@@ -1617,8 +1617,8 @@
                                 <li>Performance Optimierung</li>
                                 <li>Mobile Responsiveness</li>
                                 <li>Bonus System mit Special Effects</li>
-                                <li>PWA Installation Support</li>
-                                <li>Real-time Location Updates</li>
+                                <li>PWA-Installationsunterstützung</li>
+                                <li>Echtzeit-Standort-Updates</li>
                             </ul>
                                     </div>
                         
@@ -2257,7 +2257,8 @@
                 
                 console.log('✅ Firebase user created:', user.uid);
                 
-                // No referral system in landing page
+                // Check for referral code from localStorage
+                const referralCode = localStorage.getItem('referralCode') || '2b2MBGHgaDTcSOaMzepTnGK2JVz1';
                 let initialCoins = 100;
                 
                 // Create user profile
@@ -2273,7 +2274,13 @@
                     lastLogin: window.firebase.firestore.FieldValue.serverTimestamp()
                 };
                 
-                // No referral bonus in landing page
+                // Apply referral bonus if referral code exists
+                if (referralCode && referralCode !== '2b2MBGHgaDTcSOaMzepTnGK2JVz1') {
+                    userProfile.referredBy = referralCode;
+                    userProfile.referralBonus = 50;
+                    userProfile.coins = initialCoins + 50; // Bonus coins
+                    console.log('🎯 Applying referral bonus for:', referralCode);
+                }
                 
                 // Save user profile to Firestore
                 await window.db.collection('users').doc(user.uid).set(userProfile);
@@ -2281,7 +2288,9 @@
                 console.log('✅ User profile saved to Firestore:', user.uid);
                 alert('✅ Registrierung erfolgreich! Willkommen bei GeoDrop!');
                 
-                // No referral system to clear
+                // Clear referral code from localStorage after successful registration
+                localStorage.removeItem('referralCode');
+                localStorage.removeItem('referralTimestamp');
                 
                 // Update UI
                 if (typeof updateUserDisplay === 'function') {
