@@ -160,11 +160,11 @@
                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
                                 <span class="text-gray-300" id="settings-language-german">🇩🇪 Deutsch</span>
-                                <input type="radio" name="language" value="de" id="lang-de" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" onchange="setLanguage('de')">
+                                <input type="radio" name="language" value="de" id="lang-de" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" onchange="switchLanguage('de')">
                             </div>
                             <div class="flex items-center justify-between">
                                 <span class="text-gray-300" id="settings-language-english">🇺🇸 English</span>
-                                <input type="radio" name="language" value="en" id="lang-en" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" onchange="setLanguage('en')">
+                                <input type="radio" name="language" value="en" id="lang-en" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" onchange="switchLanguage('en')">
                             </div>
                             <div class="text-xs text-gray-400 bg-gray-800 p-2 rounded mt-2">
                                 💡 Tipp: Die Sprache wird sofort geändert und gespeichert
@@ -220,8 +220,8 @@
             const username = document.getElementById('settings-username').value;
             if (!username) {
                 const message = window.getCurrentLanguage() === 'de' ? 
-                    '❌ Benutzername ist erforderlich!' : 
-                    '❌ Username is required!';
+                    '❌ Bitte Benutzername eingeben!' : 
+                    '❌ Please enter username!';
                 alert(message);
                 return;
             }
@@ -240,10 +240,9 @@
             const isGerman = window.getCurrentLanguage() === 'de';
             const onOff = isGerman ? ['An', 'Aus'] : ['On', 'Off'];
             const message = isGerman ? 
-                '✅ Einstellungen gespeichert!' : 
-                '✅ Settings saved!';
-            
-            alert(`${message}\n\nE-Mail: ${emailNotify ? onOff[0] : onOff[1]}\nPush: ${pushNotify ? onOff[0] : onOff[1]}\nTäglich: ${dailyNotify ? onOff[0] : onOff[1]}`);
+                `✅ Benachrichtigungseinstellungen gespeichert!\n\nE-Mail: ${emailNotify ? onOff[0] : onOff[1]}\nPush: ${pushNotify ? onOff[0] : onOff[1]}\nTäglich: ${dailyNotify ? onOff[0] : onOff[1]}` :
+                `✅ Notification settings saved!\n\nEmail: ${emailNotify ? onOff[0] : onOff[1]}\nPush: ${pushNotify ? onOff[0] : onOff[1]}\nDaily: ${dailyNotify ? onOff[0] : onOff[1]}`;
+            alert(message);
         }
 
         function loadSettings() {
@@ -254,13 +253,24 @@
             }
             
             // Set current language selection
-            const currentLang = window.getCurrentLanguage();
-            document.getElementById(`lang-${currentLang}`).checked = true;
+            const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'de';
+            const langDe = document.getElementById('lang-de');
+            const langEn = document.getElementById('lang-en');
+            if (langDe && langEn) {
+                langDe.checked = currentLang === 'de';
+                langEn.checked = currentLang === 'en';
+            }
         }
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             console.log('⚙️ Einstellungen geladen');
+            
+            // Initialize language system
+            if (typeof window.initLanguageSystem === 'function') {
+                window.initLanguageSystem();
+            }
+            
             loadSettings();
             
             // Debug: Check if language system is loaded

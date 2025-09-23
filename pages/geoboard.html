@@ -245,21 +245,6 @@
             </div>
         </div>
         
-        <!-- Admin Tools -->
-        <div class="bg-gray-700 rounded-lg p-6 mt-8">
-            <h3 class="text-xl font-semibold text-white mb-4">🔧 Admin Tools</h3>
-            <div class="flex space-x-4">
-                <button onclick="repairUserProfiles()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                    🔧 Benutzerprofile reparieren
-                </button>
-                <button onclick="clearOldBackups()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                    🗑️ Alte Backups löschen
-                </button>
-                <button onclick="triggerWeeklyColloseum()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                    🏆 Colloseum Abrechnung
-                </button>
-            </div>
-        </div>
     </div>
 
     <!-- Indirect Referrals Modal -->
@@ -903,7 +888,7 @@
                 }
                 
                 // Update referral link
-                const referralLink = `https://luke0853.github.io/GeoDropV1/#/ref/${referralCode}`;
+                const referralLink = `https://geodrop-f3ee1.web.app/#/ref/${referralCode}`;
                 const referralLinkDisplay = document.getElementById('referral-link-display');
                 if (referralLinkDisplay) {
                     referralLinkDisplay.value = referralLink;

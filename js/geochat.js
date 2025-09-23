@@ -9,28 +9,32 @@ window.sendMessage = async function() {
     
     const user = auth.currentUser;
     if (!user) {
-        const isGerman = window.getCurrentLanguage ? window.getCurrentLanguage() === 'de' : true;
-        const message = isGerman ? '❌ Bitte melde dich an um zu chatten!' : '❌ Please log in to chat!';
-        alert(message);
+        alert('❌ Bitte melde dich an um zu chatten!');
         return;
     }
     
-    // Get the real username from user profile
+    // Get the real username from Firebase users collection
     let username = 'User';
     try {
+        // First try to get from global userProfile
         if (window.userProfile && window.userProfile.username) {
             username = window.userProfile.username;
         } else {
-            // Try to load user profile from Firebase
+            // Load user profile from Firebase users collection
             const userDoc = await db.collection('users').doc(user.uid).get();
             if (userDoc.exists) {
                 const userData = userDoc.data();
-                username = userData.username || user.displayName || 'User';
+                username = userData.username || userData.email?.split('@')[0] || 'User';
+                console.log('✅ Loaded username from Firebase:', username);
+            } else {
+                // Fallback to email prefix if no user document exists
+                username = user.email?.split('@')[0] || 'User';
+                console.log('⚠️ No user document found, using email prefix:', username);
             }
         }
     } catch (error) {
         console.error('❌ Error loading user profile for chat:', error);
-        username = user.displayName || 'User';
+        username = user.email?.split('@')[0] || 'User';
     }
     
     // Add message to Firebase
@@ -45,9 +49,7 @@ window.sendMessage = async function() {
         console.log('✅ Message sent with username:', username);
     }).catch(error => {
         console.error('❌ Error sending message:', error);
-        const isGerman = window.getCurrentLanguage ? window.getCurrentLanguage() === 'de' : true;
-        const message = isGerman ? '❌ Fehler beim Senden der Nachricht!' : '❌ Error sending message!';
-        alert(message);
+        alert('❌ Fehler beim Senden der Nachricht!');
     });
 };
 
@@ -56,12 +58,14 @@ window.loadChatMessages = function() {
         .orderBy('timestamp', 'desc')
         .limit(50);
     
-    messagesRef.onSnapshot((snapshot) => {
+    messagesRef.onSnapshot(async (snapshot) => {
         const chatMessages = document.getElementById('chat-messages');
         if (!chatMessages) return;
         
         let html = '';
-        snapshot.docs.reverse().forEach(doc => {
+        
+        // Process messages and get real usernames
+        for (const doc of snapshot.docs.reverse()) {
             const data = doc.data();
             const timestamp = data.timestamp ? data.timestamp.toDate() : new Date();
             const timeStr = timestamp.toLocaleTimeString('de-DE', { 
@@ -73,16 +77,21 @@ window.loadChatMessages = function() {
             const messageClass = isCurrentUser ? 'bg-blue-600' : 'bg-gray-600';
             const alignClass = isCurrentUser ? 'ml-auto' : 'mr-auto';
             
-            // Clean username - remove email addresses and use only username
+            // Get real username from Firebase users collection
             let displayUsername = data.username || 'User';
-            if (displayUsername.includes('@')) {
-                // If username is an email, extract the part before @
-                displayUsername = displayUsername.split('@')[0];
-            }
             
-            // If still no username, use a default
-            if (!displayUsername || displayUsername === 'User' || displayUsername === '') {
-                displayUsername = 'User';
+            // If username looks like an email or is generic, try to get real username
+            if (displayUsername.includes('@') || displayUsername === 'User' || displayUsername === 'Anonym') {
+                try {
+                    const userDoc = await db.collection('users').doc(data.userId).get();
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        displayUsername = userData.username || userData.email?.split('@')[0] || 'User';
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading username for message:', error);
+                    // Keep original username as fallback
+                }
             }
             
             html += `
@@ -96,17 +105,13 @@ window.loadChatMessages = function() {
                     </div>
                 </div>
             `;
-        });
+        }
         
         if (html === '') {
-            const isGerman = window.getCurrentLanguage ? window.getCurrentLanguage() === 'de' : true;
-            const welcomeText = isGerman ? '💬 Willkommen im GeoChat!' : '💬 Welcome to GeoChat!';
-            const subtitleText = isGerman ? 'Chatte mit anderen GeoDrop-Spielern' : 'Chat with other GeoDrop players';
-            
             html = `
                 <div class="text-center text-gray-400 py-8">
-                    <p>${welcomeText}</p>
-                    <p class="text-sm mt-2">${subtitleText}</p>
+                    <p>💬 Willkommen im GeoChat!</p>
+                    <p class="text-sm mt-2">Chatte mit anderen GeoDrop-Spielern</p>
                 </div>
             `;
         }
@@ -210,18 +215,15 @@ window.updateChatUsernames = async function() {
         for (const doc of messagesSnapshot.docs) {
             const data = doc.data();
             
-            // Check if username looks like an email
-            if (data.username && data.username.includes('@')) {
+            // Check if username looks like an email or is generic
+            if (data.username && (data.username.includes('@') || data.username === 'User' || data.username === 'Anonym')) {
                 try {
-                    // Try to find user by email and get their username
-                    const userQuery = await db.collection('users')
-                        .where('email', '==', data.username)
-                        .limit(1)
-                        .get();
+                    // Try to get user data by userId
+                    const userDoc = await db.collection('users').doc(data.userId).get();
                     
-                    if (!userQuery.empty) {
-                        const userData = userQuery.docs[0].data();
-                        const newUsername = userData.username || data.username;
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        const newUsername = userData.username || userData.email?.split('@')[0] || 'User';
                         
                         // Update the message with the new username
                         await doc.ref.update({
@@ -230,6 +232,27 @@ window.updateChatUsernames = async function() {
                         
                         updatedCount++;
                         console.log(`✅ Updated message from ${data.username} to ${newUsername}`);
+                    } else {
+                        // If no user document exists, try to find by email
+                        if (data.username.includes('@')) {
+                            const userQuery = await db.collection('users')
+                                .where('email', '==', data.username)
+                                .limit(1)
+                                .get();
+                            
+                            if (!userQuery.empty) {
+                                const userData = userQuery.docs[0].data();
+                                const newUsername = userData.username || userData.email?.split('@')[0] || 'User';
+                                
+                                // Update the message with the new username
+                                await doc.ref.update({
+                                    username: newUsername
+                                });
+                                
+                                updatedCount++;
+                                console.log(`✅ Updated message from ${data.username} to ${newUsername}`);
+                            }
+                        }
                     }
                 } catch (error) {
                     console.error(`❌ Error updating message ${doc.id}:`, error);
@@ -249,3 +272,13 @@ window.updateChatUsernames = async function() {
         console.error('❌ Error updating chat usernames:', error);
     }
 };
+
+// Auto-update chat usernames when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for Firebase to be ready, then update usernames
+    setTimeout(() => {
+        if (typeof window.updateChatUsernames === 'function') {
+            window.updateChatUsernames();
+        }
+    }, 3000);
+});

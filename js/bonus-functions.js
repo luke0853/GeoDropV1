@@ -1014,11 +1014,11 @@ window.applyReferralToExistingAccount = async function(referralCode) {
 // Generate referral link for current user
 window.generateReferralLink = function() {
     if (!window.userProfile || !window.userProfile.username) {
-        return 'https://luke0853.github.io/GeoDropV1/#/ref/' + (window.userProfile?.username || 'User');
+        return 'https://geodrop-f3ee1.web.app/#/ref/' + (window.userProfile?.username || 'User');
     }
     
     const refCode = window.userProfile.username.replace(/[^a-zA-Z0-9]/g, '');
-    return `https://luke0853.github.io/GeoDropV1/#/ref/${refCode}`;
+    return `https://geodrop-f3ee1.web.app/#/ref/${refCode}`;
 };
 
 // Update referral link display
@@ -1035,15 +1035,15 @@ window.updateReferralLink = function() {
         
         if (window.currentUser && window.currentUser.uid) {
             // Use Firebase UID as referral code
-            newLink = `https://luke0853.github.io/GeoDropV1/#/ref/${window.currentUser.uid}`;
+            newLink = `https://geodrop-f3ee1.web.app/#/ref/${window.currentUser.uid}`;
             console.log('🔗 Using Firebase UID as referral code:', window.currentUser.uid);
         } else if (window.userProfile && window.userProfile.username) {
             // Use username as referral code
-            newLink = `https://luke0853.github.io/GeoDropV1/#/ref/${window.userProfile.username}`;
+            newLink = `https://geodrop-f3ee1.web.app/#/ref/${window.userProfile.username}`;
             console.log('🔗 Using username as referral code:', window.userProfile.username);
         } else {
             // Fallback to generic link
-            newLink = 'https://luke0853.github.io/GeoDropV1/#/ref/User';
+            newLink = 'https://geodrop-f3ee1.web.app/#/ref/User';
             console.log('🔗 Using fallback referral link');
         }
         
@@ -1213,7 +1213,7 @@ window.loadReferralData = async function() {
             const userData = userDoc.data();
             
             // Update referral link
-            const referralLink = `https://luke0853.github.io/GeoDropV1/#?ref=${window.currentUser.uid}`;
+            const referralLink = `https://geodrop-f3ee1.web.app/#?ref=${window.currentUser.uid}`;
             const referralInput = document.getElementById('referral-link-input');
             if (referralInput) {
                 referralInput.value = referralLink;

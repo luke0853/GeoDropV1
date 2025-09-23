@@ -211,8 +211,6 @@ window.showMehrTab = function(tabId) {
                                 updateSettingsTab();
                             } else if (tabId === 'dev') {
                                 updateDevTab();
-                            } else if (tabId === 'leitfaden') {
-                                updateLeitfadenTab();
                             }
                         }, 100);
                     })
@@ -246,8 +244,6 @@ window.showMehrTab = function(tabId) {
                                 updateSettingsTab();
                             } else if (tabId === 'dev') {
                                 updateDevTab();
-                            } else if (tabId === 'leitfaden') {
-                                updateLeitfadenTab();
                             }
                         }, 100);
                     })
@@ -301,8 +297,6 @@ window.updateAllMehrTabs = function() {
                 updateSettingsTab();
             } else if (activeTabId === 'dev') {
                 updateDevTab();
-            } else if (activeTabId === 'leitfaden') {
-                updateLeitfadenTab();
             }
         }
     }
@@ -450,9 +444,6 @@ function updateTabContent(tabId) {
         case 'dev':
             updateDevTab();
             break;
-        case 'leitfaden':
-            updateLeitfadenTab();
-            break;
         default:
             console.log('📝 No specific update for tab:', tabId);
             // Force update dashboard values anyway
@@ -599,36 +590,21 @@ function updateSettingsTab() {
         }
     });
     
-    // Update language selection
-    if (window.getCurrentLanguage) {
-        const currentLang = window.getCurrentLanguage();
-        const langDe = document.getElementById('lang-de');
-        const langEn = document.getElementById('lang-en');
-        
-        if (langDe && langEn) {
-            langDe.checked = currentLang === 'de';
-            langEn.checked = currentLang === 'en';
-            console.log(`✅ Language selection updated: ${currentLang}`);
-        }
-    }
-    
     console.log(`✅ Settings tab updated: ${updatedCount} elements updated`);
+    
+    // Update radio buttons for language selection
+    if (typeof window.updateRadioButtons === 'function') {
+        setTimeout(() => {
+            window.updateRadioButtons();
+            console.log('🔄 Radio buttons updated after settings tab load');
+        }, 100);
+    }
 }
 
 // Update dev tab
 function updateDevTab() {
     // Dev tab updates are handled by dev-functions.js
     console.log('✅ Dev tab loaded');
-}
-
-// Update leitfaden tab
-function updateLeitfadenTab() {
-    console.log('✅ Leitfaden tab loaded');
-    
-    // Update language elements if language system is available
-    if (window.updateSettingsElements) {
-        window.updateSettingsElements();
-    }
 }
 
 // Calculate total machines owned
@@ -886,8 +862,6 @@ window.forceUpdateAllMehrTabs = function() {
             updateSettingsTab();
         } else if (activeTabId === 'dev') {
             updateDevTab();
-        } else if (activeTabId === 'leitfaden') {
-            updateLeitfadenTab();
         }
     }
     
@@ -897,7 +871,6 @@ window.forceUpdateAllMehrTabs = function() {
     updateStatsTab();
     updateSettingsTab();
     updateDevTab();
-    updateLeitfadenTab();
     
     console.log('🚨 FORCE UPDATE COMPLETED - All tabs should now show current values');
     return 'FORCE UPDATE COMPLETED - Check console for details';

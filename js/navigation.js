@@ -726,7 +726,7 @@ window.loadReferralsData = async function() {
         }
         
         // Update referral link
-        const referralLink = `https://luke0853.github.io/GeoDropV1/#/ref/${referralCode}`;
+        const referralLink = `https://geodrop-f3ee1.web.app/#/ref/${referralCode}`;
         const referralLinkDisplay = document.getElementById('referral-link-display');
         if (referralLinkDisplay) {
             referralLinkDisplay.value = referralLink;

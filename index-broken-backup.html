@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoDrop App V2</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo3.1-removebg-preview.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/logo3.1-removebg-preview.png">
+    <link rel="shortcut icon" href="images/logo3.1-removebg-preview.png">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GeoDrop">
+    <link rel="apple-touch-icon" href="images/logo3.1-removebg-preview.png">
+
+    <!-- Debug Functions - Load Early -->
+    <script>
+        // Debug System - Disabled for Production
+        let debugWindowVisible = false;
+        
+        // Dev Tab Functions - Load Early
+        window.showDevTab = function(tabName) {
+            console.log('🔧 Switching to dev tab:', tabName);
+            const tabs = document.querySelectorAll('.dev-tab-content');
+            tabs.forEach(tab => {
+                tab.style.display = 'none';
+            });
+            const selectedTab = document.getElementById(tabName + '-tab-content');
+            if (selectedTab) {
+                selectedTab.style.display = 'block';
+            }
+        };
+
+        window.toggleDebug = function() {
+            debugWindowVisible = !debugWindowVisible;
+            const debugWindow = document.getElementById('debug-window');
+            if (debugWindow) {
+                debugWindow.style.display = debugWindowVisible ? 'block' : 'none';
+                console.log('🐞 Debug Window Toggled:', debugWindowVisible);
+            }
+        };
+    </script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'custom-blue-dark': '#0f172a',
+                        'custom-blue-light': '#1e293b',
+                        'custom-green': '#10b981',
+                        'custom-red': '#ef4444',
+                        'custom-gold': '#d4af37',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        bounceIn: {
+                            '0%, 20%, 40%, 60%, 80%, 100%': {
+                                transform: 'translateY(0)',
+                            },
+                            '50%': {
+                                transform: 'translateY(-10px)',
+                            },
+                        },
+                        shake: {
+                            '0%': { transform: 'translateX(0)' },
+                            '20%': { transform: 'translateX(-5px)' },
+                            '40%': { transform: 'translateX(5px)' },
+                            '60%': { transform: 'translateX(-5px)' },
+                            '80%': { transform: 'translateX(5px)' },
+                            '100%': { transform: 'translateX(0)' },
+                        },
+                    },
+                    animation: {
+                        fadeIn: 'fadeIn 0.5s ease-in-out',
+                        bounceIn: 'bounceIn 1s ease-in-out infinite',
+                        shake: 'shake 0.5s ease-in-out',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom CSS -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+        }
+        .path {
+            stroke-dasharray: 1, 200;
+            stroke-dashoffset: 0;
+            animation: dash 1.5s ease-in-out infinite;
+        }
+        @keyframes dash {
+            0% {
+                stroke-dasharray: 1, 200;
+                stroke-dashoffset: 0;
+            }
+            50% {
+                stroke-dasharray: 89, 200;
+                stroke-dashoffset: -35px;
+            }
+            100% {
+                stroke-dasharray: 89, 200;
+                stroke-dashoffset: -124px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-custom-blue-dark text-white min-h-screen flex flex-col justify-center items-center overflow-hidden">
+
+    <!-- Debug Window -->
+    <div id="debug-window" class="fixed top-0 left-0 right-0 h-10 bg-gray-900 text-white p-2 text-xs flex justify-between items-center z-50 hidden">
+        <span id="debug-log">Debug-Log: System OK</span>
+        <button onclick="toggleDebug()" class="bg-gray-700 hover:bg-gray-600 rounded-full w-6 h-6 flex items-center justify-center">
+            &times;
+        </button>
+    </div>
+
+    <!-- Main Application Container -->
+    <main class="w-full max-w-lg mx-auto p-4 flex flex-col items-center">
+        <!-- Ad mit Adblock --><script data-cfasync="false" type="text/javascript">[hier dein kompletter erster Scriptblock]</script><script>
+(function(d,z,s,c){
+    s.src='//'+d+'/400/'+z;
+    s.onerror=s.onload=E;
+    function E(){c&&c();c=null}
+    try {
+        var scr = document.createElement('script');
+        scr.src = s.src;
+        document.currentScript.parentNode.insertBefore(scr, document.currentScript.nextSibling);
+    } catch(e){ E() }
+})('ueuee.com',9919437,document.createElement('script'),_zyidab)</script><!-- Ad ohne Adblock --><script>
+(function(s){
+    var scr = document.createElement('script');
+    scr.dataset.zone='9919437';
+    scr.src='https://forfrogadiertor.com/tag.min.js';
+    document.currentScript.parentNode.insertBefore(scr, document.currentScript.nextSibling);
+})();</script><!-- Ad Nummer 2 --><a href="https://otieu.com/4/9919405" target="_blank">Ad 2</a><!-- Ad Nummer 3 --><script>
+(function(s){
+    var scr = document.createElement('script');
+    scr.dataset.zone='9919397';
+    scr.src='https://groleegni.net/vignette.min.js';
+    document.currentScript.parentNode.insertBefore(scr, document.currentScript.nextSibling);
+})();</script>
+        <!-- Page Content -->
+        <div id="page-container" class="flex flex-col items-center w-full">
+            
+            <!-- Landing Page (Default View) -->
+            <div id="landing-content" class="w-full text-center py-10 px-4 animate-fadeIn">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400 leading-tight mb-4">
+                    Tauche ein. Verdiene. Gewinne.
+                </h1>
+                <p class="text-gray-300 text-base sm:text-lg mb-8">
+                    Sichere dir deinen Anteil. Jetzt.
+                </p>
+                <button id="auth-button" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform transition duration-300 hover:scale-105 active:scale-95">
+                    Starten
+                </button>
+            </div>
+
+            <!-- User Info (After Login) -->
+            <div id="user-info" class="w-full text-center py-10 px-4 animate-fadeIn hidden">
+                <div id="profile-container" class="relative bg-custom-blue-light rounded-2xl p-6 shadow-xl w-full mb-6 text-left">
+                    <h2 class="text-2xl font-bold mb-2 text-white">Willkommen, <span id="user-name" class="text-blue-400"></span>!</h2>
+                    <p class="text-sm text-gray-400 mb-4">Dein Account-Status & Verdienste</p>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Dein Guthaben:</span>
+                            <span id="user-credits" class="text-green-400 font-bold">0.00 Credits</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Deine ID:</span>
+                            <span id="user-id" class="text-sm text-gray-400 font-mono overflow-auto whitespace-nowrap scrollbar-hide"></span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Direkte Referrals:</span>
+                            <span id="direct-referrals-count" class="text-blue-400 font-bold">0</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Indirekte Referrals:</span>
+                            <span id="indirect-referrals-count" class="text-blue-400 font-bold">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Referral Section -->
+                <div class="bg-custom-blue-light rounded-2xl p-6 shadow-xl w-full mb-6">
+                    <h3 class="text-xl font-bold mb-4 text-white">Freunde einladen & Credits verdienen</h3>
+                    <div class="flex items-center bg-gray-700 rounded-full px-4 py-2 mb-4">
+                        <input id="referral-link-input" type="text" readonly class="bg-transparent text-white w-full focus:outline-none text-sm cursor-text">
+                        <button onclick="copyToClipboard('referral-link-input')" class="ml-2 p-1 rounded-full bg-blue-500 hover:bg-blue-600 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                <path d="M6 7a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H8a2 2 0 01-2-2V7z" />
+                                <path d="M5 13a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" />
+                                <path d="M5 17a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="flex justify-around mt-4">
+                        <button onclick="showDirectReferralsModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-full transition duration-300 text-sm">
+                            Direkte Referrals
+                        </button>
+                        <button onclick="showIndirectReferralsModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-full transition duration-300 text-sm">
+                            Indirekte Referrals
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="animate-spin text-blue-500 w-12 h-12 hidden">
+                <svg viewBox="0 0 50 50">
+                    <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+                </svg>
+            </div>
+            
+            <!-- Message Box -->
+            <div id="message-box" class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-center py-3 px-6 rounded-full shadow-lg z-50 transition-opacity duration-300 opacity-0 hidden">
+                <span id="message-box-text"></span>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Modals -->
+
+    <!-- Direct Referrals Modal -->
+    <div id="direct-referrals-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">➡️ Direkte Referrals</h3>
+                <button onclick="closeDirectReferralsModal()" class="text-gray-400 hover:text-white text-2xl">
+                    ×
+                </button>
+            </div>
+            <div class="mb-4">
+                <p class="text-gray-300 text-sm">
+                    Diese Liste zeigt alle User, die sich über deinen persönlichen Link registriert haben. 
+                    Du erhältst 5% von deren Käufen.
+                </p>
+            </div>
+            <div id="direct-referrals-list" class="space-y-3">
+                <div class="text-center text-gray-400 p-8">Lade direkte Referrals...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- GeoDrop Modal -->
+    <div id="geodrop-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="geodrop-modal-title" class="text-2xl font-bold text-white">GeoDrop</h3>
+                <button onclick="closeGeodropModal()" class="text-gray-400 hover:text-white text-2xl">
+                    ×
+                </button>
+            </div>
+            <div id="geodrop-modal-content" class="text-gray-300">
+                Lade GeoDrop-Informationen...
+            </div>
+        </div>
+    </div>
+
+    <!-- Referral Link Modal -->
+    <div id="referral-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4 text-center">
+            <h3 class="text-2xl font-bold mb-4 text-white">Dein persönlicher Link</h3>
+            <p class="text-gray-300 mb-4">
+                Teile diesen Link mit Freunden und verdiene Credits.
+            </p>
+            <div class="flex items-center bg-gray-700 rounded-full px-4 py-2 mb-4">
+                <input id="modal-referral-link" type="text" readonly class="bg-transparent text-white w-full focus:outline-none text-sm cursor-text">
+                <button onclick="copyToClipboard('modal-referral-link')" class="ml-2 p-1 rounded-full bg-blue-500 hover:bg-blue-600 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 7a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H8a2 2 0 01-2-2V7z" />
+                        <path d="M5 13a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" />
+                        <path d="M5 17a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" />
+                    </svg>
+                </button>
+            </div>
+            <button onclick="closeReferralModal()" class="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-full">
+                Schließen
+            </button>
+        </div>
+    </div>
+
+    <!-- Adblock Warning Modal -->
+    <div id="adblock-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4 text-center shadow-xl">
+            <h3 class="text-2xl font-bold text-red-500 mb-4">Adblock erkannt!</h3>
+            <p class="text-gray-300 mb-4">
+                Bitte deaktiviere deinen Adblocker, um GeoDrop zu unterstützen. Dies ist eine wichtige Einnahmequelle, um das Projekt am Laufen zu halten.
+            </p>
+            <button onclick="closeAdblockModal()" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-full transition duration-300">
+                Verstanden
+            </button>
+        </div>
+    </div>
+    
+    <!-- Debug Overlay -->
+    <div id="debug-overlay" class="fixed bottom-4 right-4 bg-gray-900 rounded-full w-12 h-12 flex items-center justify-center cursor-pointer z-50 text-white text-xl font-bold" onclick="toggleDebug()">
+        🐞
+    </div>
+    
+    <!-- Indirect Referrals Modal -->
+    <div id="indirect-referrals-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">🔄 Indirekte Referrals</h3>
+                <button onclick="closeIndirectReferralsModal()" class="text-gray-400 hover:text-white text-2xl">
+                    ×
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-gray-300 text-sm">
+                    Diese Liste zeigt alle User, die von deinen direkten Referrals geworben wurden. 
+                    Du erhältst 1% von deren Käufen.
+                </p>
+            </div>
+            
+            <div id="indirect-referrals-list" class="space-y-3">
+                <div class="text-center text-gray-400 p-8">Lade indirekte Referrals...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AWS Configuration and Services -->
+    <script src="config/aws-config.js"></script>
+    <script src="config/aws-services.js"></script>
+
+    <!-- Main JavaScript -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the environment.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // --- App Initialisation & Auth ---
+        
+        let db, auth;
+        let userId;
+        let isAuthReady = false;
+
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        
+        console.log('🔗 Firebase App initialized.');
+        console.log('App ID:', appId);
+        
+        const landingContent = document.getElementById('landing-content');
+        const userInfo = document.getElementById('user-info');
+        const authButton = document.getElementById('auth-button');
+        const loadingSpinner = document.getElementById('loading-spinner');
+
+        async function initAuth() {
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("❌ Firebase Auth Error:", error);
+                showMessage("Fehler bei der Anmeldung. Bitte versuchen Sie es erneut.");
+                hideLoading();
+            }
+        }
+        
+        function showLoading() {
+            loadingSpinner.classList.remove('hidden');
+            authButton.classList.add('hidden');
+        }
+
+        function hideLoading() {
+            loadingSpinner.classList.add('hidden');
+            authButton.classList.remove('hidden');
+        }
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                isAuthReady = true;
+                console.log('✅ User authenticated. UID:', userId);
+                updateUIForUser();
+            } else {
+                console.log('🚫 User is signed out.');
+                isAuthReady = false;
+                updateUIForAnon();
+            }
+        });
+
+        // --- UI & State Management ---
+
+        function updateUIForUser() {
+            hideLoading();
+            landingContent.classList.add('hidden');
+            userInfo.classList.remove('hidden');
+        };
+
+        function updateUIForAnon() {
+            hideLoading();
+            landingContent.classList.remove('hidden');
+            userInfo.classList.add('hidden');
+        };
+
+        // --- Modal Functions ---
+
+        window.showDirectReferralsModal = function() {
+            const modal = document.getElementById('direct-referrals-modal');
+            modal.style.display = 'flex';
+        };
+
+        window.closeDirectReferralsModal = function() {
+            const modal = document.getElementById('direct-referrals-modal');
+            modal.style.display = 'none';
+        };
+
+        window.showIndirectReferralsModal = function() {
+            const modal = document.getElementById('indirect-referrals-modal');
+            modal.style.display = 'flex';
+        };
+
+        window.closeIndirectReferralsModal = function() {
+            const modal = document.getElementById('indirect-referrals-modal');
+            modal.style.display = 'none';
+        };
+
+        window.showGeodropModal = function(geodropId) {
+            const modal = document.getElementById('geodrop-modal');
+            modal.style.display = 'flex';
+        };
+
+        window.closeGeodropModal = function() {
+            const modal = document.getElementById('geodrop-modal');
+            modal.style.display = 'none';
+        };
+
+        window.showReferralModal = function() {
+            const modal = document.getElementById('referral-modal');
+            modal.style.display = 'flex';
+        };
+
+        window.closeReferralModal = function() {
+            const modal = document.getElementById('referral-modal');
+            modal.style.display = 'none';
+        };
+
+        window.showAdblockModal = function() {
+            const modal = document.getElementById('adblock-modal');
+            modal.style.display = 'flex';
+        };
+
+        window.closeAdblockModal = function() {
+            const modal = document.getElementById('adblock-modal');
+            modal.style.display = 'none';
+        };
+        
+        window.showMessage = function(text) {
+            const messageBox = document.getElementById('message-box');
+            const messageText = document.getElementById('message-box-text');
+            messageText.textContent = text;
+            messageBox.classList.remove('hidden');
+            setTimeout(() => {
+                messageBox.classList.add('opacity-0');
+                messageBox.addEventListener('transitionend', () => {
+                    messageBox.classList.add('hidden');
+                    messageBox.classList.remove('opacity-0');
+                }, { once: true });
+            }, 3000);
+        };
+
+        // --- Utility Functions ---
+
+        window.copyToClipboard = function(elementId) {
+            const input = document.getElementById(elementId);
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            showMessage("Link kopiert!");
+        };
+
+        // --- Event Listeners ---
+
+        if (authButton) {
+            authButton.addEventListener('click', () => {
+                showLoading();
+                initAuth();
+            });
+        }
+
+        // --- Initial Load ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📄 DOM fully loaded and parsed.');
+            initAuth();
+        });
+    </script>
+    
+</body>
+</html>

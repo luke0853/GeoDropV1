@@ -307,6 +307,163 @@ window.toggleDebugWindow = function() {
     }
 };
 
+// Monetag SDK Functions for Container-specific Ad Display
+window.showAdInSlot = function(containerId, zoneId) {
+    console.log(`🔄 Zeige Ad in Container: ${containerId} (Zone: ${zoneId})`);
+    
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.warn(`❌ Container nicht gefunden: ${containerId}`);
+        return false;
+    }
+    
+    // Prüfe ob die entsprechende Monetag SDK Funktion verfügbar ist
+    const sdkFunction = `show_${zoneId}`;
+    if (typeof window[sdkFunction] === 'function') {
+        console.log(`✅ Monetag SDK Funktion gefunden: ${sdkFunction}`);
+        
+        try {
+            // Versuche die Ad im Container anzuzeigen
+            window[sdkFunction]({
+                type: 'inPage',
+                containerId: containerId
+            });
+            return true;
+        } catch (error) {
+            console.warn(`⚠️ SDK Funktion ${sdkFunction} Fehler:`, error);
+            return false;
+        }
+    } else {
+        console.warn(`❌ Monetag SDK Funktion nicht verfügbar: ${sdkFunction}`);
+        
+        // Fallback: Zeige Platzhalter-Banner mit korrekter Größe
+        const containerWidth = container.offsetWidth || 300;
+        const containerHeight = container.offsetHeight || 90;
+        
+        container.innerHTML = `
+            <div style="width: ${containerWidth}px; height: ${containerHeight}px; max-width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden;">
+                <div style="text-align: center; padding: 8px;">
+                    <div style="font-size: 16px; margin-bottom: 2px;">📢</div>
+                    <div style="font-size: 11px;">Zone ${zoneId}</div>
+                    <div style="font-size: 9px; opacity: 0.8;">SDK lädt...</div>
+                </div>
+            </div>
+        `;
+        
+        // Versuche SDK-Funktion später nochmal
+        setTimeout(() => {
+            if (typeof window[sdkFunction] === 'function') {
+                console.log(`🔄 Retry: Monetag SDK Funktion ${sdkFunction} jetzt verfügbar`);
+                window.showAdInSlot(containerId, zoneId);
+            }
+        }, 5000);
+        
+        return false;
+    }
+};
+
+// Container-spezifische Ad-Funktionen
+window.showSidebarAd = function() {
+    return window.showAdInSlot('monetag-9915234', '9915234');
+};
+
+window.showTopBannerAd = function() {
+    return window.showAdInSlot('monetag-9915224', '9915224');
+};
+
+window.showBottomBannerAd = function() {
+    return window.showAdInSlot('monetag-9915233', '9915233');
+};
+
+// Alle Banner auf einmal laden
+window.loadAllMonetagBanners = function() {
+    console.log('🚀 Lade alle Monetag Banner...');
+    
+    const results = {
+        sidebar: window.showSidebarAd(),
+        top: window.showTopBannerAd(),
+        bottom: window.showBottomBannerAd()
+    };
+    
+    console.log('📊 Banner Lade-Ergebnisse:', results);
+    return results;
+};
+
+// Monetag SDK Status prüfen
+window.checkMonetagSDK = function() {
+    console.log('🔍 Prüfe Monetag SDK Status...');
+    
+    const zones = ['9915234', '9915224', '9915233'];
+    const sdkStatus = {};
+    
+    zones.forEach(zoneId => {
+        const sdkFunction = `show_${zoneId}`;
+        sdkStatus[zoneId] = {
+            function: sdkFunction,
+            available: typeof window[sdkFunction] === 'function',
+            container: document.getElementById(`monetag-${zoneId}`) ? 'gefunden' : 'nicht gefunden'
+        };
+    });
+    
+    console.log('📊 Monetag SDK Status:', sdkStatus);
+    return sdkStatus;
+};
+
+// Banner Container Status prüfen
+window.checkBannerContainers = function() {
+    console.log('🔍 Prüfe Banner Container...');
+    
+    const containers = ['monetag-9915234', 'monetag-9915224', 'monetag-9915233'];
+    const containerStatus = {};
+    
+    containers.forEach(containerId => {
+        const container = document.getElementById(containerId);
+        containerStatus[containerId] = {
+            exists: !!container,
+            visible: container ? container.offsetParent !== null : false,
+            content: container ? container.innerHTML.length : 0,
+            dimensions: container ? {
+                width: container.offsetWidth,
+                height: container.offsetHeight
+            } : null
+        };
+    });
+    
+    console.log('📊 Banner Container Status:', containerStatus);
+    return containerStatus;
+};
+
+// Manuelle SDK-Test-Funktion
+window.testMonetagSDK = function() {
+    console.log('🧪 Teste Monetag SDK manuell...');
+    
+    const zones = ['9915234', '9915224', '9915233'];
+    zones.forEach(zoneId => {
+        const sdkFunction = `show_${zoneId}`;
+        console.log(`🔍 Prüfe ${sdkFunction}:`, typeof window[sdkFunction]);
+        
+        if (typeof window[sdkFunction] === 'function') {
+            console.log(`✅ ${sdkFunction} verfügbar - teste Aufruf...`);
+            try {
+                // Teste den Aufruf ohne Parameter
+                window[sdkFunction]();
+                console.log(`✅ ${sdkFunction} erfolgreich aufgerufen`);
+            } catch (error) {
+                console.warn(`⚠️ ${sdkFunction} Fehler:`, error);
+            }
+        } else {
+            console.log(`❌ ${sdkFunction} nicht verfügbar`);
+        }
+    });
+    
+    // Prüfe auch globale Monetag-Objekte
+    console.log('🔍 Globale Monetag-Objekte:', {
+        monetag: typeof window.monetag,
+        monetagObject: window.monetag,
+        monetagKeys: window.monetag ? Object.keys(window.monetag) : 'N/A'
+    });
+};
+
 // Initialize App
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 GeoDrop App initialized');
@@ -315,4 +472,18 @@ document.addEventListener('DOMContentLoaded', function() {
     getCurrentLocation().catch(error => {
         console.log('📍 GPS failed - no fallback location set');
     });
+    
+    // Warte auf Monetag SDK und lade dann Banner
+    setTimeout(() => {
+        console.log('🔄 Versuche Monetag Banner zu laden...');
+        window.checkMonetagSDK();
+        window.checkBannerContainers();
+        window.loadAllMonetagBanners();
+        
+        // Teste SDK nach 10 Sekunden nochmal
+        setTimeout(() => {
+            console.log('🔄 Teste Monetag SDK nach 10 Sekunden...');
+            window.testMonetagSDK();
+        }, 10000);
+    }, 3000);
 });

@@ -66,18 +66,86 @@
     
     <!-- Language Settings -->
     <div class="bg-gray-700 rounded-lg p-6">
-        <h3 class="text-xl font-semibold text-white mb-4" id="settings-language-title">🌍 Sprache</h3>
+        <h3 class="text-xl font-semibold text-white mb-4" id="settings-language-title">🌍 Sprache / Language</h3>
         <div class="space-y-4">
-            <div class="flex items-center justify-between">
-                <span class="text-gray-300" id="settings-language-german">🇩🇪 Deutsch</span>
-                <input type="radio" name="language" value="de" id="lang-de" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" onchange="setLanguage('de')">
+            <!-- Current Language Display -->
+            <div class="bg-gray-800 rounded-lg p-4 mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-gray-300 font-medium" id="settings-current-language-label">Aktuelle Sprache / Current Language:</span>
+                    <span class="text-blue-400 font-bold" id="settings-current-language-display">Deutsch</span>
+                </div>
+                <div class="text-sm text-gray-400" id="settings-language-status">
+                    ✅ Spracheinstellung gespeichert / Language setting saved
+                </div>
             </div>
-            <div class="flex items-center justify-between">
-                <span class="text-gray-300" id="settings-language-english">🇺🇸 English</span>
-                <input type="radio" name="language" value="en" id="lang-en" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500" onchange="setLanguage('en')">
+            
+            <!-- Language Selection -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-750 transition-colors cursor-pointer" onclick="switchLanguage('de')">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">🇩🇪</span>
+                        <div>
+                            <div class="text-white font-medium">Deutsch</div>
+                            <div class="text-gray-400 text-sm">German - Vollständige Übersetzung</div>
+                        </div>
+                    </div>
+                    <input type="radio" name="language" value="de" id="lang-de" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500">
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-750 transition-colors cursor-pointer" onclick="switchLanguage('en')">
+                    <div class="flex items-center">
+                        <span class="text-2xl mr-3">🇺🇸</span>
+                        <div>
+                            <div class="text-white font-medium">English</div>
+                            <div class="text-gray-400 text-sm">Englisch - Complete Translation</div>
+                        </div>
+                    </div>
+                    <input type="radio" name="language" value="en" id="lang-en" class="w-4 h-4 text-blue-600 bg-gray-600 border-gray-500 rounded focus:ring-blue-500">
+                </div>
             </div>
-            <div class="text-xs text-gray-400 bg-gray-800 p-2 rounded mt-2" id="settings-language-tip">
-                💡 Tipp: Die Sprache wird sofort geändert und gespeichert
+            
+            <!-- Language Preview -->
+            <div class="bg-gray-800 rounded-lg p-4 mt-4">
+                <h4 class="text-white font-medium mb-3" id="settings-language-preview-title">🔍 Sprachvorschau / Language Preview</h4>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-300" id="preview-label-1">Einstellungen:</span>
+                        <span class="text-blue-400" id="preview-text-1">Settings</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-300" id="preview-label-2">Benutzername:</span>
+                        <span class="text-blue-400" id="preview-text-2">Username</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-300" id="preview-label-3">Benachrichtigungen:</span>
+                        <span class="text-blue-400" id="preview-text-3">Notifications</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Language Information -->
+            <div class="bg-blue-900 bg-opacity-30 border border-blue-600 rounded-lg p-4 mt-4">
+                <h4 class="text-blue-400 font-medium mb-2" id="settings-language-info-title">ℹ️ Sprachinformationen / Language Information</h4>
+                <div class="text-sm text-gray-300 space-y-1" id="settings-language-info">
+                    <p>• <strong>Deutsch:</strong> Vollständige Übersetzung aller App-Bereiche</p>
+                    <p>• <strong>English:</strong> Complete translation of all app sections</p>
+                    <p>• <strong>Automatische Speicherung:</strong> Spracheinstellung wird in localStorage gespeichert</p>
+                    <p>• <strong>Auto-save:</strong> Language setting is saved in localStorage</p>
+                </div>
+            </div>
+            
+            <!-- Language Actions -->
+            <div class="flex space-x-3 mt-4">
+                <button onclick="testLanguageSwitch()" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors" id="settings-language-test">
+                    🧪 Sprachtest / Language Test
+                </button>
+                <button onclick="resetLanguageSettings()" class="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors" id="settings-language-reset">
+                    🔄 Zurücksetzen / Reset
+                </button>
+            </div>
+            
+            <div class="text-xs text-gray-400 bg-gray-800 p-3 rounded mt-4" id="settings-language-tip">
+                💡 Die Sprache wird sofort geändert und gespeichert / Language will be changed and saved immediately
             </div>
         </div>
     </div>

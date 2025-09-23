@@ -159,7 +159,7 @@
         }
 
         // Chat functions
-        function sendMessage() {
+        async function sendMessage() {
             const input = document.getElementById('chat-input');
             const message = input.value.trim();
             
@@ -171,16 +171,40 @@
                 return;
             }
             
+            // Get the real username from Firebase users collection
+            let username = 'User';
+            try {
+                // First try to get from global userProfile
+                if (window.userProfile && window.userProfile.username) {
+                    username = window.userProfile.username;
+                } else {
+                    // Load user profile from Firebase users collection
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        username = userData.username || userData.email?.split('@')[0] || 'User';
+                        console.log('✅ Loaded username from Firebase:', username);
+                    } else {
+                        // Fallback to email prefix if no user document exists
+                        username = user.email?.split('@')[0] || 'User';
+                        console.log('⚠️ No user document found, using email prefix:', username);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error loading user profile for chat:', error);
+                username = user.email?.split('@')[0] || 'User';
+            }
+            
             // Add message to Firebase
             db.collection('chatMessages').add({
                 text: message,
                 userId: user.uid,
-                username: window.userProfile?.username || user.displayName || user.email,
+                username: username,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 userEmail: user.email
             }).then(() => {
                 input.value = '';
-                console.log('✅ Message sent');
+                console.log('✅ Message sent with username:', username);
             }).catch(error => {
                 console.error('❌ Error sending message:', error);
                 alert('❌ Fehler beim Senden der Nachricht!');
@@ -192,12 +216,14 @@
                 .orderBy('timestamp', 'desc')
                 .limit(50);
             
-            messagesRef.onSnapshot((snapshot) => {
+            messagesRef.onSnapshot(async (snapshot) => {
                 const chatMessages = document.getElementById('chat-messages');
                 if (!chatMessages) return;
                 
                 let html = '';
-                snapshot.docs.reverse().forEach(doc => {
+                
+                // Process messages and get real usernames
+                for (const doc of snapshot.docs.reverse()) {
                     const data = doc.data();
                     const timestamp = data.timestamp ? data.timestamp.toDate() : new Date();
                     const timeStr = timestamp.toLocaleTimeString('de-DE', { 
@@ -209,18 +235,35 @@
                     const messageClass = isCurrentUser ? 'bg-blue-600' : 'bg-gray-600';
                     const alignClass = isCurrentUser ? 'ml-auto' : 'mr-auto';
                     
+                    // Get real username from Firebase users collection
+                    let displayUsername = data.username || 'User';
+                    
+                    // If username looks like an email or is generic, try to get real username
+                    if (displayUsername.includes('@') || displayUsername === 'User' || displayUsername === 'Anonym') {
+                        try {
+                            const userDoc = await db.collection('users').doc(data.userId).get();
+                            if (userDoc.exists) {
+                                const userData = userDoc.data();
+                                displayUsername = userData.username || userData.email?.split('@')[0] || 'User';
+                            }
+                        } catch (error) {
+                            console.error('❌ Error loading username for message:', error);
+                            // Keep original username as fallback
+                        }
+                    }
+                    
                     html += `
                         <div class="chat-message ${alignClass} max-w-xs lg:max-w-md">
                             <div class="${messageClass} rounded-lg p-3">
                                 <div class="flex justify-between items-center mb-1">
-                                    <span class="text-xs font-semibold text-gray-300">${data.username || 'Anonym'}</span>
+                                    <span class="text-xs font-semibold text-gray-300">${displayUsername}</span>
                                     <span class="text-xs text-gray-400">${timeStr}</span>
                                 </div>
                                 <p class="text-white">${data.text}</p>
                             </div>
                         </div>
                     `;
-                });
+                }
                 
                 if (html === '') {
                     html = `
@@ -279,79 +322,6 @@
             });
         });
 
-        // Chat functions - from backup
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            const user = auth.currentUser;
-            if (!user) {
-                alert('❌ Bitte melde dich an um zu chatten!');
-                return;
-            }
-            
-            // Add message to Firebase
-            db.collection('chatMessages').add({
-                text: message,
-                userId: user.uid,
-                username: window.userProfile?.username || user.displayName || user.email,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                userEmail: user.email
-            }).then(() => {
-                input.value = '';
-                console.log('✅ Message sent');
-            }).catch(error => {
-                console.error('❌ Error sending message:', error);
-                alert('❌ Fehler beim Senden der Nachricht!');
-            });
-        }
-
-        function loadChatMessages() {
-            const messagesRef = db.collection('chatMessages')
-                .orderBy('timestamp', 'desc')
-                .limit(50);
-            
-            messagesRef.onSnapshot((snapshot) => {
-                const chatMessages = document.getElementById('chat-messages');
-                if (!chatMessages) return;
-                
-                let html = '';
-                snapshot.docs.reverse().forEach(doc => {
-                    const data = doc.data();
-                    const timestamp = data.timestamp ? data.timestamp.toDate() : new Date();
-                    const timeStr = timestamp.toLocaleTimeString('de-DE', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    });
-                    
-                    const isCurrentUser = auth.currentUser && data.userId === auth.currentUser.uid;
-                    const messageClass = isCurrentUser ? 'bg-blue-600' : 'bg-gray-600';
-                    const alignClass = isCurrentUser ? 'ml-auto' : 'mr-auto';
-                    
-                    html += `
-                        <div class="flex ${alignClass} mb-3">
-                            <div class="max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${messageClass} text-white">
-                                <div class="text-xs text-gray-300 mb-1">
-                                    ${data.username || 'Unbekannt'} • ${timeStr}
-                                </div>
-                                <div>${data.text}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                chatMessages.innerHTML = html;
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            });
-        }
-
-        function updateChatStats() {
-            // Update active users (simplified)
-            const activeEl = document.getElementById('active-users');
-            if (activeEl) activeEl.textContent = '1+';
-        }
 
         // Make functions globally available
         window.sendMessage = sendMessage;

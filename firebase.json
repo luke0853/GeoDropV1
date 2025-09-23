@@ -4,7 +4,24 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/backup_cleanup/**",
+      "**/Backups/**",
+      "**/*.backup",
+      "**/*.bak",
+      "**/test-*.html",
+      "**/demo-*.html",
+      "**/*-separated.html",
+      "**/zeilenrezeptbuch.readme",
+      "**/SECURITY-AUDIT-2025.md",
+      "**/DEPLOYMENT-README.md",
+      "**/FIREBASE-RULES-SETUP.md",
+      "**/ROADMAP-2025.md",
+      "**/SECURITY.md",
+      "**/config/README.md",
+      "**/config/AWS-SETUP.md",
+      "**/dataconnect/**",
+      "**/whitepaper_alt.html"
     ],
     "rewrites": [
       {
@@ -18,19 +35,5 @@
     "location": "eur3",
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
-  },
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ],
-      "predeploy": []
-    }
-  ]
+  }
 }
