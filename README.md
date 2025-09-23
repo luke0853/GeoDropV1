@@ -11,7 +11,7 @@ GeoDrop is an innovative blockchain-based application that combines GPS-based ge
 
 ## 🚀 Live Demo
 
-- **Main App**: [https://geodrop-cryptogame.netlify.app](https://geodrop-cryptogame.netlify.app)
+- **Main App**: [https://geodrop-f3ee1.web.app/](https://geodrop-f3ee1.web.app/)
 - **GitHub Pages**: [https://luke0853.github.io/GeoDropV1/](https://luke0853.github.io/GeoDropV1/)
 
 ## ✨ Features
