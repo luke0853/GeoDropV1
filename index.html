@@ -19,6 +19,746 @@
     <link rel="apple-touch-icon" href="images/logo3.1-removebg-preview.png">
 
     <script>
+        // Language System
+        let currentLang = 'de'; // Default language
+        
+        // Make currentLang globally available
+        window.currentLang = currentLang;
+        
+        const translations = {
+            de: {
+                // Banner
+                'banner-earn': '💰 Verdiene Geld mit Gaming!',
+                
+                // Navigation
+                'startseite': 'Home',
+                'geocard': 'GeoCard',
+                'geoboard': 'GeoBoard',
+                'mining': 'Mining',
+                'bonus': 'Bonus',
+                'geochat': 'GeoChat',
+                'trading': 'Trading',
+                'mehr': 'Mehr',
+                'dev': 'Dev',
+                'machines': 'Mining',
+                
+                // Landing Page
+                'welcome-title': 'Willkommen in der Zukunft des Geo-Minings',
+                'whitepaper-title': '📖 Vollständiges Whitepaper anzeigen',
+                'main-whitepaper': '📄 Haupt-Whitepaper',
+                'alt-whitepaper': '📋 Alternative Version',
+                'whitepaper-instruction': '💡 Klicke auf die Buttons um die vollständigen Whitepaper-Dokumente in neuen Tabs zu öffnen',
+                'mobile-users': '📱 Mobile Nutzer: Die Whitepaper öffnen sich in neuen Browser-Tabs. Du kannst zwischen den Tabs wechseln oder die App im Hintergrund lassen.',
+                
+                // Content
+                'what-is-geodrop': '🎯 Was ist GeoDrop?',
+                'what-is-geodrop-desc': 'GeoDrop ist eine innovative Blockchain-basierte App, die Geocaching mit Kryptowährungen verbindet. Benutzer können virtuelle "Drops" an realen Orten platzieren und Belohnungen durch das Abschließen von Aufgaben verdienen.',
+                
+                'technology-title': '🔧 Technologie (Status: September 2025)',
+                'blockchain': 'Blockchain: tBNB-basierte Smart Contracts mit PixelDrop Token',
+                'trading-system': 'Trading System: Vollständiges DeFi-Trading zwischen PixelDrop ↔ tBNB',
+                'mining-machines': 'Mining-Maschinen: 4 verschiedene Maschinentypen mit Boost-System',
+                'gps': 'GPS: Präzise Standortbestimmung mit 20m Genauigkeit',
+                'firebase': 'Firebase: Echtzeitdatenbank für Drops und User-Interaktionen',
+                'dev-area': 'Dev Area: Erweiterte Admin-Tools und Drop-Management',
+                'bonus-system': 'Bonus System: Tägliche Belohnungen mit Spezialeffekten',
+                'pwa-support': 'PWA-Unterstützung: Installierbare Web-App für mobile Geräte',
+                'realtime-updates': 'Echtzeit-Updates: Live-Updates für alle App-Funktionen',
+                
+                'gameplay-title': '🎮 Gameplay',
+                'gameplay-desc': 'Benutzer navigieren zu GeoDrops, machen Fotos vom Standort und erhalten Belohnungen in Form von Kryptowährungen. Das System verhindert Betrug durch GPS-Validierung und Bildanalyse.',
+                
+                'security-title': '🔒 Sicherheit',
+                'security-decentralized': 'Dezentrale Blockchain-Architektur',
+                'security-smart-contracts': 'Smart Contract-basierte Belohnungen',
+                'security-anti-cheat': 'Anti-Cheat-Systeme',
+                'security-encryption': 'Verschlüsselte Datenübertragung',
+                
+                // Buttons
+                'login': 'Anmelden',
+                'register': 'Registrieren',
+                
+                // Additional missing translations
+                'geodrop-title': '🌍 GeoDrop',
+                'geodrop-subtitle': 'Willkommen in der Zukunft des Geo-Minings',
+                'user-info': '👤 Benutzer-Info',
+                'email': 'E-Mail:',
+                'username': 'Benutzername:',
+                'level': 'Level:',
+                'coins': 'Coins:',
+                'drops': 'Drops:',
+                'boost': 'Boost:',
+                'username-placeholder': 'Wähle deinen Username',
+                'email-placeholder': 'deine@email.com',
+                
+                // Hero Section
+                'future-title': 'Die Zukunft des',
+                'future-subtitle': 'Geo-Minings',
+                'hero-description': 'Verdiene Kryptowährungen durch Geocaching! Entdecke virtuelle Drops an echten Orten und sammle Belohnungen mit innovativer Blockchain-Technologie.',
+                'register-free': 'Kostenlos registrieren',
+                'learn-more': 'Mehr erfahren',
+                
+                // Statistics
+                'active-users': 'Aktive User',
+                'geodrops': 'GeoDrops',
+                'paid-out': 'Ausgezahlt',
+                
+                // Cards
+                'geodrop-found': 'GeoDrop gefunden!',
+                'daily-bonus': 'Täglicher Bonus',
+                'referral-bonus': 'Empfehlungsbonus',
+                'referral-desc': '+5% von Käufen',
+                
+                // Additional missing translations
+                'ready-future': 'Bereit für die Zukunft des Geo-Minings?',
+                'join-thousands': 'Schließe dich Tausenden von Nutzern an und verdiene Kryptowährungen durch Geocaching!',
+                'how-it-works': 'Wie es funktioniert',
+                '4-simple-steps': 'In 4 einfachen Schritten zu deinen ersten Kryptowährungen',
+                'find-drops': 'Drops finden',
+                'find-drops-desc': 'Nutze die Karte um GeoDrops in deiner Nähe zu entdecken.',
+                'take-photos': 'Fotos machen',
+                'take-photos-desc': 'Mache ein Foto vom Standort und bestätige deine Anwesenheit.',
+                'referral-system': 'Empfehlungssystem',
+                'earn-with-friends': 'Verdiene mit jedem Freund, den du einlädst',
+                '2-level-system': '🎯 2-Ebenen System',
+                'referral-bonus-text': 'Du erhältst 50 PixelDrop Startbonus!',
+                'referral-code-label': '🔗 EMPFEHLUNGSCODE (OPTIONAL)',
+                'referral-code-placeholder': 'EMPFEHLUNGSCODE EINGEBEN',
+                'referral-bonus-desc': 'Du erhältst 50 PixelDrop Bonus wenn du über einen Empfehlungslink kommst!',
+                'already-registered': 'Bereits registriert? Hier anmelden',
+                'already-registered-text': 'Bereits registriert?',
+                'login-here': 'Hier anmelden',
+                'new-crypto-chance': '🚀 Neue Krypto-Chance - Jetzt starten!',
+                'whitepaper-desc': 'Erfahre mehr über das GeoDrop-Konzept und die dahinterstehende Technologie.',
+                'read-whitepaper': 'Whitepaper lesen',
+                'show-roadmap': 'Roadmap anzeigen',
+                'tokenomics': 'Tokenomics',
+                'register-now': '🚀 Jetzt registrieren',
+                'create-account': 'Erstelle deinen Account und starte sofort!',
+                'login-title': '🔑 Anmelden',
+                'welcome-back': 'Willkommen zurück!',
+                'login-button': 'Anmelden',
+                'dev': 'Dev',
+                'best-game': '🎮 Best Idle-RPG Game! - Jetzt spielen!',
+                'password-placeholder': 'Mindestens 6 Zeichen',
+                'email-label': 'E-Mail',
+                'password-label': 'Passwort',
+                'username-label': 'Benutzername',
+                'step1-title': 'Registrieren',
+                'step1-desc': 'Erstelle kostenlos deinen Account und verbinde dein MetaMask Wallet.',
+                'step4-title': 'Belohnung erhalten',
+                'step4-desc': 'Erhalte PixelDrop Tokens direkt in dein Wallet.',
+                
+                // Feature Cards
+                'what-can-geodrop': 'Was kann GeoDrop?',
+                'discover-features': 'Entdecke die revolutionären Features der Geo-Mining App',
+                'gps-mining': 'GPS-basiertes Mining',
+                'gps-mining-desc': 'Finde virtuelle Drops an echten Orten und verdiene Kryptowährungen durch Geocaching-Aktivitäten.',
+                'mining-machines-feature': 'Mining-Maschinen',
+                'mining-machines-desc': '4 verschiedene Maschinentypen für passives Einkommen. Von Basic bis Mega Miner mit verschiedenen Boosts.',
+                'defi-trading': 'DeFi Trading',
+                'defi-trading-desc': 'Handele PixelDrop ↔ tBNB direkt in der App. Vollständiges DeFi-Trading mit Smart Contracts.',
+                'daily-bonuses': 'Tägliche Boni',
+                'daily-bonuses-desc': 'Sammle täglich 50 PixelDrop als Login-Bonus. Spezialeffekte und Animationen inklusive.',
+                'referral-system-feature': 'Empfehlungssystem',
+                'referral-system-desc': 'Lade Freunde ein und verdiene 5% ihres Einkommens. 2. Stufe: 1% zusätzlich.',
+                'pwa-support': 'PWA-Unterstützung',
+                'pwa-support-desc': 'Installierbare Web-App für mobile Geräte. Funktioniert offline und wie eine native App.',
+                
+                // GeoCard translations
+                'geocard-title': '🗺️ GeoCard',
+                'interactive-map': '🌍 Interaktive Karte',
+                'map-legend-button': '🗺️ Karten-Legende anzeigen',
+                'user-drop-button': '➕ User Drop erstellen',
+                'location-title': '📍 Standort',
+                'use-my-location': '📍 Meinen Standort verwenden',
+                'location-info-default': 'Klicke auf den Button um deine aktuelle Position zu laden',
+                'photo-upload-title': '📸 Foto-Upload',
+                'select-geodrop': 'GeoDrop auswählen:',
+                'user-drops': '👤 User Drops',
+                'dev-drops': '🎯 Dev Drops',
+                'select-dev-geodrop': 'Dev GeoDrop auswählen...',
+                'take-photo': '📸 Foto aufnehmen',
+                'upload-debug': '🔍 Upload Debug',
+                
+                // Additional GeoCard translations
+                'latitude': 'Breitengrad',
+                'longitude': 'Längengrad',
+                'latitude-lat': 'Breitengrad (Lat)',
+                'longitude-lng': 'Längengrad (Lng)',
+                'dev-latitude': 'Dev Breitengrad',
+                'dev-longitude': 'Dev Längengrad',
+                'reload-drops': '🔄 Drops neu laden',
+                'save-changes': '✅ Änderungen speichern',
+                'latitude-placeholder': 'z.B. 52.520008',
+                'longitude-placeholder': 'z.B. 13.404954',
+                'no-dev-drops': 'Keine Dev GeoDrops gefunden',
+                'error-loading-dev-drops': 'Fehler beim Laden der Dev GeoDrops',
+                'legend-collected-today': 'Heute gesammelt',
+                'legend-collected-today-desc': 'Graue Dart-Scheibe - Heute bereits gesammelt',
+                'dev-drops-legend': '🎯 Dev GeoDrops',
+                'user-drops-legend': '🌍 User GeoDrops',
+                
+                // User Drop Modal translations
+                'drop-name': '🎯 Drop Name:',
+                'drop-name-placeholder': 'z.B. Historisches Gebäude',
+                'what-to-photograph': '📸 Was soll fotografiert werden:',
+                'photograph-description-placeholder': 'Beschreibe genau, was an diesem Standort fotografiert werden soll...',
+                'reference-image-upload': '📷 Referenzbild hochladen:',
+                'choose-file': 'Datei auswählen',
+                'no-file-selected': 'Keine ausgewählt',
+                'reference-image-description': 'Lade ein Referenzbild hoch, das zeigt was fotografiert werden soll',
+                'reward-pixeldrops': '💰 Belohnung (PixelDrops):',
+                'user-drops-fixed': 'User Drops sind auf 10 PixelDrops fixiert',
+                'location': '📍 Standort:',
+                'use-current-position': 'Aktuelle Position verwenden',
+                'location-auto-description': 'Standort wird automatisch von deiner aktuellen Position übernommen',
+                'create-user-drop': '✔ User Drop erstellen',
+                'cancel': '✗ Abbrechen',
+                'create-user-drop-title': '➕ User GeoDrop erstellen',
+                'latitude': 'Breitengrad',
+                'longitude': 'Längengrad',
+                'dev-test-coordinates': '🔧 DEV: Test-Koordinaten:',
+                'dev-latitude': 'Dev Breitengrad',
+                'dev-longitude': 'Dev Längengrad',
+                'dev-test-warning': '⚠️ Nur für Dev-Tests - normale User sehen dies nicht!',
+                
+                // Additional missing translations
+                'your-location': 'Dein Standort',
+                'accuracy': 'Genauigkeit:',
+                'time': 'Zeit:',
+                'location-found': 'Standort gefunden:',
+                'current-position': 'Aktuelle Position',
+                'user-mode': 'USER MODUS (Dev deaktiviert)',
+                'adjust-coordinates': 'Koordinaten anpassen',
+                'reset': 'Zurücksetzen',
+                
+                // GeoDrops Table
+                'geodrops-overview': '📋 GeoDrops Übersicht',
+                'dev-geodrops': '🎯 Dev GeoDrops',
+                'user-geodrops': '👤 User GeoDrops',
+                'table-number': 'Nr.',
+                'table-creator': 'Ersteller',
+                'table-reward': 'Reward',
+                'table-status': 'Status',
+                'table-type': 'Typ',
+                'table-icon': 'Icon',
+                'table-coordinates': 'Koordinaten',
+                'table-created': 'Erstellt',
+                'table-actions': 'Aktionen',
+                'status-active': '✅ Aktiv',
+                'status-inactive': '❌ Inaktiv',
+                'please-login': 'Bitte zuerst anmelden',
+                'no-user-drops': 'Keine User GeoDrops gefunden',
+                'error-loading-user-drops': 'Fehler beim Laden der User GeoDrops',
+                'error-loading-geodrops': 'Fehler beim Laden der GeoDrops',
+                'loading-dev-drops-table': 'Lade Dev GeoDrops-Tabelle...',
+                'user-drops-displayed': '👤 User GeoDrops angezeigt',
+                'dev-drops-displayed': '🎯 Dev GeoDrops angezeigt',
+                'modal-not-found': '❌ Modal nicht gefunden',
+                'cleanup-duplicates': '🧹 Duplikate bereinigen',
+                'reload-all-lists': '🔄 Alle Listen neu laden',
+                'dev-test-warning': '⚠️ Nur für Dev-Tests - normale User sehen dies nicht!',
+                'end-dev-session': '🔒 Dev-Session beenden',
+                'status-claimed': '❌ Gesammelt',
+                'status-available': '✅ Verfügbar',
+                'status-claimed-today': '⏰ Heute gesammelt',
+                'selected-for-upload': 'für Upload ausgewählt',
+                
+                // Dev Coordinates Section
+                'dev-coordinates-title': '🎯 Dev Koordinaten-Anpassung',
+                'admin-status': 'Admin-Status:',
+                'admin-active': 'Aktiv',
+                'admin-inactive': 'Inaktiv (nur mit Admin-Passwort)',
+                'dev-coords-status': 'Dev-Koordinaten:',
+                'dev-coords-not-set': 'Nicht gesetzt',
+                'dev-coords-set': 'Gesetzt',
+                'admin-required': '🔒 Admin-Modus erforderlich',
+                'admin-mode-disable': '🔓 Admin-Modus deaktivieren',
+                'admin-mode-enable': '🔓 Admin-Modus aktivieren',
+                'dev-drop-create': '🎯 Dev Drop erstellen',
+                'dev-test-coordinates': '🔧 DEV: Test-Koordinaten eingeben:',
+                'set-test-coordinates': '📍 Test-Koordinaten setzen',
+                'create-test-melk': '🏛️ Test-Drop: Stift Melk erstellen',
+                'create-test-schonbrunn': '🏰 Test-Drop: Schloss Schönbrunn erstellen',
+                'create-all-states': '🇦🇹 Alle 9 Bundesländer-Drops erstellen',
+                'create-remaining-states': '🚀 Restliche 8 Bundesländer-Drops erstellen',
+                'clear-user-drops': '🧹 User Drop Listen leeren',
+                'restore-user-drops': '🔄 User Drop Listen wiederherstellen',
+                'check-user-drop-count': '📊 User Drop Anzahl prüfen',
+                'create-missing-drop1': '🏛️ Drop Nr. 1 (Stift Melk) erstellen',
+                
+                // Additional missing translations
+                'zoom': 'Zoom:',
+                'dev-latitude-label': 'Dev Breitengrad',
+                'dev-longitude-label': 'Dev Längengrad',
+                
+                // Map and Table translations
+                'dev-coordinate-adjustment': 'Dev Koordinaten-Anpassung',
+                'admin-mode-required': 'Admin-Modus erforderlich',
+                'current-position': 'Aktuelle Position',
+                'admin-status': 'Admin-Status:',
+                'dev-coordinates': 'Dev-Koordinaten:',
+                'geodrops-overview': 'GeoDrops Übersicht',
+                'dev-geodrops-tab': '🎯 Dev GeoDrops',
+                'user-geodrops-tab': '👤 User GeoDrops',
+                'reload-drops-tab': '🔄 Drops neu laden',
+                'table-number': 'Nr.',
+                'table-creator': 'Ersteller',
+                'table-reward': 'Reward',
+                'table-status': 'Status',
+                'table-type': 'Typ',
+                'table-icon': 'Icon',
+                'table-coordinates': 'Koordinaten',
+                'status-available': '✔ Verfügbar',
+                'status-collected-today': '⏰ Heute gesammelt',
+                'type-dev': 'Dev',
+                'creator-kryptoguru': 'KryptoGuru'
+            },
+            en: {
+                // Banner
+                'banner-earn': '💰 Earn Money with Gaming!',
+                
+                // Navigation
+                'startseite': 'Home',
+                'geocard': 'GeoCard',
+                'geoboard': 'GeoBoard',
+                'mining': 'Mining',
+                'bonus': 'Bonus',
+                'geochat': 'GeoChat',
+                'trading': 'Trading',
+                'mehr': 'More',
+                'dev': 'Dev',
+                'machines': 'Mining',
+                
+                // Landing Page
+                'welcome-title': 'Welcome to the future of Geo-Mining',
+                'whitepaper-title': '📖 Show complete Whitepaper',
+                'main-whitepaper': '📄 Main Whitepaper',
+                'alt-whitepaper': '📋 Alternative Version',
+                'whitepaper-instruction': '💡 Click on the buttons to open the complete Whitepaper documents in new tabs',
+                'mobile-users': '📱 Mobile Users: The Whitepapers open in new browser tabs. You can switch between tabs or leave the app in the background.',
+                
+                // Content
+                'what-is-geodrop': '🎯 What is GeoDrop?',
+                'what-is-geodrop-desc': 'GeoDrop is an innovative blockchain-based app that connects geocaching with cryptocurrencies. Users can place virtual "drops" at real locations and earn rewards by completing tasks.',
+                
+                'technology-title': '🔧 Technology (Status: September 2025)',
+                'blockchain': 'Blockchain: tBNB-based Smart Contracts with PixelDrop Token',
+                'trading-system': 'Trading System: Complete DeFi trading between PixelDrop ↔ tBNB',
+                'mining-machines': 'Mining Machines: 4 different machine types with Boost System',
+                'gps': 'GPS: Precise location determination with 20m accuracy',
+                'firebase': 'Firebase: Real-time database for Drops and User Interactions',
+                'dev-area': 'Dev Area: Extended Admin Tools and Drop Management',
+                'bonus-system': 'Bonus System: Daily rewards with special effects',
+                'pwa-support': 'PWA Support: Installable Web-App for mobile devices',
+                'realtime-updates': 'Real-time Updates: Live Updates for all App Functions',
+                
+                'gameplay-title': '🎮 Gameplay',
+                'gameplay-desc': 'Users navigate to GeoDrops, take photos of the location and receive rewards in the form of cryptocurrencies. The system prevents fraud through GPS validation and image analysis.',
+                
+                'security-title': '🔒 Security',
+                'security-decentralized': 'Decentralized Blockchain Architecture',
+                'security-smart-contracts': 'Smart Contract-based Rewards',
+                'security-anti-cheat': 'Anti-Cheat Systems',
+                'security-encryption': 'Encrypted data transmission',
+                
+                // Buttons
+                'login': 'Login',
+                'register': 'Register',
+                
+                // Additional missing translations
+                'geodrop-title': '🌍 GeoDrop',
+                'geodrop-subtitle': 'Welcome to the Future of Geo-Mining',
+                'user-info': '👤 User Info',
+                'email': 'E-Mail:',
+                'username': 'Username:',
+                'level': 'Level:',
+                'coins': 'Coins:',
+                'drops': 'Drops:',
+                'boost': 'Boost:',
+                'username-placeholder': 'Choose your Username',
+                'email-placeholder': 'your@email.com',
+                
+                // Hero Section
+                'future-title': 'The Future of',
+                'future-subtitle': 'Geo-Mining',
+                'hero-description': 'Earn cryptocurrencies through geocaching! Discover virtual drops at real locations and collect rewards with innovative blockchain technology.',
+                'register-free': 'Register for free',
+                'learn-more': 'Learn more',
+                
+                // Statistics
+                'active-users': 'Active Users',
+                'geodrops': 'GeoDrops',
+                'paid-out': 'Paid Out',
+                
+                // Cards
+                'geodrop-found': 'GeoDrop found!',
+                'daily-bonus': 'Daily Bonus',
+                'referral-bonus': 'Referral Bonus',
+                'referral-desc': '+5% from purchases',
+                
+                // Additional missing translations
+                'ready-future': 'Ready for the future of Geo-Mining?',
+                'join-thousands': 'Join thousands of users and earn cryptocurrencies through geocaching!',
+                'how-it-works': 'How it works',
+                '4-simple-steps': 'In 4 simple steps to your first cryptocurrencies',
+                'find-drops': 'Find Drops',
+                'find-drops-desc': 'Use the map to discover GeoDrops near you.',
+                'take-photos': 'Take Photos',
+                'take-photos-desc': 'Take a photo of the location and confirm your presence.',
+                'referral-system': 'Referral System',
+                'earn-with-friends': 'Earn with every friend you invite',
+                '2-level-system': '🎯 2-Level System',
+                'referral-bonus-text': 'You get 50 PixelDrop start bonus!',
+                'referral-code-label': '🔗 REFERRAL-CODE (OPTIONAL)',
+                'referral-code-placeholder': 'ENTER REFERRAL-CODE',
+                'referral-bonus-desc': 'You get 50 PixelDrop bonus if you come via a referral link!',
+                'already-registered': 'Already registered? Log in here',
+                'already-registered-text': 'Already registered?',
+                'login-here': 'Log in here',
+                'new-crypto-chance': '🚀 New Crypto Chance - Start now!',
+                'whitepaper-desc': 'Learn more about the GeoDrop concept and the technology behind it.',
+                'read-whitepaper': 'Read Whitepaper',
+                'show-roadmap': 'Show Roadmap',
+                'tokenomics': 'Tokenomics',
+                'register-now': '🚀 Register now',
+                'create-account': 'Create your account and start immediately!',
+                'login-title': '🔑 Login',
+                'welcome-back': 'Welcome back!',
+                'login-button': 'Login',
+                'dev': 'Dev',
+                'best-game': '🎮 Best Idle-RPG Game! - Play now!',
+                'password-placeholder': 'At least 6 characters',
+                'email-label': 'E-Mail',
+                'password-label': 'Password',
+                'username-label': 'Username',
+                'step1-title': 'Register',
+                'step1-desc': 'Create your free account and connect your MetaMask Wallet.',
+                'step4-title': 'Receive Reward',
+                'step4-desc': 'Receive PixelDrop Tokens directly in your wallet.',
+                
+                // Feature Cards
+                'what-can-geodrop': 'What can GeoDrop do?',
+                'discover-features': 'Discover the revolutionary features of the Geo-Mining App',
+                'gps-mining': 'GPS-based Mining',
+                'gps-mining-desc': 'Find virtual drops at real locations and earn cryptocurrencies through geocaching activities.',
+                'mining-machines-feature': 'Mining Machines',
+                'mining-machines-desc': '4 different machine types for passive income. From Basic to Mega Miner with different boosts.',
+                'defi-trading': 'DeFi Trading',
+                'defi-trading-desc': 'Trade PixelDrop ↔ tBNB directly in the app. Complete DeFi trading with smart contracts.',
+                'daily-bonuses': 'Daily Bonuses',
+                'daily-bonuses-desc': 'Collect 50 PixelDrop daily as login bonus. Special effects and animations included.',
+                'referral-system-feature': 'Referral System',
+                'referral-system-desc': 'Invite friends and earn 5% of their income. 2nd level: 1% additional.',
+                'pwa-support': 'PWA Support',
+                'pwa-support-desc': 'Installable web app for mobile devices. Works offline and like a native app.',
+                
+                // GeoCard translations
+                'geocard-title': '🗺️ GeoCard',
+                'interactive-map': '🌍 Interactive Map',
+                'map-legend-button': '🗺️ Show Map Legend',
+                'user-drop-button': '➕ Create User Drop',
+                'location-title': '📍 Location',
+                'use-my-location': '📍 Use My Location',
+                'location-info-default': 'Click the button to load your current position',
+                'photo-upload-title': '📸 Photo Upload',
+                'select-geodrop': 'Select GeoDrop:',
+                'user-drops': '👤 User Drops',
+                'dev-drops': '🎯 Dev Drops',
+                'select-dev-geodrop': 'Select Dev GeoDrop...',
+                'take-photo': '📸 Take Photo',
+                'upload-debug': '🔍 Upload Debug',
+                
+                // Additional GeoCard translations
+                'latitude': 'Latitude',
+                'longitude': 'Longitude',
+                'latitude-lat': 'Latitude (Lat)',
+                'longitude-lng': 'Longitude (Lng)',
+                'dev-latitude': 'Dev Latitude',
+                'dev-longitude': 'Dev Longitude',
+                'reload-drops': '🔄 Reload Drops',
+                'save-changes': '✅ Save Changes',
+                'latitude-placeholder': 'e.g. 52.520008',
+                'longitude-placeholder': 'e.g. 13.404954',
+                'no-dev-drops': 'No Dev GeoDrops found',
+                'error-loading-dev-drops': 'Error loading Dev GeoDrops',
+                'legend-collected-today': 'Collected Today',
+                'legend-collected-today-desc': 'Gray dart board - Already collected today',
+                'dev-drops-legend': '🎯 Dev GeoDrops',
+                'user-drops-legend': '🌍 User GeoDrops',
+                
+                // User Drop Modal translations
+                'drop-name': '🎯 Drop Name:',
+                'drop-name-placeholder': 'e.g. Historical Building',
+                'what-to-photograph': '📸 What should be photographed:',
+                'photograph-description-placeholder': 'Describe exactly what should be photographed at this location...',
+                'reference-image-upload': '📷 Upload Reference Image:',
+                'choose-file': 'Choose File',
+                'no-file-selected': 'None selected',
+                'reference-image-description': 'Upload a reference image that shows what should be photographed',
+                'reward-pixeldrops': '💰 Reward (PixelDrops):',
+                'user-drops-fixed': 'User Drops are fixed at 10 PixelDrops',
+                'location': '📍 Location:',
+                'use-current-position': 'Use Current Position',
+                'location-auto-description': 'Location is automatically taken from your current position',
+                'create-user-drop': '✔ Create User Drop',
+                'cancel': '✗ Cancel',
+                'create-user-drop-title': '➕ Create User GeoDrop',
+                'latitude': 'Latitude',
+                'longitude': 'Longitude',
+                'dev-test-coordinates': '🔧 DEV: Test Coordinates:',
+                'dev-latitude': 'Dev Latitude',
+                'dev-longitude': 'Dev Longitude',
+                'dev-test-warning': '⚠️ Only for Dev tests - normal users don\'t see this!',
+                
+                // Additional missing translations
+                'your-location': 'Your Location',
+                'accuracy': 'Accuracy:',
+                'time': 'Time:',
+                'location-found': 'Location found:',
+                'current-position': 'Current Position',
+                'user-mode': 'USER MODE (Dev disabled)',
+                'adjust-coordinates': 'Adjust Coordinates',
+                'reset': 'Reset',
+                
+                // GeoDrops Table
+                'geodrops-overview': '📋 GeoDrops Overview',
+                'dev-geodrops': '🎯 Dev GeoDrops',
+                'user-geodrops': '👤 User GeoDrops',
+                'table-number': 'No.',
+                'table-creator': 'Creator',
+                'table-reward': 'Reward',
+                'table-status': 'Status',
+                'table-type': 'Type',
+                'table-icon': 'Icon',
+                'table-coordinates': 'Coordinates',
+                'table-created': 'Created',
+                'table-actions': 'Actions',
+                'status-active': '✅ Active',
+                'status-inactive': '❌ Inactive',
+                'please-login': 'Please log in first',
+                'no-user-drops': 'No User GeoDrops found',
+                'error-loading-user-drops': 'Error loading User GeoDrops',
+                'error-loading-geodrops': 'Error loading GeoDrops',
+                'loading-dev-drops-table': 'Loading Dev GeoDrops table...',
+                'user-drops-displayed': '👤 User GeoDrops displayed',
+                'dev-drops-displayed': '🎯 Dev GeoDrops displayed',
+                'modal-not-found': '❌ Modal not found',
+                'cleanup-duplicates': '🧹 Cleanup Duplicates',
+                'reload-all-lists': '🔄 Reload All Lists',
+                'dev-test-warning': '⚠️ Only for Dev tests - normal users don\'t see this!',
+                'end-dev-session': '🔒 End Dev Session',
+                'status-claimed': '❌ Claimed',
+                'status-available': '✅ Available',
+                'status-claimed-today': '⏰ Claimed Today',
+                'selected-for-upload': 'selected for upload',
+                
+                // Dev Coordinates Section
+                'dev-coordinates-title': '🎯 Dev Coordinate Adjustment',
+                'admin-status': 'Admin Status:',
+                'admin-active': 'Active',
+                'admin-inactive': 'Inactive (admin password required)',
+                'dev-coords-status': 'Dev Coordinates:',
+                'dev-coords-not-set': 'Not set',
+                'dev-coords-set': 'Set',
+                'admin-required': '🔒 Admin Mode Required',
+                'admin-mode-disable': '🔓 Disable Admin Mode',
+                'admin-mode-enable': '🔓 Enable Admin Mode',
+                'dev-drop-create': '🎯 Create Dev Drop',
+                'dev-test-coordinates': '🔧 DEV: Enter Test Coordinates:',
+                'set-test-coordinates': '📍 Set Test Coordinates',
+                'create-test-melk': '🏛️ Test Drop: Create Melk Abbey',
+                'create-test-schonbrunn': '🏰 Test Drop: Create Schönbrunn Palace',
+                'create-all-states': '🇦🇹 Create All 9 State Drops',
+                'create-remaining-states': '🚀 Create Remaining 8 State Drops',
+                'clear-user-drops': '🧹 Clear User Drop Lists',
+                'restore-user-drops': '🔄 Restore User Drop Lists',
+                'check-user-drop-count': '📊 Check User Drop Count',
+                'create-missing-drop1': '🏛️ Create Drop No. 1 (Melk Abbey)',
+                
+                // Additional missing translations
+                'zoom': 'Zoom:',
+                'dev-latitude-label': 'Dev Latitude',
+                'dev-longitude-label': 'Dev Longitude',
+                
+                // Map and Table translations
+                'dev-coordinate-adjustment': 'Dev Coordinate Adjustment',
+                'admin-mode-required': 'Admin Mode Required',
+                'current-position': 'Current Position',
+                'admin-status': 'Admin Status:',
+                'dev-coordinates': 'Dev Coordinates:',
+                'geodrops-overview': 'GeoDrops Overview',
+                'dev-geodrops-tab': '🎯 Dev GeoDrops',
+                'user-geodrops-tab': '👤 User GeoDrops',
+                'reload-drops-tab': '🔄 Reload Drops',
+                'table-number': 'No.',
+                'table-creator': 'Creator',
+                'table-reward': 'Reward',
+                'table-status': 'Status',
+                'table-type': 'Type',
+                'table-icon': 'Icon',
+                'table-coordinates': 'Coordinates',
+                'status-available': '✔ Available',
+                'status-collected-today': '⏰ Collected Today',
+                'type-dev': 'Dev',
+                'creator-kryptoguru': 'KryptoGuru'
+            }
+        };
+        
+        // Make translations globally available
+        window.translations = translations;
+        
+        // Language switching function
+        function switchLanguage(lang) {
+            console.log('🔄 Switching language to:', lang);
+            currentLang = lang;
+            window.currentLang = currentLang; // Update global variable
+            // Save language preference
+            localStorage.setItem('selectedLanguage', lang);
+            console.log('✅ Language set to:', currentLang);
+            updateAllTexts();
+            updateLanguageButtons();
+            
+            // Force update all texts again after a longer delay to catch all dynamically loaded content
+            setTimeout(() => {
+                console.log('🔄 Force updating texts after 500ms...');
+                updateAllTexts();
+            }, 500);
+            
+            // Force update all texts again after an even longer delay
+            setTimeout(() => {
+                console.log('🔄 Force updating texts after 1000ms...');
+                updateAllTexts();
+            }, 1000);
+        }
+        
+        // Make switchLanguage globally available
+        window.switchLanguage = switchLanguage;
+        
+        // Helper function to get translated text
+        function getTranslatedText(key) {
+            return translations[currentLang] && translations[currentLang][key] ? translations[currentLang][key] : key;
+        }
+        
+        // Make getTranslatedText globally available
+        window.getTranslatedText = getTranslatedText;
+        
+        // Update language button styles
+        function updateLanguageButtons() {
+            // Main navigation buttons only
+            const mainDeBtn = document.getElementById('main-lang-de-btn');
+            const mainEnBtn = document.getElementById('main-lang-en-btn');
+            
+            // Update Main navigation buttons
+            if (mainDeBtn && mainEnBtn) {
+                // Reset all buttons
+                mainDeBtn.classList.remove('bg-gray-700');
+                mainEnBtn.classList.remove('bg-gray-700');
+                
+                // Highlight current language
+                if (currentLang === 'de') {
+                    mainDeBtn.classList.add('bg-gray-700');
+                } else {
+                    mainEnBtn.classList.add('bg-gray-700');
+                }
+            }
+        }
+        
+        // Update all texts based on current language
+        function updateAllTexts() {
+            console.log('🔄 updateAllTexts called with currentLang:', currentLang);
+            const elements = document.querySelectorAll('[data-translate]');
+            console.log('📝 Found', elements.length, 'elements with data-translate');
+            
+            elements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLang] && translations[currentLang][key]) {
+                    // Update text content for most elements
+                    if (element.tagName === 'INPUT' && element.type !== 'submit') {
+                        element.placeholder = translations[currentLang][key];
+                    } else {
+                        element.textContent = translations[currentLang][key];
+                    }
+                } else {
+                    console.log('⚠️ No translation found for key:', key, 'in language:', currentLang);
+                }
+            });
+            
+            // Update placeholders
+            const usernameInput = document.getElementById('reg-username');
+            const emailInput = document.getElementById('reg-email');
+            const passwordInput = document.getElementById('reg-password');
+            const referralInput = document.getElementById('reg-referral');
+            
+            if (usernameInput && translations[currentLang] && translations[currentLang]['username-placeholder']) {
+                usernameInput.placeholder = translations[currentLang]['username-placeholder'];
+            }
+            
+            if (emailInput && translations[currentLang] && translations[currentLang]['email-placeholder']) {
+                emailInput.placeholder = translations[currentLang]['email-placeholder'];
+            }
+            
+            if (passwordInput && translations[currentLang] && translations[currentLang]['password-placeholder']) {
+                passwordInput.placeholder = translations[currentLang]['password-placeholder'];
+            }
+            
+            if (referralInput && translations[currentLang] && translations[currentLang]['referral-code-placeholder']) {
+                referralInput.placeholder = translations[currentLang]['referral-code-placeholder'];
+            }
+            
+            // Update whitepaper links based on language
+            updateWhitepaperLinks();
+            
+            // Force update all texts again after a short delay to catch dynamically loaded content
+            setTimeout(() => {
+                document.querySelectorAll('[data-translate]').forEach(element => {
+                    const key = element.getAttribute('data-translate');
+                    if (translations[currentLang] && translations[currentLang][key]) {
+                        // Update text content for most elements
+                        if (element.tagName === 'INPUT' && element.type !== 'submit') {
+                            element.placeholder = translations[currentLang][key];
+                        } else {
+                            element.textContent = translations[currentLang][key];
+                        }
+                    }
+                });
+            }, 100);
+        }
+        
+        // Make updateAllTexts globally available
+        window.updateAllTexts = updateAllTexts;
+        
+        function updateWhitepaperLinks() {
+            console.log('🔗 Updating whitepaper links for language:', currentLang);
+            
+            // Find links by their original href or by their position in the whitepaper popup
+            const mainWhitepaperLink = document.querySelector('#whitepaper-popup a:first-of-type');
+            const altWhitepaperLink = document.querySelector('#whitepaper-popup a:last-of-type');
+            
+            if (mainWhitepaperLink) {
+                if (currentLang === 'en') {
+                    mainWhitepaperLink.href = 'english/whitepaper_english.html';
+                    console.log('✅ Main whitepaper link set to English version');
+                } else {
+                    mainWhitepaperLink.href = 'whitepaper.html';
+                    console.log('✅ Main whitepaper link set to German version');
+                }
+            }
+            
+            if (altWhitepaperLink) {
+                if (currentLang === 'en') {
+                    altWhitepaperLink.href = 'english/whitepaper_tech_english.html';
+                    altWhitepaperLink.style.display = 'inline-flex';
+                    console.log('✅ Alt whitepaper link set to English tech version');
+                } else {
+                    altWhitepaperLink.href = 'whitepaper_alt.html';
+                    altWhitepaperLink.style.display = 'inline-flex';
+                    console.log('✅ Alt whitepaper link set to German version');
+                }
+            }
+        }
+        
         // Debug System - Disabled for Production
         let debugWindowVisible = false;
         
@@ -131,10 +871,7 @@
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            background-image: url('./images/startseite-bg.png');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            background-color: #1f2937;
             background-color: #1a202c;
             color: #e2e8f0;
         }
@@ -533,6 +1270,21 @@
             /* Desktop: Ad Banner sichtbar machen */
             #ad-banner {
                 display: flex !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 50 !important;
+            }
+            
+            /* Desktop: Bottom Ad Banner sichtbar machen */
+            #bottom-ad-banner {
+                display: flex !important;
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 50 !important;
             }
             
             /* Desktop: Content anpassen */
@@ -581,6 +1333,26 @@
             /* Hide ad banner on mobile for all pages except startseite */
             #ad-banner {
                 display: none !important;
+            }
+            
+            /* Mobile: Show ad banner on startseite only */
+            #startseite #ad-banner {
+                display: flex !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 50 !important;
+            }
+            
+            /* Mobile: Show bottom ad banner on startseite only */
+            #startseite #bottom-ad-banner {
+                display: flex !important;
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 50 !important;
             }
             
             /* Ad banner visibility will be controlled by JavaScript */
@@ -719,14 +1491,14 @@
     <nav class="desktop-nav fixed top-0 left-0 w-64 h-full bg-gray-800 shadow-lg z-50">
         <div class="h-full flex flex-col">
             <div class="flex items-center p-4 border-b border-gray-700">
-                <img src="images/logo.png" alt="GeoDrop" class="h-8 w-8 mr-2">
+                <div class="h-8 w-8 mr-2 bg-blue-500 rounded flex items-center justify-center text-white font-bold">G</div>
                 <span class="text-white font-bold text-xl">GeoDrop</span>
             </div>
             
             <!-- LEFT AD BANNER -->
             <div class="bg-purple-600 border border-purple-400 text-white p-3 m-4 rounded text-center">
               <a href="https://otieu.com/4/9919405" target="_blank" class="text-white hover:text-purple-200 font-bold text-sm">
-                💰 Verdiene Geld mit Gaming!
+                <span data-translate="banner-earn">💰 Verdiene Geld mit Gaming!</span>
               </a>
             </div>
             
@@ -756,7 +1528,7 @@
                       <span class="mr-3">⚙️</span> <span data-translate="mehr">More</span>
                   </a>
                 <a href="#" class="nav-btn w-full text-left px-4 py-3 rounded-lg text-white hover:bg-gray-700 transition-colors flex items-center" onclick="showDevLoginPopup();">
-                    <span class="mr-3">🔧</span> Dev
+                    <span class="mr-3">🔧</span> <span data-translate="dev">Dev</span>
                 </a>
                 
             </div>
@@ -764,11 +1536,11 @@
     </nav>
 
 
-    <main class="ml-64 mobile-content">
-        <!-- TOP AD BANNER -->
-        <div class="bg-blue-600 border border-blue-400 text-white p-3 rounded mx-4 mb-4 shadow-lg text-center">
+    <main class="ml-64 mobile-content" style="padding-top: 60px; padding-bottom: 60px;">
+        <!-- TOP AD BANNER - FIXED -->
+        <div id="ad-banner" class="bg-blue-600 border border-blue-400 text-white p-3 shadow-lg text-center fixed top-0 left-0 right-0 z-50">
           <a href="https://otieu.com/4/9919405" target="_blank" class="text-white hover:text-blue-200 font-bold">
-            🎮 Best Idle-RPG Game! - Jetzt spielen!
+            <span data-translate="best-game">🎮 Best Idle-RPG Game! - Jetzt spielen!</span>
           </a>
         </div>
         
@@ -807,7 +1579,7 @@
                         <p class="text-green-300 text-sm">
                             🎉 <strong>Referral Bonus!</strong><br>
                             You were invited by <span id="referral-user">-</span>!<br>
-                            You get 50 PixelDrop start bonus!
+                            <span data-translate="referral-bonus-text">You get 50 PixelDrop start bonus!</span>
                         </p>
                     </div>
                     
@@ -816,16 +1588,16 @@
                 
                 <div id="whitepaper-section" class="bg-gray-800 bg-opacity-70 rounded-lg p-4 mb-6 mt-24 backdrop-blur-sm" style="max-width: 500px; width: fit-content; margin: 6rem auto 1.5rem auto;">
                     <h3 class="text-xl font-semibold text-white mb-4">📄 Whitepaper</h3>
-                    <p class="text-gray-300 mb-4">Learn more about the GeoDrop concept and the technology behind it.</p>
+                    <p class="text-gray-300 mb-4" data-translate="whitepaper-desc">Learn more about the GeoDrop concept and the technology behind it.</p>
                     <div class="flex flex-wrap gap-3 justify-center">
                         <button onclick="showWhitepaper()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                            📄 Read Whitepaper
+                            📄 <span data-translate="read-whitepaper">Read Whitepaper</span>
                         </button>
                         <button onclick="showRoadmap()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-                            🗺️ Show Roadmap
+                            🗺️ <span data-translate="show-roadmap">Show Roadmap</span>
                         </button>
                         <button onclick="showTokenomics()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                            💰 Tokenomics
+                            💰 <span data-translate="tokenomics">Tokenomics</span>
                         </button>
                     </div>
                 </div>
@@ -835,15 +1607,6 @@
                         <div class="absolute inset-0 bg-black/20"></div>
                         
                         <div class="absolute top-4 right-4 sm:top-6 sm:right-6 z-20 flex gap-2">
-                            <!-- Language Switcher -->
-                            <div class="bg-white/20 backdrop-blur-md border border-white/30 rounded-lg p-1 flex">
-                                <button onclick="switchLanguage('de')" id="lang-de-btn" class="px-3 py-1 rounded text-white font-semibold hover:bg-white/30 transition-all text-sm bg-white/30">
-                                    🇩🇪
-                                </button>
-                                <button onclick="switchLanguage('en')" id="lang-en-btn" class="px-3 py-1 rounded text-white font-semibold hover:bg-white/30 transition-all text-sm">
-                                    🇺🇸
-                                </button>
-                            </div>
                             
                             <!-- Login Button -->
                             <button onclick="showLoginForm()" class="bg-white/20 backdrop-blur-md border border-white/30 px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-white font-semibold hover:bg-white/30 transition-all shadow-lg text-sm sm:text-base">
@@ -863,7 +1626,7 @@
                                                 Geo-Mining
                                             </span>
                                         </h1>
-                                        <p class="text-xl text-gray-300 leading-relaxed" data-translate="landing-description">
+                                        <p class="text-xl text-gray-300 leading-relaxed" data-translate="hero-description">
                                             Earn cryptocurrencies through geocaching! Discover virtual drops at real locations and collect rewards with innovative blockchain technology.
                                         </p>
                             </div>
@@ -882,15 +1645,15 @@
                                     <div class="grid grid-cols-3 gap-8 pt-8">
                                         <div class="text-center">
                                             <div class="text-3xl font-bold text-blue-400">1000+</div>
-                                            <div class="text-gray-400">Aktive User</div>
+                                            <div class="text-gray-400" data-translate="active-users">Aktive User</div>
                                         </div>
                                         <div class="text-center">
                                             <div class="text-3xl font-bold text-purple-400">50+</div>
-                                            <div class="text-gray-400">GeoDrops</div>
+                                            <div class="text-gray-400" data-translate="geodrops">GeoDrops</div>
                                         </div>
                                         <div class="text-center">
                                             <div class="text-3xl font-bold text-green-400">$10K+</div>
-                                            <div class="text-gray-400">Ausgezahlt</div>
+                                            <div class="text-gray-400" data-translate="paid-out">Ausgezahlt</div>
                                         </div>
                         </div>
                     </div>
@@ -904,7 +1667,7 @@
                                                         <i class="fas fa-map-marker-alt text-white"></i>
                                                     </div>
                                                     <div>
-                                                        <div class="font-semibold">GeoDrop gefunden!</div>
+                                                        <div class="font-semibold" data-translate="geodrop-found">GeoDrop gefunden!</div>
                                                         <div class="text-sm text-gray-300">+150 PixelDrop</div>
                                                     </div>
                                                 </div>
@@ -914,7 +1677,7 @@
                                                         <i class="fas fa-coins text-white"></i>
                                                     </div>
                                                     <div>
-                                                        <div class="font-semibold">Daily Bonus</div>
+                                                        <div class="font-semibold" data-translate="daily-bonus">Daily Bonus</div>
                                                         <div class="text-sm text-gray-300">+50 PixelDrop</div>
                                                     </div>
                                                 </div>
@@ -924,8 +1687,8 @@
                                                         <i class="fas fa-users text-white"></i>
                                                     </div>
                                                     <div>
-                                                        <div class="font-semibold">Referral Bonus</div>
-                                                        <div class="text-sm text-gray-300">+5% from purchases</div>
+                                                        <div class="font-semibold" data-translate="referral-bonus">Referral Bonus</div>
+                                                        <div class="text-sm text-gray-300" data-translate="referral-desc">+5% from purchases</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -939,8 +1702,8 @@
                     <section id="features" class="py-20 bg-gray-800">
                         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div class="text-center mb-16">
-                                <h2 class="text-4xl font-bold mb-4">What can GeoDrop do?</h2>
-                                <p class="text-xl text-gray-400">Discover the revolutionary features of the Geo-Mining App</p>
+                                <h2 class="text-4xl font-bold mb-4" data-translate="what-can-geodrop">What can GeoDrop do?</h2>
+                                <p class="text-xl text-gray-400" data-translate="discover-features">Discover the revolutionary features of the Geo-Mining App</p>
                             </div>
                             
                             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -948,48 +1711,48 @@
                                     <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center mb-6">
                                         <i class="fas fa-map-marked-alt text-2xl text-white"></i>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">GPS-based Mining</h3>
-                                    <p class="text-gray-300">Find virtual drops at real locations and earn cryptocurrencies through geocaching activities.</p>
+                                    <h3 class="text-xl font-semibold mb-4" data-translate="gps-mining">GPS-based Mining</h3>
+                                    <p class="text-gray-300" data-translate="gps-mining-desc">Find virtual drops at real locations and earn cryptocurrencies through geocaching activities.</p>
                                 </div>
                                 
                                 <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
                                     <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center mb-6">
                                         <i class="fas fa-coins text-2xl text-white"></i>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">Mining Machines</h3>
-                                    <p class="text-gray-300">4 different machine types for passive income. From Basic to Mega Miner with different boosts.</p>
+                                    <h3 class="text-xl font-semibold mb-4" data-translate="mining-machines-feature">Mining Machines</h3>
+                                    <p class="text-gray-300" data-translate="mining-machines-desc">4 different machine types for passive income. From Basic to Mega Miner with different boosts.</p>
                                 </div>
                                 
                                 <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
                                     <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center mb-6">
                                         <i class="fas fa-exchange-alt text-2xl text-white"></i>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">DeFi Trading</h3>
-                                    <p class="text-gray-300">Trade PixelDrop ↔ tBNB directly in the app. Complete DeFi trading with smart contracts.</p>
+                                    <h3 class="text-xl font-semibold mb-4" data-translate="defi-trading">DeFi Trading</h3>
+                                    <p class="text-gray-300" data-translate="defi-trading-desc">Trade PixelDrop ↔ tBNB directly in the app. Complete DeFi trading with smart contracts.</p>
                                 </div>
                                 
                                 <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
                                     <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center mb-6">
                                         <i class="fas fa-gift text-2xl text-white"></i>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">Daily Bonuses</h3>
-                                    <p class="text-gray-300">Collect 50 PixelDrop daily as login bonus. Special effects and animations included.</p>
+                                    <h3 class="text-xl font-semibold mb-4" data-translate="daily-bonuses">Daily Bonuses</h3>
+                                    <p class="text-gray-300" data-translate="daily-bonuses-desc">Collect 50 PixelDrop daily as login bonus. Special effects and animations included.</p>
                                 </div>
                                 
                                 <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
                                     <div class="w-16 h-16 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center mb-6">
                                         <i class="fas fa-users text-2xl text-white"></i>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">Referral System</h3>
-                                    <p class="text-gray-300">Invite friends and earn 5% of their income. 2nd level: 1% additional.</p>
+                                    <h3 class="text-xl font-semibold mb-4" data-translate="referral-system-feature">Referral System</h3>
+                                    <p class="text-gray-300" data-translate="referral-system-desc">Invite friends and earn 5% of their income. 2nd level: 1% additional.</p>
                                 </div>
                                 
                                 <div class="bg-gray-700/50 backdrop-blur-sm rounded-xl p-8 card-hover border border-gray-600">
                                     <div class="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center mb-6">
                                         <i class="fas fa-mobile-alt text-2xl text-white"></i>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">PWA Support</h3>
-                                    <p class="text-gray-300">Installable web app for mobile devices. Works offline and like a native app.</p>
+                                    <h3 class="text-xl font-semibold mb-4" data-translate="pwa-support">PWA Support</h3>
+                                    <p class="text-gray-300" data-translate="pwa-support-desc">Installable web app for mobile devices. Works offline and like a native app.</p>
                                 </div>
                             </div>
                         </div>
@@ -998,8 +1761,8 @@
                     <section id="how-it-works" class="py-20 bg-gray-900">
                         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div class="text-center mb-16">
-                                <h2 class="text-4xl font-bold mb-4">How it works</h2>
-                                <p class="text-xl text-gray-400">In 4 simple steps to your first cryptocurrencies</p>
+                                <h2 class="text-4xl font-bold mb-4" data-translate="how-it-works">How it works</h2>
+                                <p class="text-xl text-gray-400" data-translate="4-simple-steps">In 4 simple steps to your first cryptocurrencies</p>
                             </div>
                             
                             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -1007,32 +1770,32 @@
                                     <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
                                         <span class="text-2xl font-bold">1</span>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">Registrieren</h3>
-                                    <p class="text-gray-400">Erstelle kostenlos deinen Account und verbinde dein MetaMask Wallet.</p>
+                                    <h3 class="text-xl font-semibold mb-4" data-translate="step1-title">Registrieren</h3>
+                                    <p class="text-gray-400" data-translate="step1-desc">Erstelle kostenlos deinen Account und verbinde dein MetaMask Wallet.</p>
                                 </div>
                                 
                                 <div class="text-center">
                                     <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                                         <span class="text-2xl font-bold">2</span>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">Find Drops</h3>
-                                    <p class="text-gray-400">Use the map to discover GeoDrops near you.</p>
+                                    <h3 class="text-xl font-semibold mb-4" data-translate="find-drops">Find Drops</h3>
+                                    <p class="text-gray-400" data-translate="find-drops-desc">Use the map to discover GeoDrops near you.</p>
                                 </div>
                                 
                                 <div class="text-center">
                                     <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
                                         <span class="text-2xl font-bold">3</span>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">Take Photos</h3>
-                                    <p class="text-gray-400">Take a photo of the location and confirm your presence.</p>
+                                    <h3 class="text-xl font-semibold mb-4" data-translate="take-photos">Take Photos</h3>
+                                    <p class="text-gray-400" data-translate="take-photos-desc">Take a photo of the location and confirm your presence.</p>
                                 </div>
                                 
                                 <div class="text-center">
                                     <div class="w-20 h-20 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
                                         <span class="text-2xl font-bold">4</span>
                                     </div>
-                                    <h3 class="text-xl font-semibold mb-4">Belohnung erhalten</h3>
-                                    <p class="text-gray-400">Erhalte PixelDrop Tokens direkt in dein Wallet.</p>
+                                    <h3 class="text-xl font-semibold mb-4" data-translate="step4-title">Belohnung erhalten</h3>
+                                    <p class="text-gray-400" data-translate="step4-desc">Erhalte PixelDrop Tokens direkt in dein Wallet.</p>
                                 </div>
                             </div>
                         </div>
@@ -1041,14 +1804,14 @@
                     <section id="referral" class="py-20 bg-gradient-to-r from-blue-900 to-purple-900">
                         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div class="text-center mb-16">
-                                <h2 class="text-4xl font-bold mb-4">Referral System</h2>
-                                <p class="text-xl text-gray-300">Earn with every friend you invite</p>
+                                <h2 class="text-4xl font-bold mb-4" data-translate="referral-system">Referral System</h2>
+                                <p class="text-xl text-gray-300" data-translate="earn-with-friends">Earn with every friend you invite</p>
                             </div>
                             
                             <div class="grid lg:grid-cols-2 gap-12 items-center">
                                 <div class="space-y-8">
                                     <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
-                                        <h3 class="text-2xl font-bold mb-6">🎯 2-Ebenen System</h3>
+                                        <h3 class="text-2xl font-bold mb-6" data-translate="2-level-system">🎯 2-Ebenen System</h3>
                         <div class="space-y-4">
                                             <div class="flex items-center space-x-4">
                                                 <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
@@ -1133,18 +1896,18 @@
 
                     <section class="py-20 bg-gray-800">
                         <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-                            <h2 class="text-4xl font-bold mb-6">Ready for the future of Geo-Mining?</h2>
-                            <p class="text-xl text-gray-400 mb-8">
+                            <h2 class="text-4xl font-bold mb-6" data-translate="ready-future">Ready for the future of Geo-Mining?</h2>
+                            <p class="text-xl text-gray-400 mb-8" data-translate="join-thousands">
                                 Join thousands of users and earn cryptocurrencies through geocaching!
                             </p>
                             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                                 <button onclick="showRegistrationForm()" class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-4 rounded-lg text-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all">
                                     <i class="fas fa-user-plus mr-2"></i>
-                                    Register for free
+                                    <span data-translate="register-free">Register for free</span>
                                 </button>
                                 <button onclick="scrollToFeatures()" class="border-2 border-white/20 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white/10 transition-all">
                                     <i class="fas fa-info-circle mr-2"></i>
-                                    Learn more
+                                    <span data-translate="learn-more">Learn more</span>
                                 </button>
                             </div>
                         </div>
@@ -1154,41 +1917,41 @@
                     <div id="registration-section" class="py-20 bg-gray-800" style="display: block;">
                         <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
                             <div class="text-center mb-8">
-                                <h2 id="form-title" class="text-4xl font-bold mb-4">🚀 Jetzt registrieren</h2>
-                                <p id="form-subtitle" class="text-xl text-gray-400">Erstelle deinen Account und starte sofort!</p>
+                                <h2 id="form-title" class="text-4xl font-bold mb-4" data-translate="register-now">🚀 Jetzt registrieren</h2>
+                                <p id="form-subtitle" class="text-xl text-gray-400" data-translate="create-account">Erstelle deinen Account und starte sofort!</p>
                             </div>
                             
                             <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20">
                                 <div id="registration-form" class="space-y-4">
                                     <div id="username-field">
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Benutzername</label>
-                                        <input type="text" id="reg-username" placeholder="Wähle deinen Username" class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') handleEnterKey()">
+                                        <label class="block text-sm font-medium text-gray-300 mb-2" data-translate="username-label">Benutzername</label>
+                                        <input type="text" id="reg-username" placeholder="" class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') handleEnterKey()">
                                     </div>
                                     
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">E-Mail</label>
-                                        <input type="email" id="reg-email" placeholder="deine@email.com" class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') handleEnterKey()">
+                                        <label class="block text-sm font-medium text-gray-300 mb-2" data-translate="email-label">E-Mail</label>
+                                        <input type="email" id="reg-email" placeholder="" class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') handleEnterKey()">
                                     </div>
                                     
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-2">Passwort</label>
-                                        <input type="password" id="reg-password" placeholder="Mindestens 6 Zeichen" class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') handleEnterKey()">
+                                        <label class="block text-sm font-medium text-gray-300 mb-2" data-translate="password-label">Passwort</label>
+                                        <input type="password" id="reg-password" placeholder="" class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') handleEnterKey()">
                                     </div>
                                     
                                     <div id="referral-field" style="background: red !important; padding: 15px !important; margin: 15px 0 !important; border: 3px solid yellow !important; display: block !important; visibility: visible !important;">
-                                        <label class="block text-sm font-medium text-white mb-2" style="color: white !important; font-weight: bold !important;">🔗 REFERRAL-CODE (OPTIONAL)</label>
-                                        <input type="text" id="reg-referral" placeholder="REFERRAL-CODE EINGEBEN" class="w-full px-4 py-3 bg-white text-black rounded-lg border border-red-500 focus:border-blue-500 focus:outline-none" style="background: white !important; color: black !important; border: 3px solid red !important;">
-                                        <p class="text-xs text-white mt-1" style="color: white !important;">You get 50 PixelDrop bonus if you come via a referral link!</p>
+                                        <label class="block text-sm font-medium text-white mb-2" style="color: white !important; font-weight: bold !important;" data-translate="referral-code-label">🔗 REFERRAL-CODE (OPTIONAL)</label>
+                                        <input type="text" id="reg-referral" placeholder="" class="w-full px-4 py-3 bg-white text-black rounded-lg border border-red-500 focus:border-blue-500 focus:outline-none" style="background: white !important; color: black !important; border: 3px solid red !important;">
+                                        <p class="text-xs text-white mt-1" style="color: white !important;" data-translate="referral-bonus-desc">You get 50 PixelDrop bonus if you come via a referral link!</p>
                                     </div>
                                     
                                     
                                     <button id="main-button" onclick="registerFromLanding()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-green-700 hover:to-emerald-700 transition-all">
                                         <i class="fas fa-user-plus mr-2"></i>
-                                        Kostenlos registrieren
+                                        <span data-translate="register-free">Kostenlos registrieren</span>
                                     </button>
                                     
                                     <p class="text-sm text-gray-300 text-center">
-                                        Bereits registriert? <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300">Hier anmelden</button>
+                                        <span data-translate="already-registered-text">Bereits registriert?</span> <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300" data-translate="login-here">Hier anmelden</button>
                                     </p>
                                 </div>
                                 
@@ -1264,10 +2027,10 @@
             
         </div>
         
-        <!-- BOTTOM AD BANNER -->
-        <div class="bg-green-600 border border-green-400 text-white p-3 rounded mx-4 mt-4 shadow-lg text-center">
+        <!-- BOTTOM AD BANNER - FIXED -->
+        <div id="bottom-ad-banner" class="bg-green-600 border border-green-400 text-white p-3 shadow-lg text-center fixed bottom-0 left-0 right-0 z-50">
           <a href="https://otieu.com/4/9919405" target="_blank" class="text-white hover:text-green-200 font-bold">
-            🚀 Neue Krypto-Chance - Jetzt starten!
+            <span data-translate="new-crypto-chance">🚀 Neue Krypto-Chance - Jetzt starten!</span>
           </a>
         </div>
     </main>
@@ -1347,6 +2110,7 @@
     <script src="js/ui-utils.js"></script>
     <script src="js/geoboard.js"></script>
     <script src="js/geocard.js"></script>
+    <script src="js/console-cleanup.js"></script>
     <script src="js/dev-functions.js"></script>
     <script src="js/upload-functions.js"></script>
     <script src="js/upload-functions-fixed.js"></script>
@@ -1561,8 +2325,53 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🚀 DOM loaded, initializing app...');
             
+            // Initialize language system
+            const savedLang = localStorage.getItem('selectedLanguage');
+            if (savedLang && (savedLang === 'de' || savedLang === 'en')) {
+                currentLang = savedLang;
+            }
+            updateAllTexts();
+            updateLanguageButtons();
+            
+            // Force update all texts after a delay to catch dynamically loaded content
+            setTimeout(() => {
+                updateAllTexts();
+            }, 1000);
+            
+            // Force update all texts after another delay
+            setTimeout(() => {
+                updateAllTexts();
+            }, 2000);
+            
+            // Initialize mobile navigation
+            updateMobileNav();
+            
+            // Add touch feedback to mobile nav buttons
+            const navButtons = document.querySelectorAll('.mobile-nav .nav-btn');
+            navButtons.forEach(btn => {
+                btn.addEventListener('touchstart', function() {
+                    this.style.transform = 'scale(0.95)';
+                });
+                
+                btn.addEventListener('touchend', function() {
+                    this.style.transform = '';
+                });
+            });
+            
+            // Ensure whitepaper links are set correctly on page load
+            setTimeout(() => {
+                updateWhitepaperLinks();
+                // Force update all texts after whitepaper links are updated
+                updateAllTexts();
+            }, 100);
+            
             // Process referral link first
             processReferralLink();
+            
+            // Force update all texts after referral link processing
+            setTimeout(() => {
+                updateAllTexts();
+            }, 500);
             
             // Check for page parameter (only for DEV navigation)
             const urlParams = new URLSearchParams(window.location.search);
@@ -1584,20 +2393,32 @@
             // Wait for Firebase to be ready, then check auto-login
             setTimeout(() => {
                 window.initializeLandingPage();
+                // Force update all texts after landing page initialization
+                updateAllTexts();
             }, 500);
             
             setTimeout(() => {
                 window.initializeLandingPage();
+                // Force update all texts after landing page initialization
+                updateAllTexts();
             }, 1000);
             
             setTimeout(() => {
                 window.initializeLandingPage();
+                // Force update all texts after landing page initialization
+                updateAllTexts();
             }, 2000);
             
             // Initialize Dev status
             if (typeof window.initializeDevStatus === 'function') {
                 await window.initializeDevStatus();
             }
+            
+            // Force update all texts after dev status initialization
+            setTimeout(() => {
+                updateAllTexts();
+            }, 100);
+            
             // Show startseite by default
             showPage('startseite');
             
@@ -1606,6 +2427,8 @@
                 if (typeof window.updateUserNavigation === 'function') {
                     window.updateUserNavigation();
                 }
+                // Force update all texts after navigation initialization
+                updateAllTexts();
             }, 500);
             
             // Initialize ad banner visibility
@@ -1613,6 +2436,8 @@
                 if (typeof window.updateAdBannerVisibility === 'function') {
                     window.updateAdBannerVisibility();
                 }
+                // Force update all texts after ad banner initialization
+                updateAllTexts();
             }, 500);
         });
     </script>
@@ -1627,58 +2452,58 @@
                         </div>
                     
                     <div class="mb-6 p-4 bg-gray-700 rounded-lg">
-                        <h3 class="text-lg font-semibold text-blue-400 mb-3">📖 Show complete Whitepaper</h3>
+                        <h3 class="text-lg font-semibold text-blue-400 mb-3" data-translate="whitepaper-title">📖 Show complete Whitepaper</h3>
                         <div class="flex flex-wrap gap-3">
                             <a href="whitepaper.html" target="_blank" class="px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition-all transform hover:scale-105 font-semibold text-sm min-h-[44px] flex items-center justify-center">
-                                📄 Main Whitepaper
+                                <span data-translate="main-whitepaper">📄 Main Whitepaper</span>
                             </a>
                             <a href="whitepaper_alt.html" target="_blank" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 font-semibold text-sm min-h-[44px] flex items-center justify-center">
-                                📋 Alternative Version
+                                <span data-translate="alt-whitepaper">📋 Alternative Version</span>
                             </a>
                         </div>
-                        <p class="text-gray-400 text-xs mt-2">
+                        <p class="text-gray-400 text-xs mt-2" data-translate="whitepaper-instruction">
                             💡 Klicke auf die Buttons um die vollständigen Whitepaper-Dokumente in neuen Tabs zu öffnen
                         </p>
                         
                         <div class="mt-3 p-2 bg-blue-600 bg-opacity-20 rounded border border-blue-500 hidden md:block">
-                            <p class="text-blue-300 text-xs">
+                            <p class="text-blue-300 text-xs" data-translate="mobile-users">
                                 📱 <strong>Mobile Nutzer:</strong> Die Whitepaper öffnen sich in neuen Browser-Tabs. 
                                 Du kannst zwischen den Tabs wechseln oder die App im Hintergrund lassen.
                             </p>
                         </div>
                         </div>
                     <div class="prose prose-invert max-w-none">
-                        <h3 class="text-xl font-semibold text-white mb-4">🎯 What is GeoDrop?</h3>
-                        <p class="text-gray-300 mb-4">
+                        <h3 class="text-xl font-semibold text-white mb-4" data-translate="what-is-geodrop">🎯 What is GeoDrop?</h3>
+                        <p class="text-gray-300 mb-4" data-translate="what-is-geodrop-desc">
                             GeoDrop is an innovative blockchain-based app that connects geocaching with cryptocurrencies. 
                             Users can place virtual "drops" at real locations and earn rewards by completing tasks.
                         </p>
                         
-                        <h3 class="text-xl font-semibold text-white mb-4">🔧 Technology (Status: September 2025)</h3>
+                        <h3 class="text-xl font-semibold text-white mb-4" data-translate="technology-title">🔧 Technology (Status: September 2025)</h3>
                         <ul class="text-gray-300 mb-4 list-disc list-inside">
-                            <li><strong>Blockchain:</strong> tBNB-basierte Smart Contracts mit PixelDrop Token</li>
-                            <li><strong>Trading System:</strong> Complete DeFi trading between PixelDrop ↔ tBNB</li>
-                            <li><strong>Mining-Maschinen:</strong> 4 verschiedene Maschinentypen mit Boost-System</li>
-                            <li><strong>GPS:</strong> Precise location determination with 20m accuracy</li>
-                            <li><strong>Firebase:</strong> Echtzeitdatenbank für Drops und User-Interaktionen</li>
-                            <li><strong>Dev Area:</strong> Erweiterte Admin-Tools und Drop-Management</li>
-                            <li><strong>Bonus System:</strong> Daily rewards with special effects</li>
-                            <li><strong>PWA-Unterstützung:</strong> Installierbare Web-App für mobile Geräte</li>
-                            <li><strong>Echtzeit-Updates:</strong> Live-Updates für alle App-Funktionen</li>
+                            <li data-translate="blockchain"><strong>Blockchain:</strong> tBNB-basierte Smart Contracts mit PixelDrop Token</li>
+                            <li data-translate="trading-system"><strong>Trading System:</strong> Complete DeFi trading between PixelDrop ↔ tBNB</li>
+                            <li data-translate="mining-machines"><strong>Mining-Maschinen:</strong> 4 verschiedene Maschinentypen mit Boost-System</li>
+                            <li data-translate="gps"><strong>GPS:</strong> Precise location determination with 20m accuracy</li>
+                            <li data-translate="firebase"><strong>Firebase:</strong> Echtzeitdatenbank für Drops und User-Interaktionen</li>
+                            <li data-translate="dev-area"><strong>Dev Area:</strong> Erweiterte Admin-Tools und Drop-Management</li>
+                            <li data-translate="bonus-system"><strong>Bonus System:</strong> Daily rewards with special effects</li>
+                            <li data-translate="pwa-support"><strong>PWA-Unterstützung:</strong> Installierbare Web-App für mobile Geräte</li>
+                            <li data-translate="realtime-updates"><strong>Echtzeit-Updates:</strong> Live-Updates für alle App-Funktionen</li>
                         </ul>
                         
-                        <h3 class="text-xl font-semibold text-white mb-4">🎮 Gameplay</h3>
-                        <p class="text-gray-300 mb-4">
+                        <h3 class="text-xl font-semibold text-white mb-4" data-translate="gameplay-title">🎮 Gameplay</h3>
+                        <p class="text-gray-300 mb-4" data-translate="gameplay-desc">
                             Users navigate to GeoDrops, take photos of the location and receive rewards in the form of 
                             cryptocurrencies. The system prevents fraud through GPS validation and image analysis.
                         </p>
                         
-                        <h3 class="text-xl font-semibold text-white mb-4">🔒 Security</h3>
+                        <h3 class="text-xl font-semibold text-white mb-4" data-translate="security-title">🔒 Security</h3>
                         <ul class="text-gray-300 mb-4 list-disc list-inside">
-                            <li>Dezentrale Blockchain-Architektur</li>
-                            <li>Smart Contract-basierte Belohnungen</li>
-                            <li>Anti-Cheat-Systeme</li>
-                            <li>Encrypted data transmission</li>
+                            <li data-translate="security-decentralized">Dezentrale Blockchain-Architektur</li>
+                            <li data-translate="security-smart-contracts">Smart Contract-basierte Belohnungen</li>
+                            <li data-translate="security-anti-cheat">Anti-Cheat-Systeme</li>
+                            <li data-translate="security-encryption">Encrypted data transmission</li>
                         </ul>
                                         </div>
                                         </div>
@@ -2033,22 +2858,7 @@
             }
         };
         
-        // Initialize mobile navigation
-        document.addEventListener('DOMContentLoaded', function() {
-            updateMobileNav();
-            
-            // Add touch feedback to mobile nav buttons
-            const navButtons = document.querySelectorAll('.mobile-nav .nav-btn');
-            navButtons.forEach(btn => {
-                btn.addEventListener('touchstart', function() {
-                    this.style.transform = 'scale(0.95)';
-                });
-                
-                btn.addEventListener('touchend', function() {
-                    this.style.transform = '';
-                });
-            });
-        });
+        // Mobile navigation will be initialized in the main DOMContentLoaded event
     </script>
 
 
@@ -2123,25 +2933,55 @@
         // Control ad banner visibility based on current page
         window.updateAdBannerVisibility = function() {
             const adBanner = document.getElementById('ad-banner');
+            const bottomAdBanner = document.getElementById('bottom-ad-banner');
             const currentPage = document.querySelector('.page.active');
             
-            if (adBanner && currentPage) {
+            if (adBanner && bottomAdBanner && currentPage) {
                 const isMobile = window.innerWidth <= 768;
                 const isStartseite = currentPage.id === 'startseite';
                 
                 if (isMobile) {
                     // On mobile: only show on startseite
                     if (isStartseite) {
+                        // Top banner
                         adBanner.style.display = 'flex';
+                        adBanner.style.position = 'fixed';
+                        adBanner.style.top = '0';
+                        adBanner.style.left = '0';
+                        adBanner.style.right = '0';
+                        adBanner.style.zIndex = '50';
+                        
+                        // Bottom banner
+                        bottomAdBanner.style.display = 'flex';
+                        bottomAdBanner.style.position = 'fixed';
+                        bottomAdBanner.style.bottom = '0';
+                        bottomAdBanner.style.left = '0';
+                        bottomAdBanner.style.right = '0';
+                        bottomAdBanner.style.zIndex = '50';
                     } else {
                         adBanner.style.display = 'none';
+                        bottomAdBanner.style.display = 'none';
                     }
                 } else {
                     // On desktop: always show
+                    // Top banner
                     adBanner.style.display = 'flex';
+                    adBanner.style.position = 'fixed';
+                    adBanner.style.top = '0';
+                    adBanner.style.left = '0';
+                    adBanner.style.right = '0';
+                    adBanner.style.zIndex = '50';
+                    
+                    // Bottom banner
+                    bottomAdBanner.style.display = 'flex';
+                    bottomAdBanner.style.position = 'fixed';
+                    bottomAdBanner.style.bottom = '0';
+                    bottomAdBanner.style.left = '0';
+                    bottomAdBanner.style.right = '0';
+                    bottomAdBanner.style.zIndex = '50';
                 }
                 
-                console.log(`📱 Ad banner visibility updated: mobile=${isMobile}, startseite=${isStartseite}, display=${adBanner.style.display}`);
+                console.log(`📱 Ad banners visibility updated: mobile=${isMobile}, startseite=${isStartseite}, top=${adBanner.style.display}, bottom=${bottomAdBanner.style.display}`);
             }
         };
 
@@ -2230,14 +3070,14 @@
                 
                 if (isLogin) {
                     // Switch to registration mode
-                    document.getElementById('form-title').textContent = '🚀 Jetzt registrieren';
-                    document.getElementById('form-subtitle').textContent = 'Erstelle deinen Account und starte sofort!';
+                    document.getElementById('form-title').textContent = translations[currentLang]['register-now'];
+                    document.getElementById('form-subtitle').textContent = translations[currentLang]['create-account'];
                     document.getElementById('username-field').style.display = 'block';
                     document.getElementById('referral-field').style.display = 'block'; // Show referral field for registration
-                    document.getElementById('main-button').innerHTML = '<i class="fas fa-user-plus mr-2"></i>Kostenlos registrieren';
+                    document.getElementById('main-button').innerHTML = '<i class="fas fa-user-plus mr-2"></i>' + translations[currentLang]['register-free'];
                     document.getElementById('main-button').onclick = registerFromLanding;
                     document.getElementById('main-button').className = 'w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-green-700 hover:to-emerald-700 transition-all';
-                    document.querySelector('p.text-sm.text-gray-300.text-center').innerHTML = 'Bereits registriert? <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300">Hier anmelden</button>';
+                    document.querySelector('p.text-sm.text-gray-300.text-center').innerHTML = '<span data-translate="already-registered-text">' + translations[currentLang]['already-registered-text'] + '</span> <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300" data-translate="login-here">' + translations[currentLang]['login-here'] + '</button>';
                 }
             }, 500); // Wait for scroll to complete
         };
@@ -2253,11 +3093,11 @@
                 
                 if (!isLogin) {
                     // Switch to login mode
-                    document.getElementById('form-title').textContent = '🔑 Anmelden';
-                    document.getElementById('form-subtitle').textContent = 'Willkommen zurück!';
+                    document.getElementById('form-title').textContent = translations[currentLang]['login-title'];
+                    document.getElementById('form-subtitle').textContent = translations[currentLang]['welcome-back'];
                     document.getElementById('username-field').style.display = 'none';
                     document.getElementById('referral-field').style.display = 'none'; // Hide referral field for login
-                    document.getElementById('main-button').innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Anmelden';
+                    document.getElementById('main-button').innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>' + translations[currentLang]['login-button'];
                     document.getElementById('main-button').onclick = loginFromLanding;
                     document.getElementById('main-button').className = 'w-full bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-blue-700 hover:to-purple-700 transition-all';
                     document.querySelector('p.text-sm.text-gray-300.text-center').innerHTML = 'Noch kein Account? <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300">Hier zur Registrierung</button>';
@@ -2286,18 +3126,18 @@
             
             if (isLogin) {
                 // Switch to registration
-                document.getElementById('form-title').textContent = '🚀 Jetzt registrieren';
-                document.getElementById('form-subtitle').textContent = 'Erstelle deinen Account und starte sofort!';
+                document.getElementById('form-title').textContent = translations[currentLang]['register-now'];
+                document.getElementById('form-subtitle').textContent = translations[currentLang]['create-account'];
                 document.getElementById('username-field').style.display = 'block';
                 document.getElementById('referral-field').style.display = 'block'; // Show referral field for registration
-                document.getElementById('main-button').innerHTML = '<i class="fas fa-user-plus mr-2"></i>Kostenlos registrieren';
+                document.getElementById('main-button').innerHTML = '<i class="fas fa-user-plus mr-2"></i>' + translations[currentLang]['register-free'];
                 document.getElementById('main-button').onclick = registerFromLanding;
                 document.getElementById('main-button').className = 'w-full bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4 rounded-lg text-center font-semibold hover:from-green-700 hover:to-emerald-700 transition-all';
-                document.querySelector('p.text-sm.text-gray-300.text-center').innerHTML = 'Bereits registriert? <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300">Hier anmelden</button>';
+                document.querySelector('p.text-sm.text-gray-300.text-center').innerHTML = '<span data-translate="already-registered-text">' + translations[currentLang]['already-registered-text'] + '</span> <button onclick="toggleForm()" class="text-blue-400 hover:text-blue-300" data-translate="login-here">' + translations[currentLang]['login-here'] + '</button>';
             } else {
                 // Switch to login
-                document.getElementById('form-title').textContent = '🔑 Anmelden';
-                document.getElementById('form-subtitle').textContent = 'Willkommen zurück!';
+                document.getElementById('form-title').textContent = translations[currentLang]['login-title'];
+                document.getElementById('form-subtitle').textContent = translations[currentLang]['welcome-back'];
                 document.getElementById('username-field').style.display = 'none';
                 document.getElementById('referral-field').style.display = 'none'; // Hide referral field for login
                 // No referral field to hide
@@ -2573,362 +3413,6 @@
     </div>
 
     
-    <!-- Language Switcher Script -->
-    <script>
-        // Language switcher functionality
-        function switchLanguage(lang) {
-            // Save language preference
-            localStorage.setItem('selectedLanguage', lang);
-            
-            // Update language switcher buttons on landing page
-            const deBtn = document.getElementById('lang-de-btn');
-            const enBtn = document.getElementById('lang-en-btn');
-            
-            if (deBtn && enBtn) {
-                if (lang === 'de') {
-                    deBtn.classList.add('bg-white/30');
-                    enBtn.classList.remove('bg-white/30');
-                } else if (lang === 'en') {
-                    deBtn.classList.remove('bg-white/30');
-                    enBtn.classList.add('bg-white/30');
-                }
-            }
-            
-            // Update language switcher buttons on main pages
-            const mainDeBtn = document.getElementById('main-lang-de-btn');
-            const mainEnBtn = document.getElementById('main-lang-en-btn');
-            
-            if (mainDeBtn && mainEnBtn) {
-                if (lang === 'de') {
-                    mainDeBtn.classList.add('bg-gray-700');
-                    mainDeBtn.classList.remove('hover:bg-gray-700');
-                    mainEnBtn.classList.remove('bg-gray-700');
-                    mainEnBtn.classList.add('hover:bg-gray-700');
-                } else if (lang === 'en') {
-                    mainDeBtn.classList.remove('bg-gray-700');
-                    mainDeBtn.classList.add('hover:bg-gray-700');
-                    mainEnBtn.classList.add('bg-gray-700');
-                    mainEnBtn.classList.remove('hover:bg-gray-700');
-                }
-            }
-            
-            // Update radio buttons in settings if they exist
-            const deRadio = document.getElementById('lang-de');
-            const enRadio = document.getElementById('lang-en');
-            
-            if (deRadio && enRadio) {
-                if (lang === 'de') {
-                    deRadio.checked = true;
-                    enRadio.checked = false;
-                } else if (lang === 'en') {
-                    deRadio.checked = false;
-                    enRadio.checked = true;
-                }
-            }
-            
-            // Update language display in settings
-            const currentLanguageDisplay = document.getElementById('settings-current-language-display');
-            if (currentLanguageDisplay) {
-                currentLanguageDisplay.textContent = lang === 'de' ? 'Deutsch' : 'English';
-            }
-            
-            // Force update all language switchers using global function
-            if (window.syncAllLanguageSwitchers) {
-                window.syncAllLanguageSwitchers(lang);
-            }
-            
-            // Here you could add actual language switching logic
-            console.log('Language switched to:', lang);
-        }
-        
-        // Initialize language switcher on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const currentLanguage = localStorage.getItem('selectedLanguage') || 'de';
-            
-            // Initialize landing page buttons
-            const deBtn = document.getElementById('lang-de-btn');
-            const enBtn = document.getElementById('lang-en-btn');
-            
-            if (deBtn && enBtn) {
-                if (currentLanguage === 'de') {
-                    deBtn.classList.add('bg-white/30');
-                    enBtn.classList.remove('bg-white/30');
-                } else if (currentLanguage === 'en') {
-                    deBtn.classList.remove('bg-white/30');
-                    enBtn.classList.add('bg-white/30');
-                }
-            }
-            
-            // Initialize main page buttons
-            const mainDeBtn = document.getElementById('main-lang-de-btn');
-            const mainEnBtn = document.getElementById('main-lang-en-btn');
-            
-            if (mainDeBtn && mainEnBtn) {
-                if (currentLanguage === 'de') {
-                    mainDeBtn.classList.add('bg-gray-700');
-                    mainDeBtn.classList.remove('hover:bg-gray-700');
-                    mainEnBtn.classList.remove('bg-gray-700');
-                    mainEnBtn.classList.add('hover:bg-gray-700');
-                } else if (currentLanguage === 'en') {
-                    mainDeBtn.classList.remove('bg-gray-700');
-                    mainDeBtn.classList.add('hover:bg-gray-700');
-                    mainEnBtn.classList.add('bg-gray-700');
-                    mainEnBtn.classList.remove('hover:bg-gray-700');
-                }
-            }
-            
-            // Initialize radio buttons in settings
-            const deRadio = document.getElementById('lang-de');
-            const enRadio = document.getElementById('lang-en');
-            
-            if (deRadio && enRadio) {
-                if (currentLanguage === 'de') {
-                    deRadio.checked = true;
-                    enRadio.checked = false;
-                } else if (currentLanguage === 'en') {
-                    deRadio.checked = false;
-                    enRadio.checked = true;
-                }
-            }
-            
-            // Initialize language display in settings
-            const currentLanguageDisplay = document.getElementById('settings-current-language-display');
-            if (currentLanguageDisplay) {
-                currentLanguageDisplay.textContent = currentLanguage === 'de' ? 'Deutsch' : 'English';
-            }
-            
-            // Initialize translation
-            translateText(currentLanguage);
-        });
-        
-        // Translation dictionary
-        const translations = {
-            de: {
-                // Navigation
-                'startseite': 'Startseite',
-                'geocard': 'GeoCard',
-                'geoboard': 'GeoBoard',
-                'machines': 'Mining',
-                'bonus': 'Bonus',
-                'geochat': 'GeoChat',
-                'trading': 'Trading',
-                'mehr': 'Mehr',
-                'dev': 'Dev',
-                
-                // Main content
-                'geodrop-title': '🌍 GeoDrop',
-                'geodrop-subtitle': 'Willkommen bei der Zukunft des Geo-Minings',
-                'user-info': '👤 Benutzerinfo',
-                'email': 'E-Mail:',
-                'username': 'Benutzername:',
-                'level': 'Level:',
-                'coins': 'Coins:',
-                'drops': 'Drops:',
-                'boost': 'Boost:',
-                
-                // Landing page
-                'future-title': 'Die Zukunft des',
-                'future-subtitle': 'Geo-Minings',
-                'landing-description': 'Verdiene Kryptowährungen durch Geocaching! Entdecke virtuelle Drops an realen Orten und sammle Belohnungen mit der innovativen Blockchain-Technologie.',
-                'register-free': 'Kostenlos registrieren',
-                'learn-more': 'Mehr erfahren',
-                'active-users': 'Aktive User',
-                'geodrops': 'GeoDrops',
-                'paid-out': 'Ausgezahlt',
-                
-                // Features
-                'geodrop-found': 'GeoDrop gefunden!',
-                'daily-bonus': 'Täglicher Bonus',
-                'referral-bonus': 'Referral Bonus',
-                'referral-percentage': '+5% von Käufen',
-                'pixeldrop-reward': '+150 PixelDrop',
-                'daily-pixeldrop': '+50 PixelDrop',
-                
-                // Feature descriptions
-                'what-can-geodrop': 'Was kann GeoDrop?',
-                'discover-features': 'Entdecke die revolutionären Features der Geo-Mining App',
-                'gps-mining': 'GPS-basiertes Mining',
-                'gps-mining-desc': 'Finde virtuelle Drops an realen Orten und verdiene Kryptowährungen durch Geocaching-Aktivitäten.',
-                'mining-machines': 'Mining-Maschinen',
-                'mining-machines-desc': '4 verschiedene Maschinentypen für passive Einnahmen. Von Basic bis Mega Miner mit unterschiedlichen Boosts.',
-                'defi-trading': 'DeFi Trading',
-                'defi-trading-desc': 'Handel PixelDrop ↔ tBNB direkt in der App. Vollständiges DeFi-Trading mit Smart Contracts.',
-                'daily-bonuses': 'Tägliche Boni',
-                'daily-bonuses-desc': 'Sammle täglich 50 PixelDrop als Login-Bonus. Spezielle Effekte und Animationen inklusive.',
-                'referral-system': 'Referral System',
-                'referral-system-desc': 'Lade Freunde ein und verdiene 5% ihrer Einnahmen. 2. Ebene: 1% zusätzlich.',
-                'pwa-support': 'PWA-Unterstützung',
-                'pwa-support-desc': 'Installierbare Web-App für mobile Geräte. Funktioniert offline und wie eine native App.',
-                
-                // How it works
-                'how-it-works': 'So funktioniert\'s',
-                'how-it-works-subtitle': 'In 4 einfachen Schritten zu deinen ersten Kryptowährungen',
-                
-                // Buttons
-                'login': 'Anmelden',
-                'register': 'Registrieren',
-                'logout': 'Abmelden',
-                'save': 'Speichern',
-                'cancel': 'Abbrechen',
-                'close': 'Schließen',
-                
-                // Settings
-                'settings': 'Einstellungen',
-                'profile': 'Profil',
-                'dashboard': 'Dashboard',
-                'statistics': 'Statistiken',
-                'language': 'Sprache',
-                'notifications': 'Benachrichtigungen',
-                'current-language': 'Deutsch'
-            },
-            en: {
-                // Navigation
-                'startseite': 'Home',
-                'geocard': 'GeoCard',
-                'geoboard': 'GeoBoard',
-                'machines': 'Mining',
-                'bonus': 'Bonus',
-                'geochat': 'GeoChat',
-                'trading': 'Trading',
-                'mehr': 'More',
-                'dev': 'Dev',
-                
-                // Main content
-                'geodrop-title': '🌍 GeoDrop',
-                'geodrop-subtitle': 'Welcome to the future of Geo-Mining',
-                'user-info': '👤 User Info',
-                'email': 'Email:',
-                'username': 'Username:',
-                'level': 'Level:',
-                'coins': 'Coins:',
-                'drops': 'Drops:',
-                'boost': 'Boost:',
-                
-                // Landing page
-                'future-title': 'The Future of',
-                'future-subtitle': 'Geo-Mining',
-                'landing-description': 'Earn cryptocurrencies through geocaching! Discover virtual drops at real locations and collect rewards with innovative blockchain technology.',
-                'register-free': 'Register for free',
-                'learn-more': 'Learn more',
-                'active-users': 'Active Users',
-                'geodrops': 'GeoDrops',
-                'paid-out': 'Paid Out',
-                
-                // Features
-                'geodrop-found': 'GeoDrop found!',
-                'daily-bonus': 'Daily Bonus',
-                'referral-bonus': 'Referral Bonus',
-                'referral-percentage': '+5% from purchases',
-                'pixeldrop-reward': '+150 PixelDrop',
-                'daily-pixeldrop': '+50 PixelDrop',
-                
-                // Feature descriptions
-                'what-can-geodrop': 'What can GeoDrop do?',
-                'discover-features': 'Discover the revolutionary features of the Geo-Mining App',
-                'gps-mining': 'GPS-based Mining',
-                'gps-mining-desc': 'Find virtual drops at real locations and earn cryptocurrencies through geocaching activities.',
-                'mining-machines': 'Mining Machines',
-                'mining-machines-desc': '4 different machine types for passive income. From Basic to Mega Miner with different boosts.',
-                'defi-trading': 'DeFi Trading',
-                'defi-trading-desc': 'Trade PixelDrop ↔ tBNB directly in the app. Complete DeFi trading with smart contracts.',
-                'daily-bonuses': 'Daily Bonuses',
-                'daily-bonuses-desc': 'Collect 50 PixelDrop daily as login bonus. Special effects and animations included.',
-                'referral-system': 'Referral System',
-                'referral-system-desc': 'Invite friends and earn 5% of their income. 2nd level: 1% additional.',
-                'pwa-support': 'PWA Support',
-                'pwa-support-desc': 'Installable web app for mobile devices. Works offline and like a native app.',
-                
-                // How it works
-                'how-it-works': 'How it works',
-                'how-it-works-subtitle': 'In 4 simple steps to your first cryptocurrencies',
-                
-                // Buttons
-                'login': 'Login',
-                'register': 'Register',
-                'logout': 'Logout',
-                'save': 'Save',
-                'cancel': 'Cancel',
-                'close': 'Close',
-                
-                // Settings
-                'settings': 'Settings',
-                'profile': 'Profile',
-                'dashboard': 'Dashboard',
-                'statistics': 'Statistics',
-                'language': 'Language',
-                'notifications': 'Notifications',
-                'current-language': 'English'
-            }
-        };
-        
-        // Translation function
-        function translateText(lang) {
-            const elements = document.querySelectorAll('[data-translate]');
-            elements.forEach(element => {
-                const key = element.getAttribute('data-translate');
-                if (translations[lang] && translations[lang][key]) {
-                    element.textContent = translations[lang][key];
-                }
-            });
-        }
-        
-        // Global language synchronization function
-        window.syncAllLanguageSwitchers = function(lang) {
-            // Update landing page buttons
-            const deBtn = document.getElementById('lang-de-btn');
-            const enBtn = document.getElementById('lang-en-btn');
-            
-            if (deBtn && enBtn) {
-                if (lang === 'de') {
-                    deBtn.classList.add('bg-white/30');
-                    enBtn.classList.remove('bg-white/30');
-                } else if (lang === 'en') {
-                    deBtn.classList.remove('bg-white/30');
-                    enBtn.classList.add('bg-white/30');
-                }
-            }
-            
-            // Update main page buttons
-            const mainDeBtn = document.getElementById('main-lang-de-btn');
-            const mainEnBtn = document.getElementById('main-lang-en-btn');
-            
-            if (mainDeBtn && mainEnBtn) {
-                if (lang === 'de') {
-                    mainDeBtn.classList.add('bg-gray-700');
-                    mainDeBtn.classList.remove('hover:bg-gray-700');
-                    mainEnBtn.classList.remove('bg-gray-700');
-                    mainEnBtn.classList.add('hover:bg-gray-700');
-                } else if (lang === 'en') {
-                    mainDeBtn.classList.remove('bg-gray-700');
-                    mainDeBtn.classList.add('hover:bg-gray-700');
-                    mainEnBtn.classList.add('bg-gray-700');
-                    mainEnBtn.classList.remove('hover:bg-gray-700');
-                }
-            }
-            
-            // Update radio buttons in settings
-            const deRadio = document.getElementById('lang-de');
-            const enRadio = document.getElementById('lang-en');
-            
-            if (deRadio && enRadio) {
-                if (lang === 'de') {
-                    deRadio.checked = true;
-                    enRadio.checked = false;
-                } else if (lang === 'en') {
-                    deRadio.checked = false;
-                    enRadio.checked = true;
-                }
-            }
-            
-            // Update language display in settings
-            const currentLanguageDisplay = document.getElementById('settings-current-language-display');
-            if (currentLanguageDisplay) {
-                currentLanguageDisplay.textContent = lang === 'de' ? 'Deutsch' : 'English';
-            }
-            
-            // Translate all text elements
-            translateText(lang);
-        };
     </script>
 </body>
 </html>

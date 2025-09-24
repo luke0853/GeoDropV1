@@ -46,7 +46,6 @@ window.updateUnlockCountdown = function() {
     
     const unlockTimerElement = document.getElementById('unlock-timer');
     if (!unlockTimerElement) {
-        console.log('❌ Unlock timer element not found');
         return;
     }
     
@@ -276,9 +275,6 @@ window.updateBonusDisplay = function() {
         console.log('🔍 bonusClaimed element:', bonusClaimed);
         
         if (!bonusAvailable || !bonusClaimed) {
-            console.log('❌ Bonus elements not found!');
-            console.log('🔍 Available elements:', document.querySelectorAll('[id*="bonus"]'));
-            console.log('🔍 All elements with "bonus" in ID:', document.querySelectorAll('[id*="bonus"]'));
             return;
         }
         

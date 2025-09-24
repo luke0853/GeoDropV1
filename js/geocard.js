@@ -298,7 +298,7 @@ window.clearUserDropLists = function() {
     // Clear User Drops select dropdown
     const userDropsSelect = document.getElementById('geocard-user-drop-select');
     if (userDropsSelect) {
-        userDropsSelect.innerHTML = '<option value="">User Drop Liste geleert</option>';
+        userDropsSelect.innerHTML = `<option value="">${window.t ? window.t('geocard.user-drop-list-cleared') : 'User Drop Liste geleert'}</option>`;
     }
     
     console.log('✅ User Drop lists cleared (data remains intact)');
@@ -638,8 +638,8 @@ window.createRemainingAustrianDrops = async function() {
     const allUserDropsTable = document.getElementById('all-user-drops-table');
     const userDropsSelect = document.getElementById('geocard-user-drop-select');
     
-    if (userDropsTable) userDropsTable.innerHTML = '<div class="text-center text-gray-400 p-4">Lade...</div>';
-    if (allUserDropsTable) allUserDropsTable.innerHTML = '<div class="text-center text-gray-400 p-4">Lade...</div>';
+    if (userDropsTable) userDropsTable.innerHTML = `<div class="text-center text-gray-400 p-4">${window.t ? window.t('geocard.loading-drops') : 'Lade...'}</div>`;
+    if (allUserDropsTable) allUserDropsTable.innerHTML = `<div class="text-center text-gray-400 p-4">${window.t ? window.t('geocard.loading-drops') : 'Lade...'}</div>`;
     if (userDropsSelect) userDropsSelect.innerHTML = '<option value="">Lade...</option>';
     
     await loadUserDropsForUpload();
@@ -1686,11 +1686,13 @@ window.createUserDrop = async function() {
             return;
         }
         if (isNaN(lat) || isNaN(lng)) {
-            showMessage('❌ Bitte gib gültige Koordinaten ein!', true);
+            const validCoordinatesText = window.t ? window.t('geocard.valid-coordinates') : 'Bitte gib gültige Koordinaten ein!';
+            showMessage(`❌ ${validCoordinatesText}`, true);
             return;
         }
         if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-            showMessage('❌ Ungültige Koordinaten!', true);
+            const invalidCoordinatesText = window.t ? window.t('geocard.invalid-coordinates') : 'Ungültige Koordinaten!';
+            showMessage(`❌ ${invalidCoordinatesText}`, true);
             return;
         }
         
@@ -1925,10 +1927,49 @@ window.loadDevDropsForUpload = async function() {
             return numA - numB;
         });
         
-        // Update dev drops select
+        // Update dev drops select for both languages
+        const currentLang = window.currentLanguage || 'de';
+        const selectDe = document.getElementById('geocard-drop-select-de');
+        const selectEn = document.getElementById('geocard-drop-select-en');
+        
+        let selectText, devDropText, pixeldropsText;
+        if (currentLang === 'en') {
+            selectText = 'Select Dev GeoDrop...';
+            devDropText = 'Dev GeoDrop';
+            pixeldropsText = 'PixelDrops';
+        } else {
+            selectText = 'Dev GeoDrop auswählen...';
+            devDropText = 'Dev GeoDrop';
+            pixeldropsText = 'PixelDrops';
+        }
+        
+        // Update German dropdown
+        if (selectDe) {
+            selectDe.innerHTML = `<option value="">${selectText}</option>`;
+            devDrops.forEach(drop => {
+                const option = document.createElement('option');
+                option.value = drop.id;
+                option.textContent = `${devDropText}${drop.geodropNumber || drop.id} - ${drop.reward || 100} ${pixeldropsText}`;
+                selectDe.appendChild(option);
+            });
+        }
+        
+        // Update English dropdown
+        if (selectEn) {
+            selectEn.innerHTML = `<option value="">Select Dev GeoDrop...</option>`;
+            devDrops.forEach(drop => {
+                const option = document.createElement('option');
+                option.value = drop.id;
+                option.textContent = `Dev GeoDrop${drop.geodropNumber || drop.id} - ${drop.reward || 100} PixelDrops`;
+                selectEn.appendChild(option);
+            });
+        }
+        
+        // Legacy support for old select element
         const select = document.getElementById('geocard-drop-select');
         if (select) {
-            select.innerHTML = '<option value="">Dev GeoDrop auswählen...</option>';
+            
+            select.innerHTML = `<option value="">${selectText}</option>`;
             devDrops.forEach(drop => {
                 const option = document.createElement('option');
                 option.value = `devDrops:${drop.id}`;
@@ -1940,7 +1981,10 @@ window.loadDevDropsForUpload = async function() {
                         displayNumber = match[1]; // Just the number
                     }
                 }
-                option.textContent = `🎯 Dev GeoDrop${displayNumber} - ${drop.reward || 100} PixelDrops`;
+                // Sicherheitsprüfung: displayNumber und reward validieren
+                const safeDisplayNumber = displayNumber || 'N/A';
+                const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+                option.textContent = `🎯 ${devDropText}${safeDisplayNumber} - ${safeReward} ${pixeldropsText}`;
                 select.appendChild(option);
             });
         }
@@ -2024,9 +2068,18 @@ window.loadUserDropsForUpload = async function() {
         });
         
         // Update user drops select
-        const select = document.getElementById('geocard-user-drop-select');
-        if (select) {
-            select.innerHTML = '<option value="">User GeoDrop auswählen...</option>';
+        const userSelect = document.getElementById('geocard-user-drop-select');
+        
+        let userSelectText;
+        if (currentLang === 'en') {
+            userSelectText = 'Select User GeoDrop...';
+        } else {
+            userSelectText = 'User GeoDrop auswählen...';
+        }
+        
+        // Update user dropdown
+        if (userSelect) {
+            userSelect.innerHTML = `<option value="">${userSelectText}</option>`;
             userDrops.forEach(drop => {
                 const option = document.createElement('option');
                 option.value = `userDrops:${drop.id}`;
@@ -2047,7 +2100,47 @@ window.loadUserDropsForUpload = async function() {
                 creatorName = drop.ersteller || drop.createdByName || 'Unknown';
                 console.log(`✅ Using ${creatorName} for drop ${drop.name}`);
                 const dropNumber = drop.geodropNumber || drop.name?.match(/UserDrop(\d+)/)?.[1] || 'N/A';
-                option.textContent = `👤 User GeoDrop${dropNumber} (${creatorName}) - ${drop.reward || 100} PixelDrops`;
+                const userDropText = currentLang === 'en' ? 'User GeoDrop' : 'User GeoDrop';
+                const pixeldropsText = 'PixelDrops';
+                // Sicherheitsprüfung: creatorName und reward validieren
+                const safeCreatorName = creatorName || 'Unknown';
+                const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+                option.textContent = `👤 ${userDropText}${dropNumber} (${safeCreatorName}) - ${safeReward} ${pixeldropsText}`;
+                userSelect.appendChild(option);
+            });
+        }
+        
+        
+        // Legacy support for old select element
+        const select = document.getElementById('geocard-user-drop-select');
+        if (select) {
+            select.innerHTML = `<option value="">${userSelectText}</option>`;
+            userDrops.forEach(drop => {
+                const option = document.createElement('option');
+                option.value = `userDrops:${drop.id}`;
+                // Use displayName first, then email, then fallback
+                // Get the real username from Firebase Auth, not from stored data
+                let creatorName = 'Unbekannt';
+                
+                // Check if this is the current user's drop
+                let currentUser = window.currentUser;
+                if (!currentUser && window.auth && window.auth.currentUser) {
+                    currentUser = window.auth.currentUser;
+                }
+                if (!currentUser && window.firebase && window.firebase.auth && window.firebase.auth().currentUser) {
+                    currentUser = window.firebase.auth().currentUser;
+                }
+                
+                // Use the ersteller field from Firebase
+                creatorName = drop.ersteller || drop.createdByName || 'Unknown';
+                console.log(`✅ Using ${creatorName} for drop ${drop.name}`);
+                const dropNumber = drop.geodropNumber || drop.name?.match(/UserDrop(\d+)/)?.[1] || 'N/A';
+                const userDropText = currentLang === 'en' ? 'User GeoDrop' : 'User GeoDrop';
+                const pixeldropsText = 'PixelDrops';
+                // Sicherheitsprüfung: creatorName und reward validieren
+                const safeCreatorName = creatorName || 'Unknown';
+                const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+                option.textContent = `👤 ${userDropText}${dropNumber} (${safeCreatorName}) - ${safeReward} ${pixeldropsText}`;
                 select.appendChild(option);
             });
         }
@@ -2151,7 +2244,8 @@ window.loadDevGeoDrops = async function() {
             tableHTML += '</tbody></table></div>';
             table.innerHTML = tableHTML;
         } else if (table) {
-            table.innerHTML = '<div class="text-center text-gray-400 p-4">Keine Dev GeoDrops gefunden</div>';
+            const noDropsText = window.t ? window.t('geocard.no-dev-drops') : 'Keine Dev GeoDrops gefunden';
+            table.innerHTML = `<div class="text-center text-gray-400 p-4">${noDropsText}</div>`;
         }
         
         console.log(`✅ Loaded ${devDrops.length} Dev GeoDrops`);
@@ -2159,9 +2253,11 @@ window.loadDevGeoDrops = async function() {
         console.error('❌ Error loading Dev GeoDrops:', error);
         if (error.code === 'permission-denied') {
             console.log('🔒 User not logged in, skipping Dev GeoDrops load');
-            showMessage('ℹ️ Bitte anmelden um Dev GeoDrops zu sehen', false);
+            const loginToSeeDevText = window.t ? window.t('geocard.login-to-see-dev') : 'Bitte anmelden um Dev GeoDrops zu sehen';
+            showMessage(`ℹ️ ${loginToSeeDevText}`, false);
         } else {
-            showMessage('Fehler beim Laden der Dev GeoDrops', true);
+            const errorLoadingDevText = window.t ? window.t('geocard.error-loading-dev') : 'Fehler beim Laden der Dev GeoDrops';
+            showMessage(errorLoadingDevText, true);
         }
         
         const table = document.getElementById('geodrops-table');
@@ -2264,13 +2360,15 @@ window.loadAllUserDrops = async function() {
             tableHTML += '</tbody></table></div>';
             allUserDropsTable.innerHTML = tableHTML;
         } else if (allUserDropsTable) {
-            allUserDropsTable.innerHTML = '<div class="text-center text-gray-400 p-4">Keine User GeoDrops gefunden</div>';
+            const noUserDropsText = window.t ? window.t('geocard.no-user-drops') : 'Keine User GeoDrops gefunden';
+            allUserDropsTable.innerHTML = `<div class="text-center text-gray-400 p-4">${noUserDropsText}</div>`;
         }
         
         console.log(`✅ Loaded ${userDrops.length} ALL User GeoDrops`);
     } catch (error) {
         console.error('❌ Error loading ALL User GeoDrops:', error);
-        showMessage('Fehler beim Laden aller User GeoDrops', true);
+            const errorLoadingUserText = window.t ? window.t('geocard.error-loading-user') : 'Fehler beim Laden aller User GeoDrops';
+            showMessage(errorLoadingUserText, true);
     }
 };
 
@@ -2577,7 +2675,8 @@ window.switchToListType = function(type) {
         // Load dev drops
         loadDevGeoDrops();
         
-        showMessage('🎯 Dev GeoDrops angezeigt', false);
+        const devDropsShownText = window.t ? window.t('geocard.dev-drops-shown') : 'Dev GeoDrops angezeigt';
+        showMessage(`🎯 ${devDropsShownText}`, false);
     } else if (type === 'user') {
         // Switch to user drops
         devBtn.className = 'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-300 hover:text-white';
@@ -2589,11 +2688,12 @@ window.switchToListType = function(type) {
         // Load user drops
         loadUserGeoDrops();
         
-        showMessage('👤 User GeoDrops angezeigt', false);
+        const userDropsShownText = window.t ? window.t('geocard.user-drops-shown') : 'User GeoDrops angezeigt';
+        showMessage(`👤 ${userDropsShownText}`, false);
     }
 };
 
-window.initGeoMap = function() {
+window.initGeoMap = function(mapContainerId = null) {
     console.log('🗺️ Initializing map...');
     
     try {
@@ -2603,10 +2703,19 @@ window.initGeoMap = function() {
             window.geoMap = null;
         }
         
+        // Determine which map container to use
+        let mapId = mapContainerId;
+        if (!mapId) {
+            // Default to standard map container
+            mapId = 'mapid';
+        }
+        
+        console.log(`🗺️ Using map container: ${mapId}`);
+        
         // Check if map container exists
-        const mapContainer = document.getElementById('mapid');
+        const mapContainer = document.getElementById(mapId);
         if (!mapContainer) {
-            console.error('❌ Map container not found');
+            console.error(`❌ Map container not found: ${mapId}`);
             return;
         }
         
@@ -2625,7 +2734,7 @@ window.initGeoMap = function() {
             zoomDelta: 0.5
         };
         
-        window.geoMap = L.map('mapid', mapOptions).setView([0, 0], 2);
+        window.geoMap = L.map(mapId, mapOptions).setView([0, 0], 2);
         
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap © CartoDB',
@@ -2772,7 +2881,8 @@ window.getUserLocation = function() {
             // Validate coordinates (basic sanity check)
             if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
                 console.error('❌ Invalid coordinates:', { lat, lng });
-                showMessage('❌ Ungültige GPS-Koordinaten erhalten!', true);
+                const invalidGPSText = window.t ? window.t('geocard.invalid-gps') : 'Ungültige GPS-Koordinaten erhalten!';
+                showMessage(`❌ ${invalidGPSText}`, true);
                 return;
             }
             
@@ -2787,10 +2897,10 @@ window.getUserLocation = function() {
                 if (locationInfoVienna) {
                     locationInfoVienna.innerHTML += `
                         <div class="mt-3 p-3 bg-red-900 border border-red-600 rounded-lg">
-                            <div class="text-red-300 font-bold mb-2">⚠️ Gecachte Koordinaten erkannt!</div>
-                            <div class="text-red-200 text-sm mb-3">Das sind wahrscheinlich gecachte GPS-Daten. Bitte aktualisiere deinen Standort!</div>
+                            <div class="text-red-300 font-bold mb-2">⚠️ ${window.t ? window.t('geocard.cached-coordinates') : 'Gecachte Koordinaten erkannt!'}</div>
+                            <div class="text-red-200 text-sm mb-3">${window.t ? window.t('geocard.cached-gps-data') : 'Das sind wahrscheinlich gecachte GPS-Daten. Bitte aktualisiere deinen Standort!'}</div>
                             <button onclick="clearGPSCache()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                                🗑️ GPS-Cache leeren & neu laden
+                                🗑️ ${window.t ? window.t('geocard.clear-gps-cache') : 'GPS-Cache leeren'} & neu laden
                             </button>
                         </div>
                     `;
@@ -2886,12 +2996,16 @@ window.getUserLocation = function() {
                 }).addTo(window.geoMap);
                 
                 
+                const yourLocationText = window.t ? window.t('geocard.your-location') : 'Dein Standort';
+                const accuracyText = window.t ? window.t('geocard.accuracy') : 'Genauigkeit';
+                const zoomText = window.t ? window.t('geocard.zoom') : 'Zoom';
+                
                 window.locationMarker.bindPopup(`
                     <div class="text-center">
-                        <strong>📍 Dein Standort</strong><br>
+                        <strong>📍 ${yourLocationText}</strong><br>
                         <small>${lat.toFixed(6)}, ${lng.toFixed(6)}</small><br>
-                        <small>Genauigkeit: ${accuracy.toFixed(0)}m</small><br>
-                        <small>Zoom: ${zoomLevel}</small>
+                        <small>${accuracyText}: ${accuracy.toFixed(0)}m</small><br>
+                        <small>${zoomText}: ${zoomLevel}</small>
                     </div>
                 `).openPopup();
                 
@@ -2999,11 +3113,13 @@ window.toggleMobileDebug = function() {
     }
     
     // Get map status
-    let mapStatus = '❌ Nicht initialisiert';
+    const notInitializedText = window.t ? window.t('geocard.not-initialized') : 'Nicht initialisiert';
+    let mapStatus = `❌ ${notInitializedText}`;
     if (typeof window.geoMap !== 'undefined' && window.geoMap) {
         const center = window.geoMap.getCenter();
         const zoom = window.geoMap.getZoom();
-        mapStatus = `✅ OK (${center.lat.toFixed(4)}, ${center.lng.toFixed(4)}, Zoom: ${zoom})`;
+        const zoomText = window.t ? window.t('geocard.zoom') : 'Zoom';
+        mapStatus = `✅ OK (${center.lat.toFixed(4)}, ${center.lng.toFixed(4)}, ${zoomText}: ${zoom})`;
     }
     
     // Get user agent info
@@ -3015,16 +3131,16 @@ window.toggleMobileDebug = function() {
             <h4 style="margin: 0 0 15px 0; color: #10b981; font-size: 14px;">🐛 GeoDrop Debug Console</h4>
             
             <div style="margin-bottom: 10px;">
-                <strong style="color: #fbbf24;">📍 GPS Status:</strong><br>
-                <span style="color: #d1d5db;">Position: ${locationInfo}</span><br>
-                <span style="color: #d1d5db;">Genauigkeit: ${locationAccuracy}</span><br>
-                <span style="color: #d1d5db;">Zeit: ${locationTime}</span>
+                <strong style="color: #fbbf24;">📍 ${window.t ? window.t('geocard.gps-status') : 'GPS Status'}:</strong><br>
+                <span style="color: #d1d5db;">${window.t ? window.t('geocard.position') : 'Position'}: ${locationInfo}</span><br>
+                <span style="color: #d1d5db;">${window.t ? window.t('geocard.accuracy') : 'Genauigkeit'}: ${locationAccuracy}</span><br>
+                <span style="color: #d1d5db;">${window.t ? window.t('geocard.time') : 'Zeit'}: ${locationTime}</span>
             </div>
             
             <div style="margin-bottom: 10px;">
-                <strong style="color: #3b82f6;">🗺️ Karte Status:</strong><br>
+                <strong style="color: #3b82f6;">🗺️ ${window.t ? window.t('geocard.map-status') : 'Karte Status'}:</strong><br>
                 <span style="color: #d1d5db;">${mapStatus}</span><br>
-                <span style="color: #d1d5db;">Leaflet: ${typeof L !== 'undefined' ? '✅ Geladen' : '❌ Fehlt'}</span>
+                <span style="color: #d1d5db;">Leaflet: ${typeof L !== 'undefined' ? `✅ ${window.t ? window.t('geocard.loaded') : 'Geladen'}` : `❌ ${window.t ? window.t('geocard.missing') : 'Fehlt'}`}</span>
             </div>
             
             <div style="margin-bottom: 10px;">
@@ -3043,9 +3159,9 @@ window.toggleMobileDebug = function() {
             </div>
             
             <div style="margin-bottom: 15px;">
-                <strong style="color: #06b6d4;">🔧 App Status:</strong><br>
+                <strong style="color: #06b6d4;">🔧 ${window.t ? window.t('geocard.app-status') : 'App Status'}:</strong><br>
                 <span style="color: #d1d5db;">Firebase: ${typeof auth !== 'undefined' ? '✅ OK' : '❌ Fehler'}</span><br>
-                <span style="color: #d1d5db;">User: ${auth && auth.currentUser ? auth.currentUser.email : 'Nicht angemeldet'}</span>
+                <span style="color: #d1d5db;">User: ${auth && auth.currentUser ? auth.currentUser.email : (window.t ? window.t('geocard.not-logged-in') : 'Nicht angemeldet')}</span>
             </div>
             
             <button onclick="document.getElementById('debug-window').remove()" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold;">❌ Schließen</button>
@@ -3060,7 +3176,8 @@ window.showMapLegend = function() {
 };
 
 window.showDropRules = function() {
-    showMessage('📋 Drop-Regeln: 1) Foto aufnehmen 2) GeoDrop auswählen 3) Standort bestätigen 4) Belohnung erhalten!', false);
+    const dropRulesText = window.t ? window.t('geocard.drop-rules') : 'Drop-Regeln: 1) Foto aufnehmen 2) GeoDrop auswählen 3) Standort bestätigen 4) Belohnung erhalten!';
+    showMessage(`📋 ${dropRulesText}`, false);
 };
 
 // Load GeoDrops from Firebase
@@ -3070,6 +3187,17 @@ window.loadGeoDrops = async function() {
         if (!window.firebase || !window.firebase.firestore()) {
             console.log('❌ Firebase not available');
             return;
+        }
+        
+        // Clear existing markers first
+        if (window.dropMarkers && window.dropMarkers.length > 0) {
+            console.log('🗑️ Clearing existing markers...');
+            window.dropMarkers.forEach(marker => {
+                if (marker && window.geoMap) {
+                    window.geoMap.removeLayer(marker);
+                }
+            });
+            window.dropMarkers = [];
         }
         
         const db = window.firebase.firestore();
@@ -3176,7 +3304,7 @@ window.addDropMarkersToMap = function(drops) {
     // Add new markers
     console.log(`🗺️ Processing ${drops.length} drops for markers...`);
     drops.forEach((drop, index) => {
-        console.log(`🗺️ Drop ${index + 1}: ${drop.name}, lat=${drop.lat}, lng=${drop.lng}, collection=${drop.collection}`);
+        // console.log(`🗺️ Drop ${index + 1}: ${drop.name}, lat=${drop.lat}, lng=${drop.lng}, collection=${drop.collection}`);
         if (drop.lat && drop.lng) {
             const isDevDrop = drop.isDevDrop || drop.collection === 'devDrops';
             const isUserDrop = drop.collection === 'userDrops';
@@ -3222,38 +3350,56 @@ window.addDropMarkersToMap = function(drops) {
                 popupAnchor: popupAnchor
             });
             
-            const statusText = isClaimedToday ? '⏰ Heute gesammelt' : '✅ Verfügbar';
-            const dropTypeText = isDevDrop ? '🎯 Dev' : isUserDrop ? '👤 User' : '🌍 Normal';
+            // Get current language for status texts
+            const currentLang = window.currentLanguage || 'de';
+            // Use direct language check for all texts
+            const collectedTodayText = currentLang === 'en' ? 'Collected Today' : 'Heute gesammelt';
+            const availableText = currentLang === 'en' ? 'Available' : 'Verfügbar';
+            const devDropText = currentLang === 'en' ? 'Dev' : 'Dev';
+            const userDropText = currentLang === 'en' ? 'User' : 'User';
+            const normalDropText = currentLang === 'en' ? 'Normal' : 'Normal';
+            
+            const statusText = isClaimedToday ? `⏰ ${collectedTodayText}` : `✅ ${availableText}`;
+            const dropTypeText = isDevDrop ? `🎯 ${devDropText}` : isUserDrop ? `👤 ${userDropText}` : `🌍 ${normalDropText}`;
             // Check if user can delete this drop
             const isDev = window.isDevLoggedIn || sessionStorage.getItem('devLoggedIn') === 'true';
             const isCreator = currentUser && drop.createdBy === currentUser.uid;
             const canDelete = isDev || isCreator;
             
-            console.log(`🗺️ Creating marker for ${drop.name} at [${drop.lat}, ${drop.lng}]`);
+            // console.log(`🗺️ Creating marker for ${drop.name} at [${drop.lat}, ${drop.lng}]`);
             const marker = L.marker([drop.lat, drop.lng], { icon: markerIconElement })
                 .addTo(window.geoMap);
             
-            console.log(`🗺️ Marker added to map: ${marker._leaflet_id}`);
+            // console.log(`🗺️ Marker added to map: ${marker._leaflet_id}`);
+            
+            // Create popup content with current language using window.t()
+            const rewardLabelText = currentLang === 'en' ? 'Reward:' : 'Reward:';
+            const statusLabelText = currentLang === 'en' ? 'Status:' : 'Status:';
+            const coordinatesLabelText = currentLang === 'en' ? 'Coordinates:' : 'Koordinaten:';
+            const pixeldropsText = currentLang === 'en' ? 'PixelDrops' : 'PixelDrops';
+            const photographText = currentLang === 'en' ? 'Photograph:' : 'Fotografiere:';
+            const deleteText = currentLang === 'en' ? 'Delete' : 'Löschen';
+            const defaultDescription = currentLang === 'en' ? 'The object or scene at this location' : 'Das Objekt oder die Szene an diesem Standort';
             
             marker.bindPopup(`
                     <div class="text-sm" style="min-width: 200px;">
                         <strong>${dropTypeText} GeoDrop${drop.geodropNumber || drop.id}</strong><br>
                         <div style="margin: 8px 0; padding: 8px; background: #f0f0f0; border-radius: 4px; border-left: 3px solid #10b981;">
-                            <strong>📸 Fotografiere:</strong><br>
+                            <strong>📸 ${photographText}</strong><br>
                             <span style="color: #374151; font-size: 12px;">
-                                ${drop.description || drop.photoDescription || 'Das Objekt oder die Szene an diesem Standort'}
+                                ${drop.description || drop.photoDescription || defaultDescription}
                             </span>
                         </div>
                         <div style="margin: 4px 0;">
-                            <strong>💰 Reward:</strong> ${drop.reward || 100} PixelDrops<br>
-                            <strong>📊 Status:</strong> ${statusText}<br>
-                            <strong>📍 Koordinaten:</strong> ${drop.lat.toFixed(6)}, ${drop.lng.toFixed(6)}
+                            <strong>💰 ${rewardLabelText}</strong> ${drop.reward || 100} ${pixeldropsText}<br>
+                            <strong>📊 ${statusLabelText}</strong> ${statusText}<br>
+                            <strong>📍 ${coordinatesLabelText}</strong> ${drop.lat.toFixed(6)}, ${drop.lng.toFixed(6)}
                         </div>
                         ${canDelete ? `
                             <div style="margin-top: 8px; text-align: center;">
                                 <button onclick="deleteUserDrop('${drop.id}')" 
                                         style="background: #dc2626; color: white; padding: 4px 8px; border-radius: 4px; border: none; cursor: pointer; font-size: 12px;">
-                                    🗑️ Löschen
+                                    🗑️ ${deleteText}
                                 </button>
                             </div>
                         ` : ''}
@@ -3270,14 +3416,402 @@ window.addDropMarkersToMap = function(drops) {
     console.log(`🗺️ Map zoom:`, window.geoMap.getZoom());
 };
 
+// Update all marker popups with current language
+window.updateMarkerPopups = function() {
+    console.log('🔄 Updating all marker popups with current language...');
+    
+    // Update location marker popup
+    if (window.locationMarker && window.locationMarker.getPopup()) {
+        const popup = window.locationMarker.getPopup();
+        const content = popup.getContent();
+        if (content) {
+            const yourLocationText = window.t ? window.t('geocard.your-location') : 'Your Location';
+            const accuracyText = window.t ? window.t('geocard.accuracy') : 'Accuracy';
+            const zoomText = window.t ? window.t('geocard.zoom') : 'Zoom';
+            
+            // Extract coordinates from existing popup
+            const coordMatch = content.match(/(\d+\.\d+), (\d+\.\d+)/);
+            const accuracyMatch = content.match(/(Genauigkeit|Accuracy).*?(\d+)m/);
+            const zoomMatch = content.match(/Zoom.*?(\d+)/);
+            
+            if (coordMatch && accuracyMatch && zoomMatch) {
+                const lat = coordMatch[1];
+                const lng = coordMatch[2];
+                const accuracy = accuracyMatch[2];
+                const zoom = zoomMatch[1];
+                
+                const newContent = `
+                    <div class="text-center">
+                        <strong>📍 ${yourLocationText}</strong><br>
+                        <small>${lat}, ${lng}</small><br>
+                        <small>${accuracyText}: ${accuracy}m</small><br>
+                        <small>${zoomText}: ${zoom}</small>
+                    </div>
+                `;
+                
+                window.locationMarker.setPopupContent(newContent);
+                console.log('✅ Location marker popup updated');
+            }
+        }
+    }
+    
+    // Update drop markers popups
+    if (window.dropMarkers && window.dropMarkers.length > 0) {
+        window.dropMarkers.forEach((marker, index) => {
+            if (marker && marker.getPopup()) {
+                const popup = marker.getPopup();
+                const content = popup.getContent();
+                if (content) {
+                    // Extract drop information from existing popup
+                    const dropTypeMatch = content.match(/(🎯|👤|🌍) (Dev|User|Normal)/);
+                    const rewardMatch = content.match(/💰.*?(\d+).*?PixelDrops/);
+                    const statusMatch = content.match(/(⏰|✅) (.*?)</);
+                    const coordMatch = content.match(/(Koordinaten|Coordinates).*?(\d+\.\d+), (\d+\.\d+)/);
+                    
+                    if (dropTypeMatch && rewardMatch && statusMatch && coordMatch) {
+                        const dropType = dropTypeMatch[2];
+                        const reward = rewardMatch[1];
+                        const status = statusMatch[2];
+                        const lat = coordMatch[2];
+                        const lng = coordMatch[3];
+                        
+                        // Get translated texts
+                        const devDropText = window.t ? window.t('geocard.dev-drop') : 'Dev';
+                        const userDropText = window.t ? window.t('geocard.user-drop') : 'User';
+                        const normalDropText = window.t ? window.t('geocard.normal-drop') : 'Normal';
+                        const rewardLabelText = window.t ? window.t('geocard.reward') : 'Reward:';
+                        const statusLabelText = window.t ? window.t('geocard.status') : 'Status:';
+                        const coordinatesLabelText = window.t ? window.t('geocard.coordinates') : 'Coordinates:';
+                        const pixeldropsText = window.t ? window.t('geocard.pixeldrops') : 'PixelDrops';
+                        
+                        // Determine drop type text
+                        let dropTypeText;
+                        if (dropType === 'Dev') {
+                            dropTypeText = `🎯 ${devDropText}`;
+                        } else if (dropType === 'User') {
+                            dropTypeText = `👤 ${userDropText}`;
+                        } else {
+                            dropTypeText = `🌍 ${normalDropText}`;
+                        }
+                        
+                        // Determine status text
+                        let statusText;
+                        if (status.includes('gesammelt') || status.includes('Collected')) {
+                            const collectedTodayText = window.t ? window.t('geocard.collected-today') : 'Collected Today';
+                            statusText = `⏰ ${collectedTodayText}`;
+                        } else {
+                            const availableText = window.t ? window.t('geocard.available') : 'Available';
+                            statusText = `✅ ${availableText}`;
+                        }
+                        
+                        // Extract drop number from content
+                        const dropNumberMatch = content.match(/GeoDrop(\d+|\w+)/);
+                        const dropNumber = dropNumberMatch ? dropNumberMatch[1] : '';
+                        
+                        // Extract description from content
+                        const descriptionMatch = content.match(/<span[^>]*>(.*?)<\/span>/);
+                        const description = descriptionMatch ? descriptionMatch[1] : 'Das Objekt oder die Szene an diesem Standort';
+                        
+                        const newContent = `
+                            <div class="text-sm" style="min-width: 200px;">
+                                <strong>${dropTypeText} GeoDrop${dropNumber}</strong><br>
+                                <div style="margin: 8px 0; padding: 8px; background: #f0f0f0; border-radius: 4px; border-left: 3px solid #10b981;">
+                                    <strong>📸 ${window.t ? window.t('geocard.photograph') : 'Fotografiere:'}</strong><br>
+                                    <span style="color: #374151; font-size: 12px;">
+                                        ${description}
+                                    </span>
+                                </div>
+                                <div style="margin: 4px 0;">
+                                    <strong>💰 ${rewardLabelText}</strong> ${reward} ${pixeldropsText}<br>
+                                    <strong>📊 ${statusLabelText}</strong> ${statusText}<br>
+                                    <strong>📍 ${coordinatesLabelText}</strong> ${lat}, ${lng}
+                                </div>
+                            </div>
+                        `;
+                        
+                        marker.setPopupContent(newContent);
+                        console.log(`✅ Drop marker ${index + 1} popup updated`);
+                    }
+                }
+            }
+        });
+    }
+    
+    console.log('✅ All marker popups updated with current language');
+};
+
+// Test function to manually update marker popups (for debugging)
+window.testMarkerPopupUpdate = function() {
+    console.log('🧪 Testing marker popup update...');
+    if (typeof window.updateMarkerPopups === 'function') {
+        window.updateMarkerPopups();
+        console.log('✅ Marker popup update test completed');
+    } else {
+        console.error('❌ updateMarkerPopups function not found');
+    }
+};
+
+// Test function to manually reload map markers with current language
+window.testMapLanguageSwitch = function() {
+    console.log('🧪 Testing map language switch...');
+    console.log('Current language:', window.currentLanguage || 'unknown');
+    
+    if (typeof window.loadGeoDrops === 'function') {
+        console.log('🔄 Reloading map markers...');
+        window.loadGeoDrops();
+        console.log('✅ Map markers reloaded with current language');
+    } else {
+        console.log('❌ loadGeoDrops function not found');
+    }
+};
+
+// Simple test function to switch language and reload markers
+window.testLanguageSwitch = function() {
+    console.log('🧪 Testing language switch...');
+    
+    // Get current language
+    const currentLang = window.currentLanguage || 'de';
+    const newLang = currentLang === 'de' ? 'en' : 'de';
+    
+    console.log(`Switching from ${currentLang} to ${newLang}`);
+    
+    // Change language directly
+    if (typeof window.changeLanguage === 'function') {
+        window.changeLanguage(newLang);
+        console.log('✅ Language changed, markers should reload automatically');
+    } else {
+        console.log('❌ changeLanguage function not found - trying direct approach');
+        
+        // Direct language change
+        window.currentLanguage = newLang;
+        console.log('✅ Language changed directly to:', newLang);
+        
+        // Force reload markers
+        setTimeout(() => {
+            if (typeof window.loadGeoDrops === 'function') {
+                window.loadGeoDrops();
+                console.log('✅ Markers reloaded with new language');
+            }
+        }, 100);
+    }
+};
+
+// DIRECT TEST: Force reload markers right now
+window.forceReloadMarkers = function() {
+    console.log('🔄 FORCE RELOADING MARKERS RIGHT NOW...');
+    
+    // First, clear ALL existing markers
+    if (window.geoMap && window.dropMarkers) {
+        console.log('🗑️ Clearing existing markers...');
+        window.dropMarkers.forEach(marker => {
+            if (marker) {
+                window.geoMap.removeLayer(marker);
+            }
+        });
+        window.dropMarkers = [];
+        console.log('✅ All markers cleared');
+    }
+    
+    // Then reload
+    if (typeof window.loadGeoDrops === 'function') {
+        window.loadGeoDrops();
+        console.log('✅ Markers reloaded!');
+    } else {
+        console.log('❌ loadGeoDrops not found');
+    }
+};
+
+// SUPER SIMPLE TEST: Just change one marker popup
+window.testOneMarker = function() {
+    console.log('🧪 Testing one marker popup...');
+    
+    if (window.dropMarkers && window.dropMarkers.length > 0) {
+        const marker = window.dropMarkers[0];
+        if (marker && marker.getPopup()) {
+            const newContent = `
+                <div class="text-sm" style="min-width: 200px;">
+                    <strong>🎯 Dev GeoDrop6</strong><br>
+                    <div style="margin: 8px 0; padding: 8px; background: #f0f0f0; border-radius: 4px; border-left: 3px solid #10b981;">
+                        <strong>📸 Photograph:</strong><br>
+                        <span style="color: #374151; font-size: 12px;">
+                            The object or scene at this location
+                        </span>
+                    </div>
+                    <div style="margin: 4px 0;">
+                        <strong>💰 Reward:</strong> 100 PixelDrops<br>
+                        <strong>📊 Status:</strong> ✅ Available<br>
+                        <strong>📍 Coordinates:</strong> 48.198486, 15.212260
+                    </div>
+                </div>
+            `;
+            marker.setPopupContent(newContent);
+            console.log('✅ First marker popup updated to English!');
+        }
+    } else {
+        console.log('❌ No markers found');
+    }
+};
+
+// TEST: Force reload map with new language
+window.testMapLanguageFix = function() {
+    console.log('🧪 Testing map language fix...');
+    
+    // Clear all existing markers
+    if (window.dropMarkers) {
+        window.dropMarkers.forEach(marker => {
+            if (marker && window.geoMap) {
+                window.geoMap.removeLayer(marker);
+            }
+        });
+        window.dropMarkers = [];
+    }
+    
+    // Reload all drops with current language
+    if (typeof window.loadGeoDrops === 'function') {
+        window.loadGeoDrops();
+        console.log('✅ Map reloaded with current language!');
+    } else {
+        console.log('❌ loadGeoDrops function not found');
+    }
+};
+
+// EINFACHER TEST: Ändere Sprache und lade Marker neu
+window.testSimpleLanguageSwitch = function() {
+    console.log('🧪 EINFACHER TEST: Sprache wechseln...');
+    
+    // Wechsle Sprache
+    const currentLang = window.currentLanguage || 'de';
+    const newLang = currentLang === 'de' ? 'en' : 'de';
+    window.currentLanguage = newLang;
+    
+    console.log(`🔄 Sprache gewechselt von ${currentLang} zu ${newLang}`);
+    
+    // Lösche alle Marker
+    if (window.dropMarkers && window.dropMarkers.length > 0) {
+        window.dropMarkers.forEach(marker => {
+            if (marker && window.geoMap) {
+                window.geoMap.removeLayer(marker);
+            }
+        });
+        window.dropMarkers = [];
+        console.log('🗑️ Alle Marker gelöscht');
+    }
+    
+    // Lade Marker neu
+    setTimeout(() => {
+        if (typeof window.loadGeoDrops === 'function') {
+            window.loadGeoDrops();
+            console.log('✅ Marker mit neuer Sprache geladen!');
+        }
+    }, 500);
+};
+
+// NOTFALL-FUNKTION: Karte reparieren
+window.repairMap = function() {
+    console.log('🚨 NOTFALL: Karte reparieren...');
+    
+    // Prüfe ob Karte existiert
+    const mapContainer = document.getElementById('mapid');
+    if (!mapContainer) {
+        console.log('❌ Map container nicht gefunden!');
+        return;
+    }
+    
+    // Initialisiere Karte neu
+    if (typeof window.initGeoMap === 'function') {
+        window.initGeoMap('mapid');
+        console.log('✅ Karte neu initialisiert');
+        
+        // Lade Marker
+        setTimeout(() => {
+            if (typeof window.loadGeoDrops === 'function') {
+                window.loadGeoDrops();
+                console.log('✅ Marker geladen');
+            }
+        }, 1000);
+    } else {
+        console.log('❌ initGeoMap Funktion nicht gefunden');
+    }
+};
+
+// ULTIMATE TEST: Force reload everything
+window.ultimateTest = function() {
+    console.log('🚀 ULTIMATE TEST - Reloading everything...');
+    
+    // Clear all markers
+    if (window.geoMap && window.dropMarkers) {
+        window.dropMarkers.forEach(marker => {
+            if (marker) {
+                window.geoMap.removeLayer(marker);
+            }
+        });
+        window.dropMarkers = [];
+    }
+    
+    // Force reload
+    setTimeout(() => {
+        if (typeof window.loadGeoDrops === 'function') {
+            window.loadGeoDrops();
+            console.log('✅ Everything reloaded!');
+        }
+    }, 100);
+};
+
+// SIMPLE LANGUAGE SWITCH
+window.switchToEnglish = function() {
+    console.log('🇺🇸 Switching to English...');
+    window.currentLanguage = 'en';
+    window.forceReloadMarkers();
+};
+
+window.switchToGerman = function() {
+    console.log('🇩🇪 Switching to German...');
+    window.currentLanguage = 'de';
+    window.forceReloadMarkers();
+};
+
 // Show message function (fallback if not available)
 if (!window.showMessage) {
     window.showMessage = function(message, isError = false) {
         console.log(isError ? '❌' : '✅', message);
-        // Simple alert as fallback
-        alert(message);
     };
 }
+
+// TEST CONTAINER SWITCH
+window.testContainerSwitch = function() {
+    console.log('🧪 Testing container switch...');
+    const currentLang = window.currentLanguage || 'de';
+    const newLang = currentLang === 'de' ? 'en' : 'de';
+    
+    console.log(`🔄 Switching from ${currentLang} to ${newLang}`);
+    
+    if (newLang === 'en') {
+        window.switchToEnglish();
+    } else {
+        window.switchToGerman();
+    }
+    
+    console.log('✅ Container switch completed!');
+};
+
+// TEST MAP INITIALIZATION
+window.testMapInit = function() {
+    console.log('🧪 Testing map initialization...');
+    
+    // Check if map container exists
+    const mapContainer = document.getElementById('mapid');
+    
+    console.log('📋 Container status:');
+    console.log('  Map container:', mapContainer ? '✅ Found' : '❌ Missing');
+    
+    // Try to initialize map
+    if (typeof window.initGeoMap === 'function') {
+        console.log('🗺️ Initializing map...');
+        window.initGeoMap('mapid');
+    } else {
+        console.log('❌ initGeoMap function not found');
+    }
+};
 
 // Map Legend Popup Functions
 window.showMapLegendPopup = function() {
@@ -3490,7 +4024,7 @@ window.claimGeoDropFromGeoCard = async function() {
     }
     
     if (!dropSelect || !dropSelect.value) {
-        showMessage('❌ Bitte wähle einen GeoDrop aus!', true);
+        showMessage('❌ Please select a GeoDrop!', true);
         return;
     }
     
@@ -3534,7 +4068,10 @@ window.claimGeoDropFromGeoCard = async function() {
         if (result && result.success) {
                 // Success - show reward message
                 const reward = result.reward || 100;
-                showMessage(`🎉 Erfolgreich! Du hast ${reward} PixelDrops erhalten!`, false);
+                const successText = window.t ? window.t('geocard.success-reward') : 'Erfolgreich! Du hast';
+                const receivedText = window.t ? window.t('geocard.received') : 'erhalten!';
+                const pixeldropsText = window.t ? window.t('geocard.pixeldrops') : 'PixelDrops';
+                showMessage(`🎉 ${successText} ${reward} ${pixeldropsText} ${receivedText}`, false);
                 
                 // Show success animation
                 createSuccessAnimation();
@@ -3562,7 +4099,7 @@ window.claimGeoDropFromGeoCard = async function() {
         } else {
             console.error('❌ window.claimGeoDrop function not available!');
             console.error('❌ typeof window.claimGeoDrop:', typeof window.claimGeoDrop);
-            showMessage('❌ Claim-Funktion nicht verfügbar', true);
+            showMessage('❌ Claim function not available', true);
         }
     } catch (error) {
         console.error('❌ Error claiming GeoDrop:', error);
@@ -3685,9 +4222,12 @@ window.updateDevCoordsButton = function() {
         if (isDevLoggedIn) {
             // DEV MODUS AKTIVIERT
             devCoordsBtn.disabled = false;
-            devCoordsBtn.textContent = '🎯 Koordinaten setzen';
+            const setCoordinatesText = window.t ? window.t('geocard.set-coordinates') : 'Koordinaten setzen';
+            const devModeActivatedText = window.t ? window.t('geocard.dev-mode-activated') : 'DEV MODUS AKTIVIERT';
+            
+            devCoordsBtn.textContent = `🎯 ${setCoordinatesText}`;
             devCoordsBtn.className = 'dev-drop-btn flex-1';
-            adminStatus.textContent = 'DEV MODUS AKTIVIERT';
+            adminStatus.textContent = devModeActivatedText;
             adminStatus.className = 'text-green-400';
             console.log('🔓 Dev coordinates ENABLED - DEV MODUS AKTIVIERT');
         } else {
@@ -3888,7 +4428,7 @@ console.log('🗺️ GeoCard page loaded');
     // Initialize map after a short delay to ensure DOM is ready
     setTimeout(() => {
         if (typeof window.initGeoMap === 'function') {
-            window.initGeoMap();
+            window.initGeoMap('mapid');
         }
         // Load GeoDrops for map display (not for dropdowns)
         setTimeout(() => {
@@ -4109,6 +4649,65 @@ window.addDropDescriptions = async function() {
     }
 };
 
+// Debug function to reset specific drops (7 and 9)
+window.resetSpecificDrops = async function() {
+    if (!window.currentUser) {
+        alert('❌ Bitte melde dich zuerst an!');
+        return;
+    }
+    
+    if (!confirm('⚠️ Drop 7 und 9 zurücksetzen? Das kann nicht rückgängig gemacht werden!')) {
+        return;
+    }
+    
+    try {
+        console.log('🔄 Resetting Drop 7 and 9 for user:', window.currentUser.uid);
+        
+        // Reset Drop 7 and 9 in geodrops
+        const dropsSnapshot = await db.collection('geodrops').get();
+        const batch = db.batch();
+        
+        dropsSnapshot.docs.forEach(doc => {
+            const drop = doc.data();
+            if (drop.claimedBy === window.currentUser.uid && 
+                (drop.geodropNumber === '7' || drop.geodropNumber === '9')) {
+                batch.update(doc.ref, {
+                    isClaimedToday: false,
+                    lastClaimDate: null
+                });
+                console.log(`🔄 Resetting Drop ${drop.geodropNumber}`);
+            }
+        });
+        
+        // Reset Drop 7 and 9 in userDrops
+        const userDropsSnapshot = await db.collection('userDrops').get();
+        
+        userDropsSnapshot.docs.forEach(doc => {
+            const drop = doc.data();
+            if (drop.claimedBy === window.currentUser.uid && 
+                (drop.geodropNumber === '7' || drop.geodropNumber === '9')) {
+                batch.update(doc.ref, {
+                    isClaimedToday: false,
+                    lastClaimDate: null
+                });
+                console.log(`🔄 Resetting User Drop ${drop.geodropNumber}`);
+            }
+        });
+        
+        await batch.commit();
+        
+        alert('✅ Drop 7 und 9 wurden zurückgesetzt!');
+        console.log('✅ Drop 7 and 9 reset completed');
+        
+        // Reload the page to show updated status
+        location.reload();
+        
+    } catch (error) {
+        console.error('❌ Error resetting specific drops:', error);
+        alert('❌ Fehler beim Zurücksetzen der Drops: ' + error.message);
+    }
+};
+
 // Debug function to reset daily claim status
 window.resetDailyClaims = async function() {
     if (!window.currentUser) {
@@ -4123,7 +4722,7 @@ window.resetDailyClaims = async function() {
     try {
         console.log('🔄 Resetting daily claims for user:', window.currentUser.uid);
         
-        // Reset all drops for current user
+        // Reset all geodrops for current user
         const dropsSnapshot = await db.collection('geodrops').get();
         const batch = db.batch();
         
@@ -4137,10 +4736,36 @@ window.resetDailyClaims = async function() {
             }
         });
         
+        // Reset all userDrops for current user
+        const userDropsSnapshot = await db.collection('userDrops').get();
+        
+        userDropsSnapshot.docs.forEach(doc => {
+            const drop = doc.data();
+            if (drop.claimedBy === window.currentUser.uid) {
+                batch.update(doc.ref, {
+                    isClaimedToday: false,
+                    lastClaimDate: null
+                });
+            }
+        });
+        
+        // Reset all devDrops for current user
+        const devDropsSnapshot = await db.collection('devDrops').get();
+        
+        devDropsSnapshot.docs.forEach(doc => {
+            const drop = doc.data();
+            if (drop.claimedBy === window.currentUser.uid) {
+                batch.update(doc.ref, {
+                    isClaimedToday: false,
+                    lastClaimDate: null
+                });
+            }
+        });
+        
         await batch.commit();
         
-        alert('✅ Alle täglichen Claims wurden zurückgesetzt!');
-        console.log('✅ Daily claims reset completed');
+        alert('✅ Alle täglichen Claims wurden zurückgesetzt! (GeoDrops + UserDrops + DevDrops)');
+        console.log('✅ Daily claims reset completed for all collections');
         
         // Reload the page to show updated status
         location.reload();
@@ -4149,6 +4774,202 @@ window.resetDailyClaims = async function() {
         console.error('❌ Error resetting daily claims:', error);
         alert('❌ Fehler beim Zurücksetzen der Claims: ' + error.message);
     }
+};
+
+// Spezielle Funktion um Drop 7 und 9 zu resetten
+window.resetDrop7And9 = async function() {
+    if (!window.currentUser) {
+        alert('❌ Bitte melde dich zuerst an!');
+        return;
+    }
+    
+    if (!confirm('⚠️ Drop 7 und 9 zurücksetzen? Das kann nicht rückgängig gemacht werden!')) {
+        return;
+    }
+    
+    try {
+        console.log('🔄 Resetting Drop 7 and 9 for user:', window.currentUser.uid);
+        
+        const db = window.firebase.firestore();
+        const batch = db.batch();
+        
+        // Reset Drop 7 in devDrops
+        const devDropsSnapshot = await db.collection('devDrops').get();
+        devDropsSnapshot.docs.forEach(doc => {
+            const drop = doc.data();
+            if (drop.claimedBy === window.currentUser.uid && 
+                (drop.geodropNumber === '7' || drop.name?.includes('GeoDrop7'))) {
+                batch.update(doc.ref, {
+                    isClaimedToday: false,
+                    lastClaimDate: null
+                });
+                console.log('✅ Reset Drop 7:', doc.id);
+            }
+        });
+        
+        // Reset Drop 9 in devDrops
+        devDropsSnapshot.docs.forEach(doc => {
+            const drop = doc.data();
+            if (drop.claimedBy === window.currentUser.uid && 
+                (drop.geodropNumber === '9' || drop.name?.includes('GeoDrop9'))) {
+                batch.update(doc.ref, {
+                    isClaimedToday: false,
+                    lastClaimDate: null
+                });
+                console.log('✅ Reset Drop 9:', doc.id);
+            }
+        });
+        
+        await batch.commit();
+        
+        alert('✅ Drop 7 und 9 wurden zurückgesetzt!');
+        console.log('✅ Drop 7 and 9 reset completed');
+        
+        // Reload the page to show updated status
+        location.reload();
+        
+    } catch (error) {
+        console.error('❌ Error resetting Drop 7 and 9:', error);
+        alert('❌ Fehler beim Zurücksetzen von Drop 7 und 9: ' + error.message);
+    }
+};
+
+// AUTOMATISCHES TÄGLICHES RESET-SYSTEM
+window.initDailyResetSystem = function() {
+    console.log('🔄 Initialisiere tägliches Reset-System...');
+    
+    // Prüfe ob heute bereits resettet wurde
+    const today = new Date().toDateString();
+    const lastResetDate = localStorage.getItem('lastDailyReset');
+    
+    if (lastResetDate !== today) {
+        console.log('🕐 Neuer Tag erkannt - führe automatisches Reset durch...');
+        window.performDailyReset();
+        localStorage.setItem('lastDailyReset', today);
+    } else {
+        console.log('✅ Heute bereits resettet');
+    }
+    
+    // Setze Timer für Mitternacht-Reset
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0);
+    const timeUntilMidnight = midnight.getTime() - now.getTime();
+    
+    setTimeout(() => {
+        console.log('🕛 Mitternacht erreicht - führe automatisches Reset durch...');
+        window.performDailyReset();
+        localStorage.setItem('lastDailyReset', new Date().toDateString());
+        
+        // Setze Timer für nächsten Tag
+        setTimeout(() => {
+            window.initDailyResetSystem();
+        }, 24 * 60 * 60 * 1000); // 24 Stunden
+    }, timeUntilMidnight);
+    
+    console.log(`⏰ Nächstes Reset in ${Math.round(timeUntilMidnight / 1000 / 60)} Minuten`);
+};
+
+// Automatisches tägliches Reset durchführen
+window.performDailyReset = async function() {
+    if (!window.currentUser) {
+        console.log('⚠️ Kein User angemeldet - überspringe Reset');
+        return;
+    }
+    
+    try {
+        console.log('🔄 Führe automatisches tägliches Reset durch...');
+        
+        const db = window.firebase.firestore();
+        const batch = db.batch();
+        let resetCount = 0;
+        
+        // Reset alle geodrops
+        const dropsSnapshot = await db.collection('geodrops').get();
+        dropsSnapshot.docs.forEach(doc => {
+            const drop = doc.data();
+            if (drop.claimedBy === window.currentUser.uid) {
+                batch.update(doc.ref, {
+                    isClaimedToday: false,
+                    lastClaimDate: null
+                });
+                resetCount++;
+            }
+        });
+        
+        // Reset alle userDrops
+        const userDropsSnapshot = await db.collection('userDrops').get();
+        userDropsSnapshot.docs.forEach(doc => {
+            const drop = doc.data();
+            if (drop.claimedBy === window.currentUser.uid) {
+                batch.update(doc.ref, {
+                    isClaimedToday: false,
+                    lastClaimDate: null
+                });
+                resetCount++;
+            }
+        });
+        
+        // Reset alle devDrops
+        const devDropsSnapshot = await db.collection('devDrops').get();
+        devDropsSnapshot.docs.forEach(doc => {
+            const drop = doc.data();
+            if (drop.claimedBy === window.currentUser.uid) {
+                batch.update(doc.ref, {
+                    isClaimedToday: false,
+                    lastClaimDate: null
+                });
+                resetCount++;
+            }
+        });
+        
+        if (resetCount > 0) {
+            await batch.commit();
+            console.log(`✅ Automatisches Reset abgeschlossen: ${resetCount} Drops zurückgesetzt`);
+            
+            // Lade Karte neu um Änderungen anzuzeigen
+            if (typeof window.loadGeoDrops === 'function') {
+                setTimeout(() => {
+                    window.loadGeoDrops();
+                }, 1000);
+            }
+        } else {
+            console.log('ℹ️ Keine Drops zum Zurücksetzen gefunden');
+        }
+        
+    } catch (error) {
+        console.error('❌ Fehler beim automatischen Reset:', error);
+    }
+};
+
+// Update Geocard elements for language switching
+window.updateGeocardElements = function() {
+    console.log('🔄 Updating Geocard elements...');
+    
+    // Reload drop lists to update language
+    if (typeof window.reloadAllDropLists === 'function') {
+        window.reloadAllDropLists();
+    }
+    
+    // Reload dev drops
+    if (typeof window.loadDevGeoDrops === 'function') {
+        window.loadDevGeoDrops();
+    }
+    
+    // Reload user drops
+    if (typeof window.loadUserDropsForUpload === 'function') {
+        window.loadUserDropsForUpload();
+    }
+    
+    // Force reload map markers with new language
+    if (typeof window.loadGeoDrops === 'function') {
+        setTimeout(() => {
+            console.log('🔄 Reloading map markers with new language...');
+            window.loadGeoDrops();
+        }, 300); // Warten bis andere Updates fertig sind
+    }
+    
+    console.log('✅ Geocard elements updated');
 };
 
 // Update Dev Session Button visibility
@@ -4252,7 +5073,8 @@ window.loadDevGeoDrops = async function() {
             tableHTML += '</tbody></table></div>';
             table.innerHTML = tableHTML;
         } else if (table) {
-            table.innerHTML = '<div class="text-center text-gray-400 p-4">Keine Dev GeoDrops gefunden</div>';
+            const noDropsText = window.t ? window.t('geocard.no-dev-drops') : 'Keine Dev GeoDrops gefunden';
+            table.innerHTML = `<div class="text-center text-gray-400 p-4">${noDropsText}</div>`;
         }
         
         console.log(`✅ Loaded ${devDrops.length} Dev GeoDrops`);
@@ -4260,9 +5082,11 @@ window.loadDevGeoDrops = async function() {
         console.error('❌ Error loading Dev GeoDrops:', error);
         if (error.code === 'permission-denied') {
             console.log('🔒 User not logged in, skipping Dev GeoDrops load');
-            showMessage('ℹ️ Bitte anmelden um Dev GeoDrops zu sehen', false);
+            const loginToSeeDevText = window.t ? window.t('geocard.login-to-see-dev') : 'Bitte anmelden um Dev GeoDrops zu sehen';
+            showMessage(`ℹ️ ${loginToSeeDevText}`, false);
         } else {
-            showMessage('Fehler beim Laden der Dev GeoDrops', true);
+            const errorLoadingDevText = window.t ? window.t('geocard.error-loading-dev') : 'Fehler beim Laden der Dev GeoDrops';
+            showMessage(errorLoadingDevText, true);
         }
         
         const table = document.getElementById('geodrops-table');
@@ -4390,13 +5214,14 @@ window.loadUserGeoDrops = async function() {
             tableHTML += '</tbody></table></div>';
             userDropsTable.innerHTML = tableHTML;
         } else if (userDropsTable) {
-            userDropsTable.innerHTML = '<div class="text-center text-gray-400 p-4">Keine User GeoDrops gefunden</div>';
+            const noUserDropsText = window.t ? window.t('geocard.no-user-drops') : 'Keine User GeoDrops gefunden';
+            userDropsTable.innerHTML = `<div class="text-center text-gray-400 p-4">${noUserDropsText}</div>`;
         }
         
         console.log(`✅ Loaded ${userDrops.length} User GeoDrops`);
     } catch (error) {
         console.error('❌ Error loading User GeoDrops:', error);
-        showMessage('Fehler beim Laden der User GeoDrops', true);
+        showMessage('Error loading User GeoDrops', true);
         
         const userDropsList = document.getElementById('user-drops-list');
         const userDropsTable = document.getElementById('user-drops-table');
@@ -4414,7 +5239,7 @@ window.loadUserGeoDrops = async function() {
 // Edit User Drop function
 window.editUserDrop = function(dropId) {
     console.log('✏️ Editing User Drop:', dropId);
-    showMessage('✏️ User GeoDrop Bearbeitung wird implementiert...', false);
+    showMessage('✏️ User GeoDrop editing will be implemented...', false);
     // TODO: Implement user drop editing
 };
 
@@ -4498,7 +5323,7 @@ window.toggleUserDrop = async function(dropId, currentStatus) {
             lastModified: new Date()
         });
         
-        showMessage(`✅ User GeoDrop ${!currentStatus ? 'aktiviert' : 'deaktiviert'}`, false);
+        showMessage(`✅ User GeoDrop ${!currentStatus ? 'activated' : 'deactivated'}`, false);
         
         // Reload user drops
         loadUserGeoDrops();
@@ -4549,7 +5374,7 @@ window.autoStartUpload = async function() {
             dropSelect.value = options[1].value; // Skip the first empty option
             console.log('🎯 Auto-selected drop:', dropSelect.value);
         } else {
-            showMessage('❌ Kein GeoDrop verfügbar!', true);
+            showMessage('❌ No GeoDrop available!', true);
             return;
         }
     }
@@ -4606,7 +5431,10 @@ window.autoStartUpload = async function() {
         if (result && result.success) {
                 // Success - show reward message
                 const reward = result.reward || 100;
-                showMessage(`🎉 Erfolgreich! Du hast ${reward} PixelDrops erhalten!`, false);
+                const successText = window.t ? window.t('geocard.success-reward') : 'Erfolgreich! Du hast';
+                const receivedText = window.t ? window.t('geocard.received') : 'erhalten!';
+                const pixeldropsText = window.t ? window.t('geocard.pixeldrops') : 'PixelDrops';
+                showMessage(`🎉 ${successText} ${reward} ${pixeldropsText} ${receivedText}`, false);
                 
                 // Show success animation
                 createSuccessAnimation();
@@ -4634,7 +5462,7 @@ window.autoStartUpload = async function() {
         } else {
             console.error('❌ window.claimGeoDrop function not available!');
             console.error('❌ typeof window.claimGeoDrop:', typeof window.claimGeoDrop);
-            showMessage('❌ Claim-Funktion nicht verfügbar', true);
+            showMessage('❌ Claim function not available', true);
         }
     } catch (error) {
         console.error('❌ Error claiming GeoDrop:', error);

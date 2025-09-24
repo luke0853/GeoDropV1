@@ -127,6 +127,81 @@ const translations = {
         'startseite.roadmap': '🗺️ Roadmap anzeigen',
         'startseite.whitepaper-tip': '💡 Klicke auf "Vollständiges Whitepaper" für die detaillierte Version mit aktueller Roadmap',
         
+        // Geocard
+        'geocard.dev-drop-select': 'Dev GeoDrop auswählen...',
+        'geocard.user-drop-select': 'User GeoDrop auswählen...',
+        'geocard.dev-drop-display': 'Dev GeoDrop',
+        'geocard.user-drop-display': 'User GeoDrop',
+        'geocard.pixeldrops': 'PixelDrops',
+        'geocard.user-drop-list-cleared': 'User Drop Liste geleert',
+        'geocard.no-dev-drops': 'Keine Dev GeoDrops gefunden',
+        'geocard.no-user-drops': 'Keine User GeoDrops gefunden',
+        'geocard.success-reward': 'Erfolgreich! Du hast',
+        'geocard.received': 'erhalten!',
+        'geocard.reward-label': 'Reward:',
+        'geocard.status-label': 'Status:',
+        'geocard.coordinates-label': 'Koordinaten:',
+        'geocard.drop-rules': 'Drop-Regeln: 1) Foto aufnehmen 2) GeoDrop auswählen 3) Standort bestätigen 4) Belohnung erhalten!',
+        'geocard.dev-drops-shown': 'Dev GeoDrops angezeigt',
+        'geocard.user-drops-shown': 'User GeoDrops angezeigt',
+        'geocard.loading-drops': 'Lade...',
+        'geocard.error-loading-dev': 'Fehler beim Laden der Dev GeoDrops',
+        'geocard.error-loading-user': 'Fehler beim Laden aller User GeoDrops',
+        'geocard.login-to-see-dev': 'Bitte anmelden um Dev GeoDrops zu sehen',
+        'geocard.your-location': 'Dein Standort',
+        'geocard.accuracy': 'Genauigkeit',
+        'geocard.zoom': 'Zoom',
+        'geocard.collected-today': 'Heute gesammelt',
+        'geocard.available': 'Verfügbar',
+        'geocard.dev-drop': 'Dev',
+        'geocard.user-drop': 'User',
+        'geocard.normal-drop': 'Normal',
+        'geocard.gps-status': 'GPS Status',
+        'geocard.map-status': 'Karte Status',
+        'geocard.app-status': 'App Status',
+        'geocard.position': 'Position',
+        'geocard.time': 'Zeit',
+        'geocard.loaded': 'Geladen',
+        'geocard.missing': 'Fehlt',
+        'geocard.not-logged-in': 'Nicht angemeldet',
+        'geocard.not-initialized': 'Nicht initialisiert',
+        'geocard.cached-coordinates': 'Gecachte Koordinaten erkannt!',
+        'geocard.cached-gps-data': 'Das sind wahrscheinlich gecachte GPS-Daten. Bitte aktualisiere deinen Standort!',
+        'geocard.invalid-coordinates': 'Ungültige Koordinaten!',
+        'geocard.valid-coordinates': 'Bitte gib gültige Koordinaten ein!',
+        'geocard.invalid-gps': 'Ungültige GPS-Koordinaten erhalten!',
+        'geocard.clear-gps-cache': 'GPS-Cache leeren',
+        'geocard.set-coordinates': 'Koordinaten setzen',
+        'geocard.dev-mode-activated': 'DEV MODUS AKTIVIERT',
+        'geocard.dev-mode-deactivated': 'DEV MODUS DEAKTIVIERT',
+        'geocard.photograph': 'Fotografiere:',
+        'geocard.reward': 'Reward:',
+        'geocard.status': 'Status:',
+        'geocard.coordinates': 'Koordinaten:',
+        'geocard.pixeldrops': 'PixelDrops',
+        'geocard.delete': 'Löschen',
+        'geocard.default-description': 'Das Objekt oder die Szene an diesem Standort',
+        'geocard.collected-today': 'Heute gesammelt',
+        'geocard.available': 'Verfügbar',
+        'geocard.dev-drop': 'Dev',
+        'geocard.user-drop': 'User',
+        'geocard.normal-drop': 'Normal',
+    'create-user-drop-title': 'User GeoDrop erstellen',
+    'drop-name': 'Drop Name',
+    'drop-name-placeholder': 'Gib einen Namen ein...',
+    'what-to-photograph': 'Was fotografieren?',
+    'photograph-description-placeholder': 'Beschreibe was fotografiert werden soll...',
+    'map-legend-title': 'Kartenlegende',
+    'your-location-desc': 'Verwende meinen Standort',
+    'interactive-map': 'Interaktive Karte',
+    'map-legend-button': 'Karten-Legende anzeigen',
+    'location-title': 'Standort',
+    'use-my-location': 'Meinen Standort verwenden',
+    'location-info-default': 'Klicke auf den Button um deine aktuelle Position zu laden',
+    'photo-upload-title': 'Foto-Upload',
+    'select-geodrop': 'GeoDrop auswählen:',
+    'take-photo': 'Foto aufnehmen',
+        
         // Common
         'common.loading': 'Lädt...',
         'common.error': 'Fehler',
@@ -267,6 +342,81 @@ const translations = {
         'startseite.roadmap': '🗺️ Show Roadmap',
         'startseite.whitepaper-tip': '💡 Click on "Full Whitepaper" for the detailed version with current roadmap',
         
+        // Geocard
+        'geocard.dev-drop-select': 'Select Dev GeoDrop...',
+        'geocard.user-drop-select': 'Select User GeoDrop...',
+        'geocard.dev-drop-display': 'Dev GeoDrop',
+        'geocard.user-drop-display': 'User GeoDrop',
+        'geocard.pixeldrops': 'PixelDrops',
+        'geocard.user-drop-list-cleared': 'User Drop List Cleared',
+        'geocard.no-dev-drops': 'No Dev GeoDrops Found',
+        'geocard.no-user-drops': 'No User GeoDrops Found',
+        'geocard.success-reward': 'Success! You received',
+        'geocard.received': '!',
+        'geocard.reward-label': 'Reward:',
+        'geocard.status-label': 'Status:',
+        'geocard.coordinates-label': 'Coordinates:',
+        'geocard.drop-rules': 'Drop Rules: 1) Take Photo 2) Select GeoDrop 3) Confirm Location 4) Get Reward!',
+        'geocard.dev-drops-shown': 'Dev GeoDrops Shown',
+        'geocard.user-drops-shown': 'User GeoDrops Shown',
+        'geocard.loading-drops': 'Loading...',
+        'geocard.error-loading-dev': 'Error Loading Dev GeoDrops',
+        'geocard.error-loading-user': 'Error Loading All User GeoDrops',
+        'geocard.login-to-see-dev': 'Please login to see Dev GeoDrops',
+        'geocard.your-location': 'Your Location',
+        'geocard.accuracy': 'Accuracy',
+        'geocard.zoom': 'Zoom',
+        'geocard.collected-today': 'Collected Today',
+        'geocard.available': 'Available',
+        'geocard.dev-drop': 'Dev',
+        'geocard.user-drop': 'User',
+        'geocard.normal-drop': 'Normal',
+        'geocard.gps-status': 'GPS Status',
+        'geocard.map-status': 'Map Status',
+        'geocard.app-status': 'App Status',
+        'geocard.position': 'Position',
+        'geocard.time': 'Time',
+        'geocard.loaded': 'Loaded',
+        'geocard.missing': 'Missing',
+        'geocard.not-logged-in': 'Not logged in',
+        'geocard.not-initialized': 'Not initialized',
+        'geocard.cached-coordinates': 'Cached coordinates detected!',
+        'geocard.cached-gps-data': 'These are probably cached GPS data. Please update your location!',
+        'geocard.invalid-coordinates': 'Invalid coordinates!',
+        'geocard.valid-coordinates': 'Please enter valid coordinates!',
+        'geocard.invalid-gps': 'Invalid GPS coordinates received!',
+        'geocard.clear-gps-cache': 'Clear GPS Cache',
+        'geocard.set-coordinates': 'Set Coordinates',
+        'geocard.dev-mode-activated': 'DEV MODE ACTIVATED',
+        'geocard.dev-mode-deactivated': 'DEV MODE DEACTIVATED',
+        'geocard.photograph': 'Photograph:',
+        'geocard.reward': 'Reward:',
+        'geocard.status': 'Status:',
+        'geocard.coordinates': 'Coordinates:',
+        'geocard.pixeldrops': 'PixelDrops',
+        'geocard.delete': 'Delete',
+        'geocard.default-description': 'The object or scene at this location',
+        'geocard.collected-today': 'Collected Today',
+        'geocard.available': 'Available',
+        'geocard.dev-drop': 'Dev',
+        'geocard.user-drop': 'User',
+        'geocard.normal-drop': 'Normal',
+    'create-user-drop-title': 'Create User GeoDrop',
+    'drop-name': 'Drop Name',
+    'drop-name-placeholder': 'Enter a name...',
+    'what-to-photograph': 'What to photograph?',
+    'photograph-description-placeholder': 'Describe what should be photographed...',
+    'map-legend-title': 'Map Legend',
+    'your-location-desc': 'Use My Location',
+    'interactive-map': 'Interactive Map',
+    'map-legend-button': 'Show Map Legend',
+    'location-title': 'Location',
+    'use-my-location': 'Use My Location',
+    'location-info-default': 'Click the button to load your current position',
+    'photo-upload-title': 'Photo Upload',
+    'select-geodrop': 'Select GeoDrop:',
+    'take-photo': 'Take Photo',
+        
         // Common
         'common.loading': 'Loading...',
         'common.error': 'Error',
@@ -292,12 +442,17 @@ function initLanguageSystem() {
     console.log('🌍 Initializing language system...');
     
     // Load saved language from localStorage
-    const savedLanguage = localStorage.getItem('geodrop-language');
-    if (savedLanguage && translations[savedLanguage]) {
-        currentLanguage = savedLanguage;
-        console.log('✅ Loaded saved language:', currentLanguage);
-    } else {
-        console.log('✅ Using default language:', currentLanguage);
+    try {
+        const savedLanguage = localStorage.getItem('geodrop-language');
+        if (savedLanguage && typeof savedLanguage === 'string' && translations[savedLanguage]) {
+            currentLanguage = savedLanguage;
+            console.log('✅ Loaded saved language:', currentLanguage);
+        } else {
+            console.log('✅ Using default language:', currentLanguage);
+        }
+    } catch (error) {
+        console.warn('⚠️ Error loading language from localStorage:', error);
+        currentLanguage = 'de'; // Fallback zu Deutsch
     }
     
     // Update UI language
@@ -317,6 +472,18 @@ function initLanguageSystem() {
 
 // Get translation for a key / Übersetzung für einen Schlüssel abrufen
 function t(key) {
+    // Sicherheitsprüfung: Key muss String sein
+    if (!key || typeof key !== 'string') {
+        console.warn('⚠️ Invalid translation key:', key);
+        return key || '';
+    }
+    
+    // Sicherheitsprüfung: currentLanguage muss gültig sein
+    if (!currentLanguage || !translations[currentLanguage]) {
+        console.warn('⚠️ Invalid current language:', currentLanguage);
+        currentLanguage = 'de'; // Fallback zu Deutsch
+    }
+    
     const translation = translations[currentLanguage] && translations[currentLanguage][key];
     if (translation) {
         return translation;
@@ -335,17 +502,20 @@ function t(key) {
 }
 
 // Change language / Sprache ändern
-window.changeLanguage = function() {
+window.changeLanguage = function(newLanguage) {
     console.log('🌍 Changing language...');
     
-    const selector = document.getElementById('language-selector');
-    if (!selector) {
-        console.error('❌ Language selector not found');
-        return;
+    // If no parameter provided, get from selector
+    if (!newLanguage) {
+        const selector = document.getElementById('language-selector');
+        if (!selector) {
+            console.error('❌ Language selector not found');
+            return;
+        }
+        newLanguage = selector.value;
     }
-    
-    const newLanguage = selector.value;
-    if (!translations[newLanguage]) {
+    // Sicherheitsprüfung: Nur erlaubte Sprachen
+    if (!newLanguage || typeof newLanguage !== 'string' || !translations[newLanguage]) {
         console.error('❌ Invalid language:', newLanguage);
         return;
     }
@@ -356,7 +526,11 @@ window.changeLanguage = function() {
     currentLanguage = newLanguage;
     
     // Save to localStorage
-    localStorage.setItem('geodrop-language', currentLanguage);
+    try {
+        localStorage.setItem('geodrop-language', currentLanguage);
+    } catch (error) {
+        console.warn('⚠️ Error saving language to localStorage:', error);
+    }
     console.log('💾 Language saved to localStorage:', currentLanguage);
     
     // Update UI
@@ -390,7 +564,11 @@ window.switchLanguage = function(language) {
     currentLanguage = language;
     
     // Save to localStorage
-    localStorage.setItem('geodrop-language', currentLanguage);
+    try {
+        localStorage.setItem('geodrop-language', currentLanguage);
+    } catch (error) {
+        console.warn('⚠️ Error saving language to localStorage:', error);
+    }
     console.log('💾 Language saved to localStorage:', currentLanguage);
     
     // Update UI
@@ -430,7 +608,11 @@ window.toggleLanguage = function() {
     currentLanguage = newLanguage;
     
     // Save to localStorage
-    localStorage.setItem('geodrop-language', currentLanguage);
+    try {
+        localStorage.setItem('geodrop-language', currentLanguage);
+    } catch (error) {
+        console.warn('⚠️ Error saving language to localStorage:', error);
+    }
     console.log('💾 Language saved to localStorage:', currentLanguage);
     
     // Update UI immediately
@@ -595,6 +777,7 @@ function updateLanguageDisplay() {
     // Update language info
     const languageInfo = document.getElementById('settings-language-info');
     if (languageInfo) {
+        // Sicherer: textContent verwenden, da der Text kontrolliert ist
         languageInfo.innerHTML = t('settings.language-info-text').replace(/\n/g, '<br>');
     }
     
@@ -648,6 +831,15 @@ function applyLanguage() {
     
     // Update startseite elements
     updateStartseiteElements();
+    
+    // FORCE RELOAD MAP MARKERS WITH NEW LANGUAGE
+    console.log('🔄 FORCE RELOADING MAP MARKERS WITH NEW LANGUAGE...');
+    setTimeout(() => {
+        if (typeof window.loadGeoDrops === 'function') {
+            window.loadGeoDrops();
+            console.log('✅ Map markers reloaded with new language');
+        }
+    }, 200);
 }
 
 // Update specific elements that don't have data-lang attributes
@@ -668,6 +860,9 @@ function updateSpecificElements() {
     
     // Update page titles when tabs are loaded
     updatePageTitles();
+    
+    // Update Geocard elements
+    updateGeocardElements();
 }
 
 // Update page titles / Seitentitel aktualisieren
@@ -758,6 +953,42 @@ function updateStartseiteElements() {
     console.log('✅ Startseite elements updated');
 }
 
+// Update Geocard elements / Geocard-Elemente aktualisieren
+function updateGeocardElements() {
+    console.log('🔄 Updating Geocard elements...');
+    
+    // Reload drop lists to update language
+    if (typeof window.reloadAllDropLists === 'function') {
+        window.reloadAllDropLists();
+    }
+    
+    // Reload dev drops
+    if (typeof window.loadDevGeoDrops === 'function') {
+        window.loadDevGeoDrops();
+    }
+    
+    // Reload user drops
+    if (typeof window.loadUserGeoDrops === 'function') {
+        window.loadUserGeoDrops();
+    }
+    
+    // FORCE RELOAD ALL MAP MARKERS WITH NEW LANGUAGE
+    if (typeof window.loadGeoDrops === 'function') {
+        console.log('🔄 FORCE RELOADING MAP MARKERS WITH NEW LANGUAGE...');
+        // Small delay to ensure other updates are complete
+        setTimeout(() => {
+            window.loadGeoDrops();
+        }, 100);
+    }
+    
+    // Update all marker popups with current language
+    if (typeof window.updateMarkerPopups === 'function') {
+        window.updateMarkerPopups();
+    }
+    
+    console.log('✅ Geocard elements updated');
+}
+
 // Get current language / Aktuelle Sprache abrufen
 window.getCurrentLanguage = function() {
     return currentLanguage;
@@ -771,7 +1002,11 @@ window.setLanguage = function(language) {
     }
     
     currentLanguage = language;
-    localStorage.setItem('geodrop-language', currentLanguage);
+    try {
+        localStorage.setItem('geodrop-language', currentLanguage);
+    } catch (error) {
+        console.warn('⚠️ Error saving language to localStorage:', error);
+    }
     updateLanguageDisplay();
     applyLanguage();
     
@@ -845,5 +1080,20 @@ window.applyLanguage = applyLanguage;
 window.updateLanguageDisplay = updateLanguageDisplay;
 window.updateStartseiteButton = updateStartseiteButton;
 window.updateRadioButtons = updateRadioButtons;
+window.updateGeocardElements = updateGeocardElements;
+
+// Test function to manually reload map markers with current language
+window.testMapLanguageSwitch = function() {
+    console.log('🧪 Testing map language switch...');
+    console.log('Current language:', currentLanguage);
+    
+    if (typeof window.loadGeoDrops === 'function') {
+        console.log('🔄 Reloading map markers...');
+        window.loadGeoDrops();
+        console.log('✅ Map markers reloaded with current language');
+    } else {
+        console.log('❌ loadGeoDrops function not found');
+    }
+};
 
 console.log('✅ Language system loaded');

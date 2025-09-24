@@ -18,6 +18,429 @@
     
     <!-- Dev Functions -->
     <script>
+        // Language System - Use translations from index.html
+        let currentLang = window.currentLang || 'de'; // Default language
+        
+        // Sync with global currentLang
+        if (window.currentLang) {
+            currentLang = window.currentLang;
+        }
+        
+        // Get translations from parent window (index.html)
+        const translations = window.translations || {
+            de: {
+                // Main Title
+                'geocard-title': '🗺️ GeoCard',
+                
+                // Map Section
+                'interactive-map': '🌍 Interaktive Karte',
+                'map-legend-button': '🗺️ Karten-Legende anzeigen',
+                'user-drop-button': '➕ User Drop erstellen',
+                
+                // Location Section
+                'location-title': '📍 Standort',
+                'use-my-location': '📍 Meinen Standort verwenden',
+                'location-info-default': 'Klicke auf den Button um deine aktuelle Position zu laden',
+                
+                // Photo Upload Section
+                'photo-upload-title': '📸 Foto-Upload',
+                'select-geodrop': 'GeoDrop auswählen:',
+                'user-drops': '👤 User Drops',
+                'dev-drops': '🔧 Dev Drops',
+                'select-dev-geodrop': 'Dev GeoDrop auswählen...',
+                'dev-test-coordinates': '🔧 DEV: Test-Koordinaten eingeben:',
+                'set-test-coordinates': '📍 Test-Koordinaten setzen',
+                'create-test-melk': '🏛️ Test-Drop: Stift Melk erstellen',
+                'create-test-schonbrunn': '🏰 Test-Drop: Schloss Schönbrunn erstellen',
+                'create-all-states': '🇦🇹 Alle 9 Bundesländer-Drops erstellen',
+                'create-remaining-states': '🚀 Restliche 8 Bundesländer-Drops erstellen',
+                'clear-user-drops': '🧹 User Drop Listen leeren',
+                'restore-user-drops': '🔄 User Drop Listen wiederherstellen',
+                'check-user-drop-count': '📊 User Drop Anzahl prüfen',
+                'create-missing-drop1': '🏛️ Drop Nr. 1 (Stift Melk) erstellen',
+                
+                // Dev Coordinates Section
+                'dev-coordinates-title': '🎯 Dev Koordinaten-Anpassung',
+                'admin-status': 'Admin-Status:',
+                'admin-active': 'Aktiv',
+                'admin-inactive': 'Inaktiv (nur mit Admin-Passwort)',
+                'dev-coords-status': 'Dev-Koordinaten:',
+                'dev-coords-not-set': 'Nicht gesetzt',
+                'dev-coords-set': 'Gesetzt',
+                
+                // GeoDrops Overview
+                'geodrops-overview': '📋 GeoDrops Übersicht',
+                
+                // Create User Drop Modal
+                'create-user-drop-title': '➕ User GeoDrop erstellen',
+                'drop-name': 'Name des GeoDrops:',
+                'drop-name-placeholder': 'z.B. Historisches Gebäude',
+                'what-to-photograph': '📸 Was soll fotografiert werden:',
+                'photograph-description-placeholder': 'Beschreibe genau, was an diesem Standort fotografiert werden soll...',
+                'reward-amount': 'Belohnung (PixelDrops):',
+                'user-drops-fixed': 'User Drops sind auf 10 PixelDrops fixiert',
+                'location': '📍 Standort:',
+                'location-auto': 'Standort wird automatisch von deiner aktuellen Position übernommen',
+                'dev-test-coordinates-label': '🔧 DEV: Test-Koordinaten:',
+                'create-user-drop-button': '✅ User Drop erstellen',
+                'cancel': '❌ Abbrechen',
+                
+                // Map Legend
+                'map-legend-title': '🗺️ Karten-Legende',
+                'your-location': 'Dein Standort',
+                'your-location-desc': 'Deine aktuelle GPS-Position',
+                'dev-drops-legend': 'Dev GeoDrops',
+                'dev-drops-desc': 'Entwickler-Test-Drops',
+                'user-drops-legend': 'User GeoDrops',
+                'user-drops-desc': 'Von Benutzern erstellte Drops',
+                
+                // Messages
+                'location-success': 'Standort erfolgreich ermittelt!',
+                'location-error': 'Fehler beim Ermitteln des Standorts: ',
+                'permission-denied': 'Standort-Zugriff verweigert. Bitte erlaube den Standort-Zugriff in deinem Browser.',
+                'position-unavailable': 'Standort nicht verfügbar.',
+                'timeout': 'Zeitüberschreitung beim Ermitteln des Standorts.',
+                'last-known-location': 'Letzter bekannter Standort verwendet',
+                'accuracy': 'Genauigkeit:',
+                'last-known-location-warning': '⚠️ Letzter bekannter Standort',
+                'saved': 'Gespeichert:',
+                
+                // Admin/Dev Buttons
+                'dev-drop-create': '🎯 Dev Drop erstellen',
+                'admin-mode-disable': '🔓 Admin-Modus deaktivieren',
+                'admin-mode-enable': '🔓 Admin-Modus aktivieren',
+                'admin-required': '🔒 Admin-Modus erforderlich',
+                
+                // Additional dynamic texts
+                'dev-access-required': '❌ Dev-Zugang erforderlich!',
+                'test-melk-success': '✅ Test Melk Drop erfolgreich erstellt! (Stift Melk)',
+                'test-austria-success': '✅ Test Austria Drop erfolgreich erstellt! (Schloss Schönbrunn)',
+                'image-load-error': '❌ Fehler beim Laden des Bildes - alle Quellen fehlgeschlagen',
+                'test-melk-error': '❌ Fehler beim Erstellen des Test Melk Drops: ',
+                'test-austria-error': '❌ Fehler beim Erstellen des Test Austria Drops: ',
+                
+                // Missing translations
+                'latitude': 'Breitengrad',
+                'longitude': 'Längengrad',
+                'latitude-lat': 'Breitengrad (Lat)',
+                'longitude-lng': 'Längengrad (Lng)',
+                'dev-latitude': 'Dev Breitengrad',
+                'dev-longitude': 'Dev Längengrad',
+                'reload-drops': '🔄 Drops neu laden',
+                'save-changes': '✅ Änderungen speichern',
+                'latitude-placeholder': 'z.B. 52.520008',
+                'longitude-placeholder': 'z.B. 13.404954',
+                
+                // Additional missing translations
+                'your-location': 'Dein Standort',
+                'accuracy': 'Genauigkeit:',
+                'time': 'Zeit:',
+                'location-found': 'Standort gefunden:',
+                'current-position': 'Aktuelle Position',
+                'user-mode': 'USER MODUS (Dev deaktiviert)',
+                'take-photo': '📸 Foto aufnehmen',
+                'upload-debug': '🔍 Upload Debug',
+                'adjust-coordinates': 'Koordinaten anpassen',
+                'reset': 'Zurücksetzen',
+                
+                // GeoDrops Table
+                'geodrops-overview': '📋 GeoDrops Übersicht',
+                'reload-drops': '🔄 Drops neu laden',
+                'dev-geodrops': '🎯 Dev GeoDrops',
+                'user-geodrops': '👤 User GeoDrops',
+                'table-number': 'Nr.',
+                'table-creator': 'Ersteller',
+                'table-reward': 'Reward',
+                'table-status': 'Status',
+                'table-type': 'Typ',
+                'table-icon': 'Icon',
+                'table-coordinates': 'Koordinaten',
+                'table-created': 'Erstellt',
+                'table-actions': 'Aktionen',
+                'status-active': '✅ Aktiv',
+                'status-inactive': '❌ Inaktiv',
+                'please-login': 'Bitte zuerst anmelden',
+                'no-user-drops': 'Keine User GeoDrops gefunden',
+                'error-loading-user-drops': 'Fehler beim Laden der User GeoDrops',
+                'error-loading-geodrops': 'Fehler beim Laden der GeoDrops',
+                'loading-dev-drops-table': 'Lade Dev GeoDrops-Tabelle...',
+                'user-drops-displayed': '👤 User GeoDrops angezeigt',
+                'dev-drops-displayed': '🎯 Dev GeoDrops angezeigt',
+                'modal-not-found': '❌ Modal nicht gefunden',
+                'cleanup-duplicates': '🧹 Duplikate bereinigen',
+                'reload-all-lists': '🔄 Alle Listen neu laden',
+                'dev-test-warning': '⚠️ Nur für Dev-Tests - normale User sehen dies nicht!',
+                'end-dev-session': '🔒 Dev-Session beenden',
+                'status-claimed': '❌ Gesammelt',
+                'status-available': '✅ Verfügbar',
+                'status-claimed-today': '⏰ Heute gesammelt',
+                'selected-for-upload': 'für Upload ausgewählt'
+            },
+            en: {
+                // Main Title
+                'geocard-title': '🗺️ GeoCard',
+                
+                // Map Section
+                'interactive-map': '🌍 Interactive Map',
+                'map-legend-button': '🗺️ Show Map Legend',
+                'user-drop-button': '➕ Create User Drop',
+                
+                // Location Section
+                'location-title': '📍 Location',
+                'use-my-location': '📍 Use My Location',
+                'location-info-default': 'Click the button to load your current position',
+                
+                // Photo Upload Section
+                'photo-upload-title': '📸 Photo Upload',
+                'select-geodrop': 'Select GeoDrop:',
+                'user-drops': '👤 User Drops',
+                'dev-drops': '🔧 Dev Drops',
+                'select-dev-geodrop': 'Select Dev GeoDrop...',
+                'dev-test-coordinates': '🔧 DEV: Enter Test Coordinates:',
+                'set-test-coordinates': '📍 Set Test Coordinates',
+                'create-test-melk': '🏛️ Create Test Drop: Melk Abbey',
+                'create-test-schonbrunn': '🏰 Create Test Drop: Schönbrunn Palace',
+                'create-all-states': '🇦🇹 Create All 9 State Drops',
+                'create-remaining-states': '🚀 Create Remaining 8 State Drops',
+                'clear-user-drops': '🧹 Clear User Drop Lists',
+                'restore-user-drops': '🔄 Restore User Drop Lists',
+                'check-user-drop-count': '📊 Check User Drop Count',
+                'create-missing-drop1': '🏛️ Create Drop No. 1 (Melk Abbey)',
+                
+                // Dev Coordinates Section
+                'dev-coordinates-title': '🎯 Dev Coordinate Adjustment',
+                'admin-status': 'Admin Status:',
+                'admin-active': 'Active',
+                'admin-inactive': 'Inactive (admin password required)',
+                'dev-coords-status': 'Dev Coordinates:',
+                'dev-coords-not-set': 'Not set',
+                'dev-coords-set': 'Set',
+                
+                // GeoDrops Overview
+                'geodrops-overview': '📋 GeoDrops Overview',
+                
+                // Create User Drop Modal
+                'create-user-drop-title': '➕ Create User GeoDrop',
+                'drop-name': 'GeoDrop Name:',
+                'drop-name-placeholder': 'e.g. Historic Building',
+                'what-to-photograph': '📸 What to photograph:',
+                'photograph-description-placeholder': 'Describe exactly what should be photographed at this location...',
+                'reward-amount': 'Reward (PixelDrops):',
+                'user-drops-fixed': 'User Drops are fixed at 10 PixelDrops',
+                'location': '📍 Location:',
+                'location-auto': 'Location will be automatically taken from your current position',
+                'dev-test-coordinates-label': '🔧 DEV: Test Coordinates:',
+                'create-user-drop-button': '✅ Create User Drop',
+                'cancel': '❌ Cancel',
+                
+                // Map Legend
+                'map-legend-title': '🗺️ Map Legend',
+                'your-location': 'Your Location',
+                'your-location-desc': 'Your current GPS position',
+                'dev-drops-legend': 'Dev GeoDrops',
+                'dev-drops-desc': 'Developer test drops',
+                'user-drops-legend': 'User GeoDrops',
+                'user-drops-desc': 'Drops created by users',
+                
+                // Messages
+                'location-success': 'Location successfully determined!',
+                'location-error': 'Error determining location: ',
+                'permission-denied': 'Location access denied. Please allow location access in your browser.',
+                'position-unavailable': 'Location not available.',
+                'timeout': 'Timeout while determining location.',
+                'last-known-location': 'Last known location used',
+                'accuracy': 'Accuracy:',
+                'last-known-location-warning': '⚠️ Last known location',
+                'saved': 'Saved:',
+                
+                // Admin/Dev Buttons
+                'dev-drop-create': '🎯 Create Dev Drop',
+                'admin-mode-disable': '🔓 Disable Admin Mode',
+                'admin-mode-enable': '🔓 Enable Admin Mode',
+                'admin-required': '🔒 Admin Mode Required',
+                
+                // Additional dynamic texts
+                'dev-access-required': '❌ Dev access required!',
+                'test-melk-success': '✅ Test Melk Drop successfully created! (Melk Abbey)',
+                'test-austria-success': '✅ Test Austria Drop successfully created! (Schönbrunn Palace)',
+                'image-load-error': '❌ Error loading image - all sources failed',
+                'test-melk-error': '❌ Error creating Test Melk Drop: ',
+                'test-austria-error': '❌ Error creating Test Austria Drop: ',
+                
+                // Missing translations
+                'latitude': 'Latitude',
+                'longitude': 'Longitude',
+                'latitude-lat': 'Latitude (Lat)',
+                'longitude-lng': 'Longitude (Lng)',
+                'dev-latitude': 'Dev Latitude',
+                'dev-longitude': 'Dev Longitude',
+                'reload-drops': '🔄 Reload Drops',
+                'save-changes': '✅ Save Changes',
+                'latitude-placeholder': 'e.g. 52.520008',
+                'longitude-placeholder': 'e.g. 13.404954',
+                
+                // Additional missing translations
+                'your-location': 'Your Location',
+                'accuracy': 'Accuracy:',
+                'time': 'Time:',
+                'location-found': 'Location found:',
+                'current-position': 'Current Position',
+                'user-mode': 'USER MODE (Dev disabled)',
+                'take-photo': '📸 Take Photo',
+                'upload-debug': '🔍 Upload Debug',
+                'adjust-coordinates': 'Adjust Coordinates',
+                'reset': 'Reset',
+                
+                // GeoDrops Table
+                'geodrops-overview': '📋 GeoDrops Overview',
+                'reload-drops': '🔄 Reload Drops',
+                'dev-geodrops': '🎯 Dev GeoDrops',
+                'user-geodrops': '👤 User GeoDrops',
+                'table-number': 'No.',
+                'table-creator': 'Creator',
+                'table-reward': 'Reward',
+                'table-status': 'Status',
+                'table-type': 'Type',
+                'table-icon': 'Icon',
+                'table-coordinates': 'Coordinates',
+                'table-created': 'Created',
+                'table-actions': 'Actions',
+                'status-active': '✅ Active',
+                'status-inactive': '❌ Inactive',
+                'please-login': 'Please log in first',
+                'no-user-drops': 'No User GeoDrops found',
+                'error-loading-user-drops': 'Error loading User GeoDrops',
+                'error-loading-geodrops': 'Error loading GeoDrops',
+                'loading-dev-drops-table': 'Loading Dev GeoDrops table...',
+                'user-drops-displayed': '👤 User GeoDrops displayed',
+                'dev-drops-displayed': '🎯 Dev GeoDrops displayed',
+                'modal-not-found': '❌ Modal not found',
+                'cleanup-duplicates': '🧹 Cleanup Duplicates',
+                'reload-all-lists': '🔄 Reload All Lists',
+                'dev-test-warning': '⚠️ Only for Dev tests - normal users don\'t see this!',
+                'end-dev-session': '🔒 End Dev Session',
+                'status-claimed': '❌ Claimed',
+                'status-available': '✅ Available',
+                'status-claimed-today': '⏰ Claimed Today',
+                'selected-for-upload': 'selected for upload'
+            }
+        };
+        
+        // Language switching functions - Use global function from index.html
+        function switchLanguage(lang) {
+            console.log('🔄 GeoCard switchLanguage called with:', lang);
+            
+            if (window.switchLanguage) {
+                console.log('📞 Calling global switchLanguage function');
+                window.switchLanguage(lang);
+                
+                // Update map marker popups after global language switch
+                setTimeout(() => {
+                    console.log('🗺️ Updating map markers after global language switch...');
+                    updateMapMarkerPopups();
+                    // Also update modal placeholders if modal is open
+                    if (window.updateModalPlaceholders) {
+                        window.updateModalPlaceholders();
+                    }
+                }, 100);
+            } else {
+                console.log('📝 Using local switchLanguage function');
+                currentLang = lang;
+                window.currentLang = currentLang; // Update global variable
+                localStorage.setItem('selectedLanguage', lang);
+                updateAllTexts();
+                updateLanguageButtons();
+                // Also update modal placeholders
+                if (window.updateModalPlaceholders) {
+                    window.updateModalPlaceholders();
+                }
+            }
+        }
+        
+        function updateLanguageButtons() {
+            // No language buttons in GeoCard - they are in the main index.html
+        }
+        
+        function updateAllTexts() {
+            console.log('🔄 GeoCard updateAllTexts called with currentLang:', currentLang);
+            
+            // Use global translations if available, otherwise use local translations
+            const globalTranslations = window.translations;
+            const localTranslations = translations;
+            const activeTranslations = globalTranslations || localTranslations;
+            
+            console.log('📝 Using translations:', globalTranslations ? 'global' : 'local');
+            
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (activeTranslations[currentLang] && activeTranslations[currentLang][key]) {
+                    if (element.tagName === 'INPUT' && element.type !== 'submit') {
+                        element.placeholder = activeTranslations[currentLang][key];
+                    } else {
+                        element.textContent = activeTranslations[currentLang][key];
+                    }
+                    console.log('✅ Updated element with key:', key, 'to:', activeTranslations[currentLang][key]);
+                } else {
+                    console.log('⚠️ No translation found for key:', key, 'in language:', currentLang);
+                }
+            });
+            
+            // Update dynamic texts in location info
+            updateLocationInfoTexts();
+            
+            // Update map marker popups
+            updateMapMarkerPopups();
+        }
+        
+        function updateLocationInfoTexts() {
+            const locationInfo = document.getElementById('location-info');
+            if (locationInfo && locationInfo.querySelector('p[data-translate="location-info-default"]')) {
+                const defaultText = locationInfo.querySelector('p[data-translate="location-info-default"]');
+                if (defaultText && translations[currentLang] && translations[currentLang]['location-info-default']) {
+                    defaultText.textContent = translations[currentLang]['location-info-default'];
+                }
+            }
+        }
+        
+        function updateMapMarkerPopups() {
+            console.log('🗺️ Updating map marker popups...');
+            
+            // Get current translations
+            const globalTranslations = window.translations;
+            const localTranslations = translations;
+            const activeTranslations = globalTranslations || localTranslations;
+            
+            // Update all existing markers
+            dropMarkers.forEach(marker => {
+                const latlng = marker.getLatLng();
+                const dropData = marker.dropData; // Store drop data in marker
+                
+                if (dropData) {
+                    const isDevDrop = dropData.collection === 'devDrops';
+                    const popupContent = `
+                        <div class="text-sm">
+                            <strong>${isDevDrop ? getTranslatedText('dev-drops-legend') : getTranslatedText('user-drops-legend')} ${dropData.geodropNumber || dropData.id}</strong><br>
+                            ${getTranslatedText('table-reward')}: ${dropData.reward || 100} PixelDrops<br>
+                            ${getTranslatedText('table-status')}: ${dropData.isClaimed ? getTranslatedText('status-claimed') : getTranslatedText('status-available')}<br>
+                            ${getTranslatedText('table-coordinates')}: ${dropData.lat.toFixed(6)}, ${dropData.lng.toFixed(6)}
+                        </div>
+                    `;
+                    
+                    marker.setPopupContent(popupContent);
+                    console.log('✅ Updated marker popup for drop:', dropData.geodropNumber || dropData.id);
+                }
+            });
+        }
+        
+        // Helper function to get translated text - Use global function from index.html
+        function getTranslatedText(key) {
+            if (window.getTranslatedText) {
+                return window.getTranslatedText(key);
+            } else {
+                return translations[currentLang] && translations[currentLang][key] ? translations[currentLang][key] : key;
+            }
+        }
+        
         // DEV FUNCTION - Fix any drop creator name
         window.devFixDropCreator = async function(dropNumber, newCreatorName) {
             console.log(`🔧 DEV: Fixing Drop ${dropNumber} creator to: ${newCreatorName}`);
@@ -423,21 +846,22 @@
 </head>
 <body class="bg-gray-900 text-white">
     <div class="max-w-6xl mx-auto p-6">
+        
         <h2 class="text-3xl font-bold text-white mb-8">
-            <span style="background: rgba(0, 0, 0, 0.7); padding: 8px 12px; border-radius: 8px; display: inline-block;">🗺️ GeoCard</span>
+            <span style="background: rgba(0, 0, 0, 0.7); padding: 8px 12px; border-radius: 8px; display: inline-block;" data-translate="geocard-title">🗺️ GeoCard</span>
         </h2>
         
         <!-- Map Container -->
         <div class="bg-gray-700 rounded-lg p-6 mb-6">
-            <h3 class="text-xl font-semibold text-white mb-4">🌍 Interaktive Karte</h3>
+            <h3 class="text-xl font-semibold text-white mb-4" data-translate="interactive-map">🌍 Interaktive Karte</h3>
             <div id="mapid"></div>
             
             <!-- Map Legend and User Drop Creation Buttons -->
             <div class="mt-4 text-center space-x-3">
-                <button onclick="showMapLegendPopup()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                <button onclick="showMapLegendPopup()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors" data-translate="map-legend-button">
                     🗺️ Karten-Legende anzeigen
                 </button>
-                <button onclick="showCreateUserDropModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                <button onclick="showCreateUserDropModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors" data-translate="user-drop-button">
                     ➕ User Drop erstellen
                 </button>
             </div>
@@ -446,31 +870,31 @@
         <!-- Location & Photo Section -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-gray-700 rounded-lg p-6">
-                <h3 class="text-xl font-semibold text-white mb-4">📍 Standort</h3>
-                <button onclick="getUserLocation()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mb-4">
+                <h3 class="text-xl font-semibold text-white mb-4" data-translate="location-title">📍 Standort</h3>
+                <button onclick="getUserLocation()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mb-4" data-translate="use-my-location">
                     📍 Meinen Standort verwenden
                 </button>
                 <div id="location-info" class="text-sm text-gray-300">
-                    <p>Klicke auf den Button um deine aktuelle Position zu laden</p>
+                    <p data-translate="location-info-default">Klicke auf den Button um deine aktuelle Position zu laden</p>
                 </div>
             </div>
             
             <div class="bg-gray-700 rounded-lg p-6">
-                <h3 class="text-xl font-semibold text-white mb-4">📸 Foto-Upload</h3>
+                <h3 class="text-xl font-semibold text-white mb-4" data-translate="photo-upload-title">📸 Foto-Upload</h3>
                 
                 <!-- Drop Selection -->
                 <div class="mb-4">
-                    <label for="geocard-drop-select" class="block text-sm font-medium text-gray-300 mb-2">
+                    <label for="geocard-drop-select" class="block text-sm font-medium text-gray-300 mb-2" data-translate="select-geodrop">
                         GeoDrop auswählen:
                     </label>
                 
                 <!-- Upload List Type Toggle -->
                 <div class="mb-3">
                     <div class="flex bg-gray-600 rounded-lg p-1">
-                        <button id="upload-dev-drops-btn" onclick="switchToUploadListType('dev')" class="flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-blue-600 text-white">
+                        <button id="upload-dev-drops-btn" onclick="switchToUploadListType('dev')" class="flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-blue-600 text-white" data-translate="dev-drops">
                             🎯 Dev Drops
                         </button>
-                        <button id="upload-user-drops-btn" onclick="switchToUploadListType('user')" class="flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white">
+                        <button id="upload-user-drops-btn" onclick="switchToUploadListType('user')" class="flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white" data-translate="user-drops">
                             👤 User Drops
                         </button>
                     </div>
@@ -479,7 +903,7 @@
                 <!-- Dev Drops Select -->
                 <div id="upload-dev-drops-section">
                     <select id="geocard-drop-select" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white" onchange="updateClaimButton()">
-                        <option value="">Dev GeoDrop auswählen...</option>
+                        <option value="" data-translate="select-dev-geodrop">Dev GeoDrop auswählen...</option>
                         <option value="devDrops:dev1">🎯 Dev GeoDrop1 - 100 PixelDrops</option>
                         <option value="devDrops:dev2">🎯 Dev GeoDrop2 - 100 PixelDrops</option>
                         <option value="devDrops:dev3">🎯 Dev GeoDrop3 - 100 PixelDrops</option>
@@ -504,51 +928,51 @@
                 
                 <!-- Dev Coordinates Input (nur für Dev-User) -->
                 <div id="dev-drop-selection" class="mb-4 p-3 bg-yellow-900 border border-yellow-600 rounded" style="display: none;">
-                    <label class="block text-sm font-medium text-yellow-300 mb-2 font-bold">
+                    <label class="block text-sm font-medium text-yellow-300 mb-2 font-bold" data-translate="dev-test-coordinates">
                         🔧 DEV: Test-Koordinaten eingeben:
                     </label>
                     <div class="grid grid-cols-2 gap-2 mb-2">
                         <div>
-                            <label for="dev-test-lat" class="block text-xs text-yellow-300 mb-1">Breitengrad:</label>
+                            <label for="dev-test-lat" class="block text-xs text-yellow-300 mb-1" data-translate="latitude">Breitengrad:</label>
                             <input type="number" id="dev-test-lat" step="0.000001" placeholder="52.123456" class="w-full p-2 bg-gray-600 border border-yellow-500 rounded text-white text-sm" onkeypress="if(event.key === 'Enter') setDevTestCoordinates()">
                         </div>
                         <div>
-                            <label for="dev-test-lng" class="block text-xs text-yellow-300 mb-1">Längengrad:</label>
+                            <label for="dev-test-lng" class="block text-xs text-yellow-300 mb-1" data-translate="longitude">Längengrad:</label>
                             <input type="number" id="dev-test-lng" step="0.000001" placeholder="13.123456" class="w-full p-2 bg-gray-600 border border-yellow-500 rounded text-white text-sm" onkeypress="if(event.key === 'Enter') setDevTestCoordinates()">
                         </div>
                     </div>
-                    <button onclick="setDevTestCoordinates()" class="w-full px-3 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm">
+                    <button onclick="setDevTestCoordinates()" class="w-full px-3 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm" data-translate="set-test-coordinates">
                         📍 Test-Koordinaten setzen
                     </button>
-                    <p class="text-yellow-300 text-sm mt-1">⚠️ Nur für Dev-Tests - normale User sehen dies nicht!</p>
+                    <p class="text-yellow-300 text-sm mt-1" data-translate="dev-test-warning">⚠️ Nur für Dev-Tests - normale User sehen dies nicht!</p>
                     
                     <!-- Test Drop Buttons -->
                     <div class="mt-3 space-y-2">
-                        <button onclick="createTestMelkDrop()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
+                        <button onclick="createTestMelkDrop()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm" data-translate="create-test-melk">
                             🏛️ Test-Drop: Stift Melk erstellen
                         </button>
-                        <button onclick="createTestAustriaDrop()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+                        <button onclick="createTestAustriaDrop()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm" data-translate="create-test-schonbrunn">
                             🏰 Test-Drop: Schloss Schönbrunn erstellen
                         </button>
-                        <button onclick="createAllAustrianStateDrops()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
+                        <button onclick="createAllAustrianStateDrops()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm" data-translate="create-all-states">
                             🇦🇹 Alle 9 Bundesländer-Drops erstellen
                         </button>
-                        <button onclick="createRemainingAustrianDrops()" class="w-full px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm">
+                        <button onclick="createRemainingAustrianDrops()" class="w-full px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm" data-translate="create-remaining-states">
                             🚀 Restliche 8 Bundesländer-Drops erstellen
                         </button>
-                        <button onclick="reloadAllDropLists()" class="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
+                        <button onclick="reloadAllDropLists()" class="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm" data-translate="reload-all-lists">
                             🔄 Alle Listen neu laden
                         </button>
-                        <button onclick="clearUserDropLists()" class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
+                        <button onclick="clearUserDropLists()" class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm" data-translate="clear-user-drops">
                             🧹 User Drop Listen leeren
                         </button>
-                        <button onclick="restoreUserDropLists()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+                        <button onclick="restoreUserDropLists()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm" data-translate="restore-user-drops">
                             🔄 User Drop Listen wiederherstellen
                         </button>
-                        <button onclick="checkUserDropCount()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
+                        <button onclick="checkUserDropCount()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm" data-translate="check-user-drop-count">
                             📊 User Drop Anzahl prüfen
                         </button>
-                        <button onclick="cleanupDuplicateUserDrops()" class="w-full px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm">
+                        <button onclick="cleanupDuplicateUserDrops()" class="w-full px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm" data-translate="cleanup-duplicates">
                             🧹 Duplikate bereinigen
                         </button>
                         <button onclick="createMissingDrop1()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
@@ -558,7 +982,7 @@
                 </div>
                 
                 <input type="file" id="photo-input" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoFileSelect()">
-                <button onclick="handlePhotoCapture()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4">
+                <button onclick="handlePhotoCapture()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4" data-translate="take-photo">
                     📸 Foto aufnehmen
                 </button>
                 
@@ -568,7 +992,7 @@
                 </button>
                 
                 <!-- Debug Button -->
-                <button onclick="debugUploadProcess()" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors mb-4">
+                <button onclick="debugUploadProcess()" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors mb-4" data-translate="upload-debug">
                     🔍 Upload Debug
                 </button>
                 
@@ -578,32 +1002,32 @@
         
         <!-- Dev Coordinate Adjustment Section -->
         <div class="bg-gray-700 rounded-lg p-6 mt-6">
-            <h3 class="text-xl font-semibold text-white mb-4">🎯 Dev Koordinaten-Anpassung</h3>
+            <h3 class="text-xl font-semibold text-white mb-4" data-translate="dev-coordinate-adjustment">🎯 Dev Koordinaten-Anpassung</h3>
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Breitengrad (Lat)</label>
-                        <input type="number" id="dev-lat-input" step="0.000001" class="w-full px-3 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="z.B. 52.520008">
+                        <label class="block text-sm font-medium text-gray-300 mb-2" data-translate="latitude-lat">Breitengrad (Lat)</label>
+                        <input type="number" id="dev-lat-input" step="0.000001" class="w-full px-3 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="z.B. 52.520008" data-translate="latitude-placeholder">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Längengrad (Lng)</label>
-                        <input type="number" id="dev-lng-input" step="0.000001" class="w-full px-3 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="z.B. 13.404954">
+                        <label class="block text-sm font-medium text-gray-300 mb-2" data-translate="longitude-lng">Längengrad (Lng)</label>
+                        <input type="number" id="dev-lng-input" step="0.000001" class="w-full px-3 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="z.B. 13.404954" data-translate="longitude-placeholder">
                     </div>
                 </div>
                 <div class="flex space-x-3">
-                    <button id="dev-coords-btn" class="dev-drop-btn flex-1" onclick="setDevCoordinates()" disabled>
+                    <button id="dev-coords-btn" class="dev-drop-btn flex-1" onclick="setDevCoordinates()" disabled data-translate="admin-mode-required">
                     🔒 Admin-Modus erforderlich
                 </button>
-                    <button onclick="resetToCurrentLocation()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors">
+                    <button onclick="resetToCurrentLocation()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors" data-translate="current-position">
                         📍 Aktuelle Position
                 </button>
         </div>
             <div class="text-sm text-gray-400">
-                <p>Admin-Status: <span id="admin-status">Inaktiv (nur mit Admin-Passwort)</span></p>
-                    <p>Dev-Koordinaten: <span id="dev-coords-status">Nicht gesetzt</span></p>
+                <p data-translate="admin-status">Admin-Status: <span id="admin-status">Inaktiv (nur mit Admin-Passwort)</span></p>
+                    <p data-translate="dev-coordinates">Dev-Koordinaten: <span id="dev-coords-status">Nicht gesetzt</span></p>
                 </div>
                 <div class="mt-4" id="dev-session-section" style="display: none;">
-                    <button onclick="endDevSession()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
+                    <button onclick="endDevSession()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm" data-translate="end-dev-session">
                         🔒 Dev-Session beenden
                     </button>
                 </div>
@@ -613,9 +1037,9 @@
         <!-- GeoDrops Table -->
         <div class="bg-gray-700 rounded-lg p-6 mt-6">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-semibold text-white">📋 GeoDrops Übersicht</h3>
+                <h3 class="text-xl font-semibold text-white" data-translate="geodrops-overview">📋 GeoDrops Übersicht</h3>
                 <div class="flex gap-2">
-                    <button onclick="reloadAllDropLists()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                    <button onclick="reloadAllDropLists()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" data-translate="reload-drops-tab">
                         🔄 Drops neu laden
                     </button>
                 </div>
@@ -624,10 +1048,10 @@
             <!-- List Type Toggle -->
             <div class="mb-6">
                 <div class="flex bg-gray-600 rounded-lg p-1">
-                    <button id="dev-drops-btn" onclick="switchToListType('dev')" class="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white">
+                    <button id="dev-drops-btn" onclick="switchToListType('dev')" class="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white" data-translate="dev-geodrops-tab">
                         🎯 Dev GeoDrops
                     </button>
-                    <button id="user-drops-btn" onclick="switchToListType('user')" class="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-300 hover:text-white">
+                    <button id="user-drops-btn" onclick="switchToListType('user')" class="flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-300 hover:text-white" data-translate="user-geodrops-tab">
                         👤 User GeoDrops
                     </button>
                 </div>
@@ -637,7 +1061,7 @@
             <div id="dev-drops-section" style="display: block;">
                 <div id="geodrops-table" class="mt-4">
                     <div class="text-center text-gray-400 py-4">
-                        <p>Lade Dev GeoDrops-Tabelle...</p>
+                        <p data-translate="loading-dev-drops-table">Lade Dev GeoDrops-Tabelle...</p>
                     </div>
                 </div>
             </div>
@@ -694,26 +1118,26 @@
     <div id="create-user-drop-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; overflow-y: auto;">
         <div style="display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 2px;">
             <div style="background: #374151; border-radius: 8px; max-width: 600px; width: 100%; padding: 12px; max-height: 99vh; overflow-y: auto; margin-top: 5px; margin-bottom: 5px;">
-                <h2 style="color: white; font-size: 20px; font-weight: bold; margin-bottom: 12px; text-align: center;">➕ User GeoDrop erstellen</h2>
+                <h2 style="color: white; font-size: 20px; font-weight: bold; margin-bottom: 12px; text-align: center;" data-translate="create-user-drop-title"></h2>
                 
                 <div style="space-y: 16px;">
                     <!-- Drop Name -->
                     <div>
-                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">🎯 Drop Name:</label>
-                        <input type="text" id="user-drop-name" placeholder="z.B. Historisches Gebäude" style="width: 100%; padding: 10px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 14px;">
+                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;" data-translate="drop-name"></label>
+                        <input type="text" id="user-drop-name" style="width: 100%; padding: 10px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 14px;">
                     </div>
                     
                     <!-- Photo Description -->
                     <div>
-                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">📸 Was soll fotografiert werden:</label>
-                        <textarea id="user-drop-description" placeholder="Beschreibe genau, was an diesem Standort fotografiert werden soll..." style="width: 100%; padding: 10px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 14px; height: 70px; resize: vertical;"></textarea>
+                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;" data-translate="what-to-photograph"></label>
+                        <textarea id="user-drop-description" style="width: 100%; padding: 10px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 14px; height: 70px; resize: vertical;"></textarea>
                     </div>
                     
                     <!-- Reference Image Upload -->
                     <div>
-                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">🖼️ Referenzbild hochladen:</label>
+                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;" data-translate="reference-image-upload"></label>
                         <input type="file" id="user-drop-reference-image" accept="image/*" style="width: 100%; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
-                        <p style="color: #9CA3AF; font-size: 12px; margin-top: 4px;">Lade ein Referenzbild hoch, das zeigt was fotografiert werden soll</p>
+                        <p style="color: #9CA3AF; font-size: 12px; margin-top: 4px;" data-translate="reference-image-description"></p>
                         <div id="user-drop-image-preview" style="margin-top: 8px; display: none;">
                             <img id="user-drop-preview-img" style="max-width: 200px; max-height: 150px; border-radius: 6px; border: 1px solid #6B7280;">
                         </div>
@@ -721,42 +1145,36 @@
                     
                     <!-- Reward -->
                     <div>
-                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">💰 Belohnung (PixelDrops):</label>
+                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;" data-translate="reward-pixeldrops"></label>
                         <input type="number" id="user-drop-reward" value="10" min="10" max="10" readonly style="width: 100%; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
-                        <p style="color: #9CA3AF; font-size: 12px; margin-top: 4px;">User Drops sind auf 10 PixelDrops fixiert</p>
+                        <p style="color: #9CA3AF; font-size: 12px; margin-top: 4px;" data-translate="user-drops-fixed"></p>
                     </div>
                     
                     <!-- Current Location -->
                     <div>
-                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">📍 Standort:</label>
+                        <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;" data-translate="location"></label>
                         <div style="display: flex; gap: 8px;">
-                            <input type="number" id="user-drop-lat" step="0.000001" placeholder="Breitengrad" readonly style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
-                            <input type="number" id="user-drop-lng" step="0.000001" placeholder="Längengrad" readonly style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
+                            <input type="number" id="user-drop-lat" step="0.000001" readonly style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
+                            <input type="number" id="user-drop-lng" step="0.000001" readonly style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
                         </div>
-                        <button onclick="useCurrentLocationForUserDrop()" style="margin-top: 8px; padding: 8px 16px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
-                            📍 Aktuelle Position verwenden
-                        </button>
-                        <p style="color: #9CA3AF; font-size: 12px; margin-top: 4px;">Standort wird automatisch von deiner aktuellen Position übernommen</p>
+                        <button onclick="useCurrentLocationForUserDrop()" style="margin-top: 8px; padding: 8px 16px; background: #3B82F6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;" data-translate="use-current-position"></button>
+                        <p style="color: #9CA3AF; font-size: 12px; margin-top: 4px;" data-translate="location-auto-description"></p>
                     </div>
                     
                     <!-- Dev Coordinates (only for Dev users) -->
                     <div id="dev-coordinates-section" style="display: none;">
-                        <label style="color: #FBBF24; font-weight: bold; margin-bottom: 8px; display: block;">🔧 DEV: Test-Koordinaten:</label>
+                        <label style="color: #FBBF24; font-weight: bold; margin-bottom: 8px; display: block;" data-translate="dev-test-coordinates"></label>
                         <div style="display: flex; gap: 8px;">
-                            <input type="number" id="dev-user-drop-lat" step="0.000001" placeholder="Dev Breitengrad" style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #FBBF24; border-radius: 6px; color: white; font-size: 16px;">
-                            <input type="number" id="dev-user-drop-lng" step="0.000001" placeholder="Dev Längengrad" style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #FBBF24; border-radius: 6px; color: white; font-size: 16px;">
+                            <input type="number" id="dev-user-drop-lat" step="0.000001" style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #FBBF24; border-radius: 6px; color: white; font-size: 16px;">
+                            <input type="number" id="dev-user-drop-lng" step="0.000001" style="flex: 1; padding: 12px; background: #4B5563; border: 1px solid #FBBF24; border-radius: 6px; color: white; font-size: 16px;">
                         </div>
-                        <p style="color: #FBBF24; font-size: 12px; margin-top: 4px;">⚠️ Nur für Dev-Tests - normale User sehen dies nicht!</p>
+                        <p style="color: #FBBF24; font-size: 12px; margin-top: 4px;" data-translate="dev-test-warning"></p>
                     </div>
                 </div>
                 
                 <div style="display: flex; gap: 8px; margin-top: 16px; margin-bottom: 20px; padding-bottom: 10px;">
-                    <button onclick="createUserDrop()" style="flex: 1; padding: 12px; background: #10B981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; min-height: 48px;">
-                        ✅ User Drop erstellen
-                    </button>
-                    <button onclick="closeCreateUserDropModal()" style="flex: 1; padding: 12px; background: #6B7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; min-height: 48px;">
-                        ❌ Abbrechen
-                    </button>
+                    <button onclick="createUserDrop()" style="flex: 1; padding: 12px; background: #10B981; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; min-height: 48px;" data-translate="create-user-drop"></button>
+                    <button onclick="closeCreateUserDropModal()" style="flex: 1; padding: 12px; background: #6B7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; min-height: 48px;" data-translate="cancel"></button>
                 </div>
             </div>
         </div>
@@ -766,13 +1184,13 @@
     <div id="map-legend-popup" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; overflow-y: auto;">
         <div style="display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 5px;">
             <div style="background: #374151; border-radius: 8px; max-width: 500px; width: 100%; padding: 16px; max-height: 98vh; overflow-y: auto; margin-top: 10px; margin-bottom: 10px;">
-                <h2 style="color: white; font-size: 20px; font-weight: bold; margin-bottom: 12px; text-align: center;">🗺️ Karten-Legende</h2>
+                <h2 style="color: white; font-size: 20px; font-weight: bold; margin-bottom: 12px; text-align: center;" data-translate="map-legend-title">🗺️ Karten-Legende</h2>
                 <div style="space-y: 12px;">
                     <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: #4B5563; border-radius: 6px;">
                         <span style="font-size: 24px; margin-right: 12px;">📍</span>
                         <div>
-                            <div style="color: white; font-weight: bold;">Dein Standort</div>
-                            <div style="color: #9CA3AF; font-size: 14px;">Deine aktuelle GPS-Position</div>
+                            <div style="color: white; font-weight: bold;" data-translate="your-location">Dein Standort</div>
+                            <div style="color: #9CA3AF; font-size: 14px;" data-translate="your-location-desc">Deine aktuelle GPS-Position</div>
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: #4B5563; border-radius: 6px;">
@@ -799,8 +1217,8 @@
                     <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: #4B5563; border-radius: 6px;">
                         <span style="font-size: 24px; margin-right: 12px; filter: grayscale(100%) opacity(0.5);">🎯</span>
                         <div>
-                            <div style="color: white; font-weight: bold;">Heute gesammelt</div>
-                            <div style="color: #9CA3AF; font-size: 14px;">Graue Dart-Scheibe - Heute bereits gesammelt</div>
+                            <div style="color: white; font-weight: bold;" data-translate="legend-collected-today">Heute gesammelt</div>
+                            <div style="color: #9CA3AF; font-size: 14px;" data-translate="legend-collected-today-desc">Graue Dart-Scheibe - Heute bereits gesammelt</div>
                         </div>
                     </div>
                 </div>
@@ -860,6 +1278,19 @@
         // Initialize GeoCard when page loads
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🗺️ GeoCard page loaded, initializing...');
+            
+            // Initialize language system
+            const savedLang = localStorage.getItem('selectedLanguage');
+            if (savedLang && (savedLang === 'de' || savedLang === 'en')) {
+                currentLang = savedLang;
+                window.currentLang = currentLang;
+            }
+            
+            // Apply translations immediately
+            setTimeout(() => {
+                console.log('🔄 Applying translations on GeoCard load...');
+                updateAllTexts();
+            }, 100);
             
             // Check Dev status from sessionStorage first
             const savedDevStatus = sessionStorage.getItem('devLoggedIn');
@@ -1083,16 +1514,16 @@
                 if (locationInfo) {
                     const savedTime = new Date(lastLocation.timestamp);
                     locationInfo.innerHTML = `
-                        <p><strong>Breitengrad:</strong> ${lastLocation.lat.toFixed(6)}</p>
-                        <p><strong>Längengrad:</strong> ${lastLocation.lng.toFixed(6)}</p>
-                        <p><strong>Genauigkeit:</strong> ±${Math.round(lastLocation.accuracy)}m</p>
-                        <p class="text-yellow-400"><strong>⚠️ Letzter bekannter Standort</strong></p>
-                        <p class="text-sm text-gray-400">Gespeichert: ${savedTime.toLocaleString()}</p>
+                        <p><strong>${getTranslatedText('latitude')}:</strong> ${lastLocation.lat.toFixed(6)}</p>
+                        <p><strong>${getTranslatedText('longitude')}:</strong> ${lastLocation.lng.toFixed(6)}</p>
+                        <p><strong>${getTranslatedText('accuracy')}</strong> ±${Math.round(lastLocation.accuracy)}m</p>
+                        <p class="text-yellow-400"><strong>${getTranslatedText('last-known-location-warning')}</strong></p>
+                        <p class="text-sm text-gray-400">${getTranslatedText('saved')} ${savedTime.toLocaleString()}</p>
                     `;
                     console.log('📍 Location info updated with last known location');
                 }
                 
-                showMessage('📍 Letzter bekannter Standort verwendet');
+                showMessage('📍 ' + getTranslatedText('last-known-location'));
                 return true;
             }
             return false;
@@ -1153,9 +1584,9 @@
                         const locationInfo = document.getElementById('location-info');
                         if (locationInfo) {
                             locationInfo.innerHTML = `
-                                <p><strong>Breitengrad:</strong> ${lat.toFixed(6)}</p>
-                                <p><strong>Längengrad:</strong> ${lng.toFixed(6)}</p>
-                                <p><strong>Genauigkeit:</strong> ±${Math.round(position.coords.accuracy)}m</p>
+                                <p><strong>${getTranslatedText('latitude')}:</strong> ${lat.toFixed(6)}</p>
+                                <p><strong>${getTranslatedText('longitude')}:</strong> ${lng.toFixed(6)}</p>
+                                <p><strong>${getTranslatedText('accuracy')}</strong> ±${Math.round(position.coords.accuracy)}m</p>
                             `;
                             console.log('📍 Location info updated');
                         }
@@ -1253,7 +1684,7 @@
                 console.log(`✅ Loaded ${allDrops.length} GeoDrops for map and dropdown`);
             } catch (error) {
                 console.error('❌ Error loading GeoDrops:', error);
-                showMessage('Fehler beim Laden der GeoDrops', true);
+                showMessage(getTranslatedText('error-loading-geodrops'), true);
             }
         }
         
@@ -1284,12 +1715,15 @@
                         .addTo(map)
                         .bindPopup(`
                             <div class="text-sm">
-                                <strong>${isDevDrop ? '🎯 Dev' : '🌍'} GeoDrop${drop.geodropNumber || drop.id}</strong><br>
-                                Reward: ${drop.reward || 100} PixelDrops<br>
-                                Status: ${drop.isClaimed ? '❌ Gesammelt' : '✅ Verfügbar'}<br>
-                                Koordinaten: ${drop.lat.toFixed(6)}, ${drop.lng.toFixed(6)}
+                                <strong>${isDevDrop ? getTranslatedText('dev-drops-legend') : getTranslatedText('user-drops-legend')} ${drop.geodropNumber || drop.id}</strong><br>
+                                ${getTranslatedText('table-reward')}: ${drop.reward || 100} PixelDrops<br>
+                                ${getTranslatedText('table-status')}: ${drop.isClaimed ? getTranslatedText('status-claimed') : getTranslatedText('status-available')}<br>
+                                ${getTranslatedText('table-coordinates')}: ${drop.lat.toFixed(6)}, ${drop.lng.toFixed(6)}
                             </div>
                         `);
+                    
+                    // Store drop data in marker for later updates
+                    marker.dropData = drop;
                     
                     dropMarkers.push(marker);
                 }
@@ -1308,14 +1742,14 @@
             if (typeof window.isDevLoggedIn !== 'undefined' && window.isDevLoggedIn) {
                 if (devBtn) {
                     devBtn.disabled = false;
-                    devBtn.textContent = '🎯 Dev Drop erstellen';
+                    devBtn.textContent = '🎯 ' + getTranslatedText('dev-drop-create');
                 }
                 if (adminBtn) {
-                    adminBtn.textContent = '🔓 Admin-Modus deaktivieren';
+                    adminBtn.textContent = '🔓 ' + getTranslatedText('admin-mode-disable');
                     adminBtn.onclick = () => window.deauthorizeDev();
                 }
                 if (adminStatus) {
-                    adminStatus.textContent = 'Aktiv';
+                    adminStatus.textContent = getTranslatedText('admin-active');
                     adminStatus.className = 'text-green-400';
                 }
                 if (devSection) {
@@ -1324,14 +1758,14 @@
             } else {
                 if (devBtn) {
                     devBtn.disabled = true;
-                    devBtn.textContent = '🔒 Admin-Modus erforderlich';
+                    devBtn.textContent = '🔒 ' + getTranslatedText('admin-required');
                 }
                 if (adminBtn) {
-                    adminBtn.textContent = '🔓 Admin-Modus aktivieren';
+                    adminBtn.textContent = '🔓 ' + getTranslatedText('admin-mode-enable');
                     adminBtn.onclick = () => window.authorizeDev();
                 }
                 if (adminStatus) {
-                    adminStatus.textContent = 'Inaktiv';
+                    adminStatus.textContent = getTranslatedText('admin-inactive');
                     adminStatus.className = 'text-red-400';
                 }
                 if (devSection) {
@@ -1419,7 +1853,7 @@
             if (type === 'dev') {
                 // Switch to dev drops
                 devBtn.className = 'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors bg-blue-600 text-white';
-                devBtn.innerHTML = '🎯 Dev GeoDrops';
+                devBtn.innerHTML = getTranslatedText('dev-geodrops');
                 
                 userBtn.className = 'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-300 hover:text-white';
                 userBtn.innerHTML = '👤 User GeoDrops';
@@ -1431,11 +1865,11 @@
                 // Load dev drops
                 loadDevGeoDrops();
                 
-                showMessage('🎯 Dev GeoDrops angezeigt', false);
+                showMessage(getTranslatedText('dev-drops-displayed'), false);
             } else if (type === 'user') {
                 // Switch to user drops
                 devBtn.className = 'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors text-gray-300 hover:text-white';
-                devBtn.innerHTML = '🎯 Dev GeoDrops';
+                devBtn.innerHTML = getTranslatedText('dev-geodrops');
                 
                 userBtn.className = 'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors bg-green-600 text-white';
                 userBtn.innerHTML = '👤 User GeoDrops';
@@ -1447,7 +1881,7 @@
                 // Load user drops
                 loadUserGeoDrops();
                 
-                showMessage('👤 User GeoDrops angezeigt', false);
+                showMessage(getTranslatedText('user-drops-displayed'), false);
             }
         };
         
@@ -1637,14 +2071,14 @@
                         currentUser = window.firebase.auth().currentUser;
                     }
                     
-                    let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-600"><th class="text-left p-2">Nr.</th><th class="text-left p-2">Reward</th><th class="text-left p-2">Status</th><th class="text-left p-2">Typ</th><th class="text-center p-2">Icon</th><th class="text-left p-2">Koordinaten</th></tr></thead><tbody>';
+                    let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-600"><th class="text-left p-2">' + getTranslatedText('table-number') + '</th><th class="text-left p-2">' + getTranslatedText('table-reward') + '</th><th class="text-left p-2">' + getTranslatedText('table-status') + '</th><th class="text-left p-2">' + getTranslatedText('table-type') + '</th><th class="text-center p-2">' + getTranslatedText('table-icon') + '</th><th class="text-left p-2">' + getTranslatedText('table-coordinates') + '</th></tr></thead><tbody>';
                     devDrops.forEach(drop => {
                         const coords = drop.lat && drop.lng ? `${drop.lat.toFixed(4)}, ${drop.lng.toFixed(4)}` : 'N/A';
                         // Check if claimed today with proper date comparison
                         const today = new Date().toDateString();
                         const lastClaimDate = drop.lastClaimDate ? drop.lastClaimDate.toDate().toDateString() : null;
                         const isClaimedToday = lastClaimDate === today && drop.claimedBy === currentUser?.uid;
-                        const statusText = isClaimedToday ? '⏰ Heute gesammelt' : '✅ Verfügbar';
+                        const statusText = isClaimedToday ? getTranslatedText('status-claimed-today') : getTranslatedText('status-available');
                         const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-800 opacity-60' : 'border-b border-gray-700';
                         const textClass = isClaimedToday ? 'text-gray-500' : 'text-white';
                         tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${drop.geodropNumber || drop.id}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;
@@ -1652,17 +2086,17 @@
                     tableHTML += '</tbody></table></div>';
                     table.innerHTML = tableHTML;
                 } else if (table) {
-                    table.innerHTML = '<div class="text-center text-gray-400 p-4">Keine Dev GeoDrops gefunden</div>';
+                    table.innerHTML = '<div class="text-center text-gray-400 p-4">' + getTranslatedText('no-dev-drops') + '</div>';
                 }
                 
                 console.log(`✅ Loaded ${devDrops.length} Dev GeoDrops`);
             } catch (error) {
                 console.error('❌ Error loading Dev GeoDrops:', error);
-                showMessage('Fehler beim Laden der Dev GeoDrops', true);
+                showMessage(getTranslatedText('error-loading-dev-drops'), true);
                 
                 const table = document.getElementById('geodrops-table');
                 if (table) {
-                    table.innerHTML = '<div class="text-center text-red-400 p-4">Fehler beim Laden der Dev GeoDrops</div>';
+                    table.innerHTML = '<div class="text-center text-red-400 p-4">' + getTranslatedText('error-loading-dev-drops') + '</div>';
                 }
             }
         };
@@ -1691,7 +2125,7 @@
                     console.log('❌ User not logged in, cannot load user drops');
                     const userDropsTable = document.getElementById('user-drops-table');
                     if (userDropsTable) {
-                        userDropsTable.innerHTML = '<div class="text-center text-red-400 p-4">Bitte zuerst anmelden</div>';
+                        userDropsTable.innerHTML = '<div class="text-center text-red-400 p-4">' + getTranslatedText('please-login') + '</div>';
                     }
                     return;
                 }
@@ -1709,11 +2143,11 @@
                 // Update user drops table
                 const userDropsTable = document.getElementById('user-drops-table');
                 if (userDropsTable && userDrops.length > 0) {
-                    let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-600"><th class="text-left p-2">Nr.</th><th class="text-left p-2">Reward</th><th class="text-left p-2">Status</th><th class="text-left p-2">Ersteller</th><th class="text-left p-2">Koordinaten</th><th class="text-left p-2">Erstellt</th><th class="text-center p-2">Icon</th><th class="text-left p-2">Aktionen</th></tr></thead><tbody>';
+                    let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-600"><th class="text-left p-2">' + getTranslatedText('table-number') + '</th><th class="text-left p-2">' + getTranslatedText('table-reward') + '</th><th class="text-left p-2">' + getTranslatedText('table-status') + '</th><th class="text-left p-2">' + getTranslatedText('table-creator') + '</th><th class="text-left p-2">' + getTranslatedText('table-coordinates') + '</th><th class="text-left p-2">' + getTranslatedText('table-created') + '</th><th class="text-center p-2">' + getTranslatedText('table-icon') + '</th><th class="text-left p-2">' + getTranslatedText('table-actions') + '</th></tr></thead><tbody>';
                     userDrops.forEach(drop => {
                         const coords = drop.lat && drop.lng ? `${drop.lat.toFixed(4)}, ${drop.lng.toFixed(4)}` : 'N/A';
                         const createdDate = drop.createdAt ? drop.createdAt.toDate().toLocaleDateString() : 'N/A';
-                        const statusText = drop.isActive ? '✅ Aktiv' : '❌ Inaktiv';
+                        const statusText = drop.isActive ? getTranslatedText('status-active') : getTranslatedText('status-inactive');
                         const statusClass = drop.isActive ? 'text-green-400' : 'text-red-400';
                         tableHTML += `
                             <tr class="border-b border-gray-700">
@@ -1740,17 +2174,17 @@
                     tableHTML += '</tbody></table></div>';
                     userDropsTable.innerHTML = tableHTML;
                 } else if (userDropsTable) {
-                    userDropsTable.innerHTML = '<div class="text-center text-gray-400 p-4">Keine User GeoDrops gefunden</div>';
+                    userDropsTable.innerHTML = '<div class="text-center text-gray-400 p-4">' + getTranslatedText('no-user-drops') + '</div>';
                 }
                 
                 console.log(`✅ Loaded ${userDrops.length} User GeoDrops`);
             } catch (error) {
                 console.error('❌ Error loading User GeoDrops:', error);
-                showMessage('Fehler beim Laden der User GeoDrops', true);
+                showMessage(getTranslatedText('error-loading-user-drops'), true);
                 
                 const userDropsTable = document.getElementById('user-drops-table');
                 if (userDropsTable) {
-                    userDropsTable.innerHTML = '<div class="text-center text-red-400 p-4">Fehler beim Laden der User GeoDrops</div>';
+                    userDropsTable.innerHTML = '<div class="text-center text-red-400 p-4">' + getTranslatedText('error-loading-user-drops') + '</div>';
                 }
             }
         };
@@ -1773,7 +2207,7 @@
             if (window.currentLocation) {
                 document.getElementById('user-drop-lat').value = window.currentLocation.lat.toFixed(6);
                 document.getElementById('user-drop-lng').value = window.currentLocation.lng.toFixed(6);
-                showMessage('📍 Aktuelle Position verwendet', false);
+                showMessage('📍 ' + getTranslatedText('current-position') + ' verwendet', false);
             } else {
                 showMessage('❌ Keine aktuelle Position verfügbar. Bitte zuerst Standort laden!', true);
             }
@@ -1826,7 +2260,7 @@
             if (type === 'dev') {
                 // Switch to dev drops for upload
                 devBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-blue-600 text-white';
-                devBtn.innerHTML = '🎯 Dev Drops';
+                devBtn.innerHTML = getTranslatedText('dev-drops');
                 
                 userBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white';
                 userBtn.innerHTML = '👤 User Drops';
@@ -1843,11 +2277,11 @@
                     console.log('❌ loadDevDropsForUpload function not available in switch');
                 }
                 
-                showMessage('🎯 Dev Drops für Upload ausgewählt', false);
+                showMessage('🎯 ' + getTranslatedText('dev-drops') + ' ' + getTranslatedText('selected-for-upload'), false);
             } else if (type === 'user') {
                 // Switch to user drops for upload
                 devBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white';
-                devBtn.innerHTML = '🎯 Dev Drops';
+                devBtn.innerHTML = getTranslatedText('dev-drops');
                 
                 userBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-green-600 text-white';
                 userBtn.innerHTML = '👤 User Drops';
@@ -1861,7 +2295,7 @@
                     window.loadUserDropsForUpload();
                 }
                 
-                showMessage('👤 User Drops für Upload ausgewählt', false);
+                showMessage('👤 ' + getTranslatedText('user-drops') + ' ' + getTranslatedText('selected-for-upload'), false);
             }
         };
         
@@ -1943,8 +2377,8 @@
                                 <div>
                                     <label style="color: white; font-weight: bold; margin-bottom: 8px; display: block;">📊 Status:</label>
                                     <select id="edit-user-drop-status" style="width: 100%; padding: 12px; background: #4B5563; border: 1px solid #6B7280; border-radius: 6px; color: white; font-size: 16px;">
-                                        <option value="true" ${dropData.isActive ? 'selected' : ''}>✅ Aktiv</option>
-                                        <option value="false" ${!dropData.isActive ? 'selected' : ''}>❌ Inaktiv</option>
+                                        <option value="true" ${dropData.isActive ? 'selected' : ''}>${getTranslatedText('status-active')}</option>
+                                        <option value="false" ${!dropData.isActive ? 'selected' : ''}>${getTranslatedText('status-inactive')}</option>
                                     </select>
                                 </div>
                             </div>
@@ -2127,9 +2561,14 @@
                     document.getElementById('user-drop-lat').value = window.currentLocation.lat.toFixed(6);
                     document.getElementById('user-drop-lng').value = window.currentLocation.lng.toFixed(6);
                 }
+                
+                // Update placeholders for current language
+                if (window.updateModalPlaceholders) {
+                    window.updateModalPlaceholders();
+                }
             } else {
                 console.error('❌ Create user drop modal not found');
-                showMessage('❌ Modal nicht gefunden', true);
+                showMessage(getTranslatedText('modal-not-found'), true);
             }
         };
         
@@ -2158,15 +2597,69 @@
                         document.getElementById('user-drop-lat').value = window.currentLocation.lat.toFixed(6);
                         document.getElementById('user-drop-lng').value = window.currentLocation.lng.toFixed(6);
                     }
+                    
+                    // Update placeholders for current language
+                    if (window.updateModalPlaceholders) {
+                        window.updateModalPlaceholders();
+                    }
                 } else {
                     console.error('❌ Create user drop modal not found');
-                    showMessage('❌ Modal nicht gefunden', true);
+                    showMessage(getTranslatedText('modal-not-found'), true);
                 }
             };
             
             // Duplicate function removed - using the main one above
             
             console.log('✅ Functions ensured to be available');
+            
+            // Function to update modal placeholders
+            window.updateModalPlaceholders = function() {
+                const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'de';
+                const translations = window.translations || {};
+                
+                // Update User Drop Modal placeholders
+                const nameInput = document.getElementById('user-drop-name');
+                const descriptionTextarea = document.getElementById('user-drop-description');
+                const latInput = document.getElementById('user-drop-lat');
+                const lngInput = document.getElementById('user-drop-lng');
+                const devLatInput = document.getElementById('dev-user-drop-lat');
+                const devLngInput = document.getElementById('dev-user-drop-lng');
+                
+                if (nameInput && translations[currentLang]) {
+                    nameInput.placeholder = translations[currentLang]['drop-name-placeholder'] || 'z.B. Historisches Gebäude';
+                }
+                
+                if (descriptionTextarea && translations[currentLang]) {
+                    descriptionTextarea.placeholder = translations[currentLang]['photograph-description-placeholder'] || 'Beschreibe genau, was an diesem Standort fotografiert werden soll...';
+                }
+                
+                if (latInput && translations[currentLang]) {
+                    latInput.placeholder = translations[currentLang]['latitude'] || 'Breitengrad';
+                }
+                
+                if (lngInput && translations[currentLang]) {
+                    lngInput.placeholder = translations[currentLang]['longitude'] || 'Längengrad';
+                }
+                
+                if (devLatInput && translations[currentLang]) {
+                    devLatInput.placeholder = translations[currentLang]['dev-latitude'] || 'Dev Breitengrad';
+                }
+                
+                if (devLngInput && translations[currentLang]) {
+                    devLngInput.placeholder = translations[currentLang]['dev-longitude'] || 'Dev Längengrad';
+                }
+                
+                console.log('✅ Modal placeholders updated for language:', currentLang);
+            };
+            
+            // Initialize language system
+            const savedLang = localStorage.getItem('selectedLanguage');
+            if (savedLang && (savedLang === 'de' || savedLang === 'en')) {
+                currentLang = savedLang;
+            }
+            updateAllTexts();
+            updateLanguageButtons();
+            updateModalPlaceholders();
         });
     </script>
 </body>

@@ -303,8 +303,6 @@ window.updateNextFilenameDisplay = async function() {
         if (displayElement) {
             displayElement.textContent = `Nächster: ${nextFilename}`;
             console.log(`✅ Updated display element: Nächster: ${nextFilename}`);
-        } else {
-            console.log('❌ next-filename-display element not found');
         }
         
         // Also update the filename input field
@@ -316,8 +314,6 @@ window.updateNextFilenameDisplay = async function() {
             } else {
                 console.log(`ℹ️ Filename input already has value: ${filenameInput.value}`);
             }
-        } else {
-            console.log('❌ dev-filename element not found');
         }
         
         console.log(`📝 Next filename: ${nextFilename} (${count} existing drops)`);

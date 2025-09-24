@@ -92,8 +92,6 @@ window.updateMiningStats = function() {
             const boostPercentage = ((totalBoost - 1) * 100).toFixed(1);
             boostElement.textContent = `${boostPercentage}%`;
             console.log('🔧 Boost calculated:', totalBoost, 'Percentage:', boostPercentage);
-        } else {
-            console.log('❌ mining-bonus element not found');
         }
         
         // Update owned machines count - IMPROVED COUNTING
@@ -126,8 +124,6 @@ window.updateMiningStats = function() {
         if (machinesElement) {
             machinesElement.textContent = totalMachines;
             console.log('🔧 Machines count updated:', totalMachines, 'from:', ownedMachines);
-        } else {
-            console.log('❌ mining-machines-count element not found');
         }
         
     // Update mining package expiry countdown
@@ -155,7 +151,6 @@ window.updateMiningStats = function() {
 window.updateMiningExpiryCountdown = function() {
     const countdownElement = document.getElementById('mining-expiry-countdown');
     if (!countdownElement) {
-        console.log('❌ mining-expiry-countdown element not found');
         return;
     }
 
@@ -399,7 +394,6 @@ window.loadMiningMachines = function() {
     console.log('⛏️ Loading mining machines...');
     const container = document.getElementById('machines-container');
     if (!container) {
-        console.log('❌ machines-container not found');
         return;
     }
     

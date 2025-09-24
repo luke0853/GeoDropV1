@@ -53,30 +53,42 @@
                 <!-- Content -->
                 <div class="relative z-10">
                     <div class="text-center mb-8 mt-16">
-                        <h2 class="text-4xl font-bold text-white mb-2">GeoDrop</h2>
-                        <p class="text-gray-300 text-lg">Willkommen bei der Zukunft des Geo-Minings</p>
+                        <!-- Language Switcher -->
+                        <div class="flex justify-center mb-4">
+                            <div class="flex space-x-2 bg-gray-800/50 backdrop-blur-sm rounded-lg p-2">
+                                <button onclick="switchLanguage('de')" id="lang-de-btn" class="px-3 py-1 rounded text-white font-semibold hover:bg-white/30 transition-all text-sm bg-white/30">
+                                    🇩🇪
+                                </button>
+                                <button onclick="switchLanguage('en')" id="lang-en-btn" class="px-3 py-1 rounded text-white font-semibold hover:bg-white/30 transition-all text-sm">
+                                    🇺🇸
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <h2 class="text-4xl font-bold text-white mb-2" data-translate="startseite-title">GeoDrop</h2>
+                        <p class="text-gray-300 text-lg" data-translate="startseite-subtitle">Willkommen bei der Zukunft des Geo-Minings</p>
         </div>
 
                 <!-- Login Section -->
                 <div id="login-section" class="bg-gray-700 rounded-lg p-6 mb-6" style="background: rgba(55, 65, 81, 0.8); backdrop-filter: blur(2px);">
-                    <h3 class="text-xl font-semibold text-white mb-4">🔑 Anmeldung</h3>
+                    <h3 class="text-xl font-semibold text-white mb-4" data-translate="login-title">🔑 Anmeldung</h3>
                     <div class="space-y-4">
-                        <input type="email" id="startseite-auth-email" placeholder="E-Mail" class="w-full px-4 py-2 rounded-lg bg-gray-600 text-white border border-gray-500 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') login()">
-                        <input type="password" id="startseite-auth-password" placeholder="Passwort" class="w-full px-4 py-2 rounded-lg bg-gray-600 text-white border border-gray-500 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') login()">
+                        <input type="email" id="startseite-auth-email" data-translate="email-placeholder" placeholder="E-Mail" class="w-full px-4 py-2 rounded-lg bg-gray-600 text-white border border-gray-500 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') login()">
+                        <input type="password" id="startseite-auth-password" data-translate="password-placeholder" placeholder="Passwort" class="w-full px-4 py-2 rounded-lg bg-gray-600 text-white border border-gray-500 focus:border-blue-500 focus:outline-none" onkeypress="if(event.key === 'Enter') login()">
                         
                         <!-- REFERRAL FIELD - MUST BE VISIBLE -->
                         <div style="background: red !important; padding: 15px !important; margin: 15px 0 !important; border: 3px solid yellow !important; display: block !important; visibility: visible !important; position: relative !important; z-index: 9999 !important;">
-                            <label class="block text-sm font-medium text-white mb-2" style="color: white !important; font-weight: bold !important;">🔗 REFERRAL-CODE (OPTIONAL)</label>
-                            <input type="text" id="reg-referral" placeholder="REFERRAL-CODE EINGEBEN" class="w-full px-4 py-3 bg-white text-black rounded-lg border border-red-500 focus:border-blue-500 focus:outline-none" style="background: white !important; color: black !important; border: 3px solid red !important; font-size: 16px !important;">
-                            <p class="text-xs text-white mt-1" style="color: white !important;">Du erhältst 50 PixelDrop Bonus wenn du über einen Referral-Link kommst!</p>
+                            <label class="block text-sm font-medium text-white mb-2" style="color: white !important; font-weight: bold !important;" data-translate="referral-label">🔗 REFERRAL-CODE (OPTIONAL)</label>
+                            <input type="text" id="reg-referral" data-translate="referral-placeholder" placeholder="REFERRAL-CODE EINGEBEN" class="w-full px-4 py-3 bg-white text-black rounded-lg border border-red-500 focus:border-blue-500 focus:outline-none" style="background: white !important; color: black !important; border: 3px solid red !important; font-size: 16px !important;">
+                            <p class="text-xs text-white mt-1" style="color: white !important;" data-translate="referral-hint">Du erhältst 50 PixelDrop Bonus wenn du über einen Referral-Link kommst!</p>
                         </div>
                         
                         <div class="flex space-x-2">
-                            <button onclick="login()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Anmelden</button>
-                            <button onclick="register()" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">Registrieren</button>
+                            <button onclick="login()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" data-translate="login-button">Anmelden</button>
+                            <button onclick="register()" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors" data-translate="register-button">Registrieren</button>
                         </div>
-                        <button onclick="resetPassword()" class="w-full px-4 py-2 text-blue-400 hover:text-blue-300 transition-colors">Passwort vergessen?</button>
-                        <div class="text-xs text-gray-400 mt-2">
+                        <button onclick="resetPassword()" class="w-full px-4 py-2 text-blue-400 hover:text-blue-300 transition-colors" data-translate="forgot-password">Passwort vergessen?</button>
+                        <div class="text-xs text-gray-400 mt-2" data-translate="login-tip">
                             💡 Tipp: Drücke Enter in den Eingabefeldern zum schnellen Anmelden
                         </div>
                     </div>
@@ -84,44 +96,44 @@
 
                 <!-- User Info -->
                 <div id="user-info" class="bg-gray-700 rounded-lg p-6 mb-6" style="display: none; background: rgba(55, 65, 81, 0.8); backdrop-filter: blur(2px);">
-                    <h3 class="text-xl font-semibold text-white mb-4">👤 Benutzerinfo</h3>
+                    <h3 class="text-xl font-semibold text-white mb-4" data-translate="user-info-title">👤 Benutzerinfo</h3>
                     <div class="mb-4 text-center">
                         <p class="text-lg font-semibold text-white" id="user-username">Lade...</p>
-                        <p class="text-sm text-gray-400">Benutzername</p>
+                        <p class="text-sm text-gray-400" data-translate="username-label">Benutzername</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                         <div>
                             <p class="text-2xl font-bold text-purple-400" id="user-coins">0</p>
-                            <p class="text-sm text-gray-400">PixelDrop</p>
+                            <p class="text-sm text-gray-400" data-translate="pixeldrop-label">PixelDrop</p>
                         </div>
                         <div>
                             <p class="text-xl font-bold text-yellow-400" id="user-tbnb">0.00</p>
-                            <p class="text-sm text-gray-400">tBNB</p>
+                            <p class="text-sm text-gray-400" data-translate="tbnb-label">tBNB</p>
                         </div>
                         <div>
                             <p class="text-2xl font-bold text-blue-400" id="user-drops">0</p>
-                            <p class="text-sm text-gray-400">Drops</p>
+                            <p class="text-sm text-gray-400" data-translate="drops-label">Drops</p>
                         </div>
                     </div>
                     <div class="mt-4">
                         <p class="text-lg font-semibold text-green-400" id="user-boost">1.0x</p>
-                        <p class="text-sm text-gray-400">Boost</p>
+                        <p class="text-sm text-gray-400" data-translate="boost-label">Boost</p>
                     </div>
-                    <button onclick="logout()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">Abmelden</button>
+                    <button onclick="logout()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors" data-translate="logout-button">Abmelden</button>
                         </div>
                     </div>
                     
                 <!-- Whitepaper & Roadmap Section -->
                 <div class="text-center mt-8 space-y-4">
                     <div class="flex flex-wrap gap-4 justify-center">
-                        <a href="../whitepaper_alt.html" target="_blank" class="px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition-all transform hover:scale-105 font-semibold">
+                        <a href="../whitepaper_alt.html" target="_blank" class="px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg hover:from-green-700 hover:to-blue-700 transition-all transform hover:scale-105 font-semibold" data-translate="whitepaper-button">
                             📖 Vollständiges Whitepaper
                         </a>
-                        <button onclick="showRoadmapPopup()" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 font-semibold">
+                        <button onclick="showRoadmapPopup()" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 font-semibold" data-translate="roadmap-button">
                             🗺️ Roadmap anzeigen
                         </button>
                     </div>
-                    <p class="text-gray-300 text-sm mt-4">
+                    <p class="text-gray-300 text-sm mt-4" data-translate="whitepaper-hint">
                         💡 Klicke auf "Vollständiges Whitepaper" für die detaillierte Version mit aktueller Roadmap
                     </p>
                 </div>
@@ -135,22 +147,22 @@
         <div class="flex items-center justify-center min-h-screen p-4">
             <div class="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 <div class="sticky top-0 bg-gray-800 p-4 border-b border-gray-700 flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-white">📄 GeoDrop White Paper</h2>
+                    <h2 class="text-2xl font-bold text-white" data-translate="whitepaper-popup-title">📄 GeoDrop White Paper</h2>
                     <button onclick="closeWhitePaperPopup()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
                 </div>
                 <div class="p-6">
                     <div class="space-y-6 text-gray-300">
                         <div class="bg-gray-700 rounded-lg p-6">
-                            <h3 class="text-xl font-semibold text-blue-400 mb-3">🌍 Vision & Mission</h3>
-                            <p class="text-sm leading-relaxed">
+                            <h3 class="text-xl font-semibold text-blue-400 mb-3" data-translate="vision-mission">🌍 Vision & Mission</h3>
+                            <p class="text-sm leading-relaxed" data-translate="vision-text">
                                 GeoDrop revolutioniert das Geo-Mining durch innovative Blockchain-Technologie und gamifizierte Standort-basierte Belohnungen. 
                                 Unsere Mission ist es, eine dezentrale Plattform zu schaffen, die Benutzer für reale geografische Aktivitäten belohnt.
                             </p>
                 </div>
                         
                         <div class="bg-gray-700 rounded-lg p-6">
-                            <h3 class="text-xl font-semibold text-green-400 mb-3">⚡ Technologie</h3>
-                            <p class="text-sm leading-relaxed">
+                            <h3 class="text-xl font-semibold text-green-400 mb-3" data-translate="technology">⚡ Technologie</h3>
+                            <p class="text-sm leading-relaxed" data-translate="tech-text">
                                 <strong>Blockchain-Integration:</strong> BSC (Binance Smart Chain) für schnelle, kostengünstige Transaktionen<br>
                                 <strong>GPS-Verifikation:</strong> Präzise Standortbestimmung mit Hash-basierter Verifikation<br>
                                 <strong>Smart Contracts:</strong> Automatisierte Belohnungsverteilung und Drop-Verwaltung
@@ -158,8 +170,8 @@
                 </div>
                         
                         <div class="bg-gray-700 rounded-lg p-6">
-                            <h3 class="text-xl font-semibold text-purple-400 mb-3">🎮 Gameplay</h3>
-                            <p class="text-sm leading-relaxed">
+                            <h3 class="text-xl font-semibold text-purple-400 mb-3" data-translate="gameplay">🎮 Gameplay</h3>
+                            <p class="text-sm leading-relaxed" data-translate="gameplay-text">
                                 <strong>GeoDrops:</strong> Sammle Belohnungen an speziellen Standorten<br>
                                 <strong>Mining-Maschinen:</strong> Investiere in automatische Mining-Geräte<br>
                                 <strong>Leaderboard:</strong> Konkurriere mit anderen Spielern weltweit<br>
@@ -168,8 +180,8 @@
                 </div>
                         
                         <div class="bg-gray-700 rounded-lg p-6">
-                            <h3 class="text-xl font-semibold text-yellow-400 mb-3">💰 Tokenomics</h3>
-                            <p class="text-sm leading-relaxed">
+                            <h3 class="text-xl font-semibold text-yellow-400 mb-3" data-translate="tokenomics">💰 Tokenomics</h3>
+                            <p class="text-sm leading-relaxed" data-translate="tokenomics-text">
                                 <strong>PixelDrop Token:</strong> Hauptwährung der Plattform<br>
                                 <strong>tBNB Integration:</strong> Direkte BSC-Integration für Transaktionen<br>
                                 <strong>Deflationärer Mechanismus:</strong> Token-Burning bei bestimmten Aktionen<br>
@@ -178,7 +190,7 @@
             </div>
             
                         <div class="text-center mt-8">
-                            <button onclick="downloadWhitePaper()" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105">
+                            <button onclick="downloadWhitePaper()" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105" data-translate="download-whitepaper">
                                 📥 White Paper herunterladen
                             </button>
                 </div>
@@ -193,14 +205,14 @@
         <div class="flex items-center justify-center min-h-screen p-4">
             <div class="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 <div class="sticky top-0 bg-gray-800 p-4 border-b border-gray-700 flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-white">🗺️ GeoDrop Roadmap</h2>
+                    <h2 class="text-2xl font-bold text-white" data-translate="roadmap-popup-title">🗺️ GeoDrop Roadmap</h2>
                     <button onclick="closeRoadmapPopup()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
                 </div>
                 <div class="p-6">
                     <div class="space-y-6 text-gray-300">
                         <div class="bg-gray-700 rounded-lg p-6">
-                            <h3 class="text-xl font-semibold text-green-400 mb-3">✅ Phase 1: Foundation (August 2025)</h3>
-                            <p class="text-sm leading-relaxed mb-3">Grundlegende App-Struktur und Core-Features - ABGESCHLOSSEN</p>
+                            <h3 class="text-xl font-semibold text-green-400 mb-3" data-translate="phase1-title">✅ Phase 1: Foundation (August 2025)</h3>
+                            <p class="text-sm leading-relaxed mb-3" data-translate="phase1-desc">Grundlegende App-Struktur und Core-Features - ABGESCHLOSSEN</p>
                             <ul class="text-sm space-y-1">
                                 <li>✅ Geo-Location Integration</li>
                                 <li>✅ Firebase Backend Setup</li>
@@ -212,8 +224,8 @@
                         </div>
                         
                         <div class="bg-gray-700 rounded-lg p-6">
-                            <h3 class="text-xl font-semibold text-green-400 mb-3">✅ Phase 2: Blockchain Integration (September 2025)</h3>
-                            <p class="text-sm leading-relaxed mb-3">Vollständige Blockchain-Integration und DeFi-Features - ABGESCHLOSSEN</p>
+                            <h3 class="text-xl font-semibold text-green-400 mb-3" data-translate="phase2-title">✅ Phase 2: Blockchain Integration (September 2025)</h3>
+                            <p class="text-sm leading-relaxed mb-3" data-translate="phase2-desc">Vollständige Blockchain-Integration und DeFi-Features - ABGESCHLOSSEN</p>
                             <ul class="text-sm space-y-1">
                                 <li>✅ tBNB Integration</li>
                                 <li>✅ MetaMask Wallet</li>
@@ -225,8 +237,8 @@
                         </div>
                         
                         <div class="bg-gray-700 rounded-lg p-6">
-                            <h3 class="text-xl font-semibold text-blue-400 mb-3">🚧 Phase 3: Advanced Features (September 2025)</h3>
-                            <p class="text-sm leading-relaxed mb-3">Erweiterte Features und Optimierungen - IN ENTWICKLUNG</p>
+                            <h3 class="text-xl font-semibold text-blue-400 mb-3" data-translate="phase3-title">🚧 Phase 3: Advanced Features (September 2025)</h3>
+                            <p class="text-sm leading-relaxed mb-3" data-translate="phase3-desc">Erweiterte Features und Optimierungen - IN ENTWICKLUNG</p>
                             <ul class="text-sm space-y-1">
                                 <li>🔄 Dev Area Erweiterung</li>
                                 <li>🔄 Drop Nummerierung</li>
@@ -238,8 +250,8 @@
                         </div>
                         
                         <div class="bg-gray-700 rounded-lg p-6">
-                            <h3 class="text-xl font-semibold text-yellow-400 mb-3">⏳ Phase 4: Future Development (Q4 2025)</h3>
-                            <p class="text-sm leading-relaxed mb-3">Geplante Entwicklung und Verbesserungen</p>
+                            <h3 class="text-xl font-semibold text-yellow-400 mb-3" data-translate="phase4-title">⏳ Phase 4: Future Development (Q4 2025)</h3>
+                            <p class="text-sm leading-relaxed mb-3" data-translate="phase4-desc">Geplante Entwicklung und Verbesserungen</p>
                             <ul class="text-sm space-y-1">
                                 <li>⏳ Enhanced Security Features</li>
                                 <li>⏳ Advanced Trading Analytics</li>
@@ -250,8 +262,8 @@
                         </div>
                         
                         <div class="bg-gray-700 rounded-lg p-6">
-                            <h3 class="text-xl font-semibold text-purple-400 mb-3">🔮 Phase 5: Future Vision (2026)</h3>
-                            <p class="text-sm leading-relaxed mb-3">Zukunftsweisende Features und Innovationen</p>
+                            <h3 class="text-xl font-semibold text-purple-400 mb-3" data-translate="phase5-title">🔮 Phase 5: Future Vision (2026)</h3>
+                            <p class="text-sm leading-relaxed mb-3" data-translate="phase5-desc">Zukunftsweisende Features und Innovationen</p>
                             <ul class="text-sm space-y-1">
                                 <li>⏳ AI-Powered Features</li>
                                 <li>⏳ Advanced Analytics</li>
@@ -263,7 +275,7 @@
                         </div>
                         
                         <div class="text-center mt-8">
-                            <a href="../whitepaper_alt.html" target="_blank" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105">
+                            <a href="../whitepaper_alt.html" target="_blank" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105" data-translate="show-full-roadmap">
                                 📖 Vollständige Roadmap anzeigen
                             </a>
                         </div>
@@ -279,6 +291,229 @@
     <script src="../js/wallet-system.js"></script>
     
     <script>
+        // Language System
+        let currentLang = 'de'; // Default language
+        
+        const translations = {
+            de: {
+                // Main Content
+                'startseite-title': 'GeoDrop',
+                'startseite-subtitle': 'Willkommen bei der Zukunft des Geo-Minings',
+                
+                // Login Section
+                'login-title': '🔑 Anmeldung',
+                'email-placeholder': 'E-Mail',
+                'password-placeholder': 'Passwort',
+                'referral-label': '🔗 REFERRAL-CODE (OPTIONAL)',
+                'referral-placeholder': 'REFERRAL-CODE EINGEBEN',
+                'referral-hint': 'Du erhältst 50 PixelDrop Bonus wenn du über einen Referral-Link kommst!',
+                'login-button': 'Anmelden',
+                'register-button': 'Registrieren',
+                'forgot-password': 'Passwort vergessen?',
+                'login-tip': '💡 Tipp: Drücke Enter in den Eingabefeldern zum schnellen Anmelden',
+                
+                // User Info
+                'user-info-title': '👤 Benutzerinfo',
+                'username-label': 'Benutzername',
+                'pixeldrop-label': 'PixelDrop',
+                'tbnb-label': 'tBNB',
+                'drops-label': 'Drops',
+                'boost-label': 'Boost',
+                'logout-button': 'Abmelden',
+                
+                // Whitepaper & Roadmap
+                'whitepaper-button': '📖 Vollständiges Whitepaper',
+                'roadmap-button': '🗺️ Roadmap anzeigen',
+                'whitepaper-hint': '💡 Klicke auf "Vollständiges Whitepaper" für die detaillierte Version mit aktueller Roadmap',
+                
+                // Popup Titles
+                'whitepaper-popup-title': '📄 GeoDrop White Paper',
+                'roadmap-popup-title': '🗺️ GeoDrop Roadmap',
+                'download-whitepaper': '📥 White Paper herunterladen',
+                'show-full-roadmap': '📖 Vollständige Roadmap anzeigen',
+                
+                // Whitepaper Content
+                'vision-mission': '🌍 Vision & Mission',
+                'vision-text': 'GeoDrop revolutioniert das Geo-Mining durch innovative Blockchain-Technologie und gamifizierte Standort-basierte Belohnungen. Unsere Mission ist es, eine dezentrale Plattform zu schaffen, die Benutzer für reale geografische Aktivitäten belohnt.',
+                'technology': '⚡ Technologie',
+                'tech-text': '<strong>Blockchain-Integration:</strong> BSC (Binance Smart Chain) für schnelle, kostengünstige Transaktionen<br><strong>GPS-Verifikation:</strong> Präzise Standortbestimmung mit Hash-basierter Verifikation<br><strong>Smart Contracts:</strong> Automatisierte Belohnungsverteilung und Drop-Verwaltung',
+                'gameplay': '🎮 Gameplay',
+                'gameplay-text': '<strong>GeoDrops:</strong> Sammle Belohnungen an speziellen Standorten<br><strong>Mining-Maschinen:</strong> Investiere in automatische Mining-Geräte<br><strong>Leaderboard:</strong> Konkurriere mit anderen Spielern weltweit<br><strong>Daily Bonuses:</strong> Tägliche Belohnungen für aktive Teilnahme',
+                'tokenomics': '💰 Tokenomics',
+                'tokenomics-text': '<strong>PixelDrop Token:</strong> Hauptwährung der Plattform<br><strong>tBNB Integration:</strong> Direkte BSC-Integration für Transaktionen<br><strong>Deflationärer Mechanismus:</strong> Token-Burning bei bestimmten Aktionen<br><strong>Staking Rewards:</strong> Belohnungen für langfristige Token-Haltung',
+                
+                // Roadmap Content
+                'phase1-title': '✅ Phase 1: Foundation (August 2025)',
+                'phase1-desc': 'Grundlegende App-Struktur und Core-Features - ABGESCHLOSSEN',
+                'phase2-title': '✅ Phase 2: Blockchain Integration (September 2025)',
+                'phase2-desc': 'Vollständige Blockchain-Integration und DeFi-Features - ABGESCHLOSSEN',
+                'phase3-title': '🚧 Phase 3: Advanced Features (September 2025)',
+                'phase3-desc': 'Erweiterte Features und Optimierungen - IN ENTWICKLUNG',
+                'phase4-title': '⏳ Phase 4: Future Development (Q4 2025)',
+                'phase4-desc': 'Geplante Entwicklung und Verbesserungen',
+                'phase5-title': '🔮 Phase 5: Future Vision (2026)',
+                'phase5-desc': 'Zukunftsweisende Features und Innovationen',
+                
+                // Messages
+                'login-success': 'Anmeldung erfolgreich!',
+                'login-error': 'Anmeldung fehlgeschlagen: ',
+                'register-success': 'Registrierung erfolgreich!',
+                'register-error': 'Registrierung fehlgeschlagen: ',
+                'logout-success': 'Abmeldung erfolgreich!',
+                'logout-error': 'Abmeldung fehlgeschlagen: ',
+                'reset-success': 'Passwort-Reset E-Mail wurde gesendet!',
+                'reset-error': 'Fehler beim Senden der Reset-E-Mail: ',
+                'email-required': 'Bitte E-Mail und Passwort eingeben.',
+                'email-only-required': 'Bitte E-Mail-Adresse eingeben.',
+                'download-message': '📥 White Paper Download\n\nDas vollständige White Paper wird hier heruntergeladen.'
+            },
+            en: {
+                // Main Content
+                'startseite-title': 'GeoDrop',
+                'startseite-subtitle': 'Welcome to the Future of Geo-Mining',
+                
+                // Login Section
+                'login-title': '🔑 Login',
+                'email-placeholder': 'Email',
+                'password-placeholder': 'Password',
+                'referral-label': '🔗 REFERRAL CODE (OPTIONAL)',
+                'referral-placeholder': 'ENTER REFERRAL CODE',
+                'referral-hint': 'You get 50 PixelDrop bonus if you come via a referral link!',
+                'login-button': 'Login',
+                'register-button': 'Register',
+                'forgot-password': 'Forgot Password?',
+                'login-tip': '💡 Tip: Press Enter in the input fields for quick login',
+                
+                // User Info
+                'user-info-title': '👤 User Info',
+                'username-label': 'Username',
+                'pixeldrop-label': 'PixelDrop',
+                'tbnb-label': 'tBNB',
+                'drops-label': 'Drops',
+                'boost-label': 'Boost',
+                'logout-button': 'Logout',
+                
+                // Whitepaper & Roadmap
+                'whitepaper-button': '📖 Show Complete Whitepaper',
+                'roadmap-button': '🗺️ Show Roadmap',
+                'whitepaper-hint': '💡 Click on "Show Complete Whitepaper" for the detailed version with current roadmap',
+                
+                // Popup Titles
+                'whitepaper-popup-title': '📄 GeoDrop White Paper',
+                'roadmap-popup-title': '🗺️ GeoDrop Roadmap',
+                'download-whitepaper': '📥 Download White Paper',
+                'show-full-roadmap': '📖 Show Complete Roadmap',
+                
+                // Whitepaper Content
+                'vision-mission': '🌍 Vision & Mission',
+                'vision-text': 'GeoDrop revolutionizes geo-mining through innovative blockchain technology and gamified location-based rewards. Our mission is to create a decentralized platform that rewards users for real geographic activities.',
+                'technology': '⚡ Technology',
+                'tech-text': '<strong>Blockchain Integration:</strong> BSC (Binance Smart Chain) for fast, cost-effective transactions<br><strong>GPS Verification:</strong> Precise location determination with hash-based verification<br><strong>Smart Contracts:</strong> Automated reward distribution and drop management',
+                'gameplay': '🎮 Gameplay',
+                'gameplay-text': '<strong>GeoDrops:</strong> Collect rewards at special locations<br><strong>Mining Machines:</strong> Invest in automatic mining devices<br><strong>Leaderboard:</strong> Compete with players worldwide<br><strong>Daily Bonuses:</strong> Daily rewards for active participation',
+                'tokenomics': '💰 Tokenomics',
+                'tokenomics-text': '<strong>PixelDrop Token:</strong> Main currency of the platform<br><strong>tBNB Integration:</strong> Direct BSC integration for transactions<br><strong>Deflationary Mechanism:</strong> Token burning on certain actions<br><strong>Staking Rewards:</strong> Rewards for long-term token holding',
+                
+                // Roadmap Content
+                'phase1-title': '✅ Phase 1: Foundation (August 2025)',
+                'phase1-desc': 'Basic app structure and core features - COMPLETED',
+                'phase2-title': '✅ Phase 2: Blockchain Integration (September 2025)',
+                'phase2-desc': 'Complete blockchain integration and DeFi features - COMPLETED',
+                'phase3-title': '🚧 Phase 3: Advanced Features (September 2025)',
+                'phase3-desc': 'Advanced features and optimizations - IN DEVELOPMENT',
+                'phase4-title': '⏳ Phase 4: Future Development (Q4 2025)',
+                'phase4-desc': 'Planned development and improvements',
+                'phase5-title': '🔮 Phase 5: Future Vision (2026)',
+                'phase5-desc': 'Future-oriented features and innovations',
+                
+                // Messages
+                'login-success': 'Login successful!',
+                'login-error': 'Login failed: ',
+                'register-success': 'Registration successful!',
+                'register-error': 'Registration failed: ',
+                'logout-success': 'Logout successful!',
+                'logout-error': 'Logout failed: ',
+                'reset-success': 'Password reset email has been sent!',
+                'reset-error': 'Error sending reset email: ',
+                'email-required': 'Please enter email and password.',
+                'email-only-required': 'Please enter email address.',
+                'download-message': '📥 White Paper Download\n\nThe complete White Paper will be downloaded here.'
+            }
+        };
+        
+        // Language switching functions
+        function switchLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('selectedLanguage', lang);
+            updateAllTexts();
+            updateLanguageButtons();
+        }
+        
+        function updateLanguageButtons() {
+            const deBtn = document.getElementById('lang-de-btn');
+            const enBtn = document.getElementById('lang-en-btn');
+            
+            if (deBtn && enBtn) {
+                if (currentLang === 'de') {
+                    deBtn.classList.add('bg-white/30');
+                    deBtn.classList.remove('bg-transparent');
+                    enBtn.classList.add('bg-transparent');
+                    enBtn.classList.remove('bg-white/30');
+                } else {
+                    enBtn.classList.add('bg-white/30');
+                    enBtn.classList.remove('bg-transparent');
+                    deBtn.classList.add('bg-transparent');
+                    deBtn.classList.remove('bg-white/30');
+                }
+            }
+        }
+        
+        function updateAllTexts() {
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLang] && translations[currentLang][key]) {
+                    if (element.tagName === 'INPUT' && element.type !== 'submit') {
+                        element.placeholder = translations[currentLang][key];
+                    } else {
+                        element.textContent = translations[currentLang][key];
+                    }
+                }
+            });
+            
+            // Update whitepaper links based on language
+            updateWhitepaperLinks();
+        }
+        
+        function updateWhitepaperLinks() {
+            console.log('🔗 Updating whitepaper links for language:', currentLang);
+            
+            // Update main whitepaper button link - find by text content or position
+            const whitepaperLink = document.querySelector('a[data-translate="whitepaper-button"]');
+            
+            if (whitepaperLink) {
+                if (currentLang === 'en') {
+                    whitepaperLink.href = '../english/whitepaper_tech_english.html';
+                    console.log('✅ Whitepaper link set to English tech version');
+                } else {
+                    whitepaperLink.href = '../whitepaper_alt.html';
+                    console.log('✅ Whitepaper link set to German version');
+                }
+            }
+            
+            // Update roadmap popup link (the one inside the roadmap popup)
+            const roadmapPopupLink = document.querySelector('#roadmap-popup a[data-translate="show-full-roadmap"]');
+            
+            if (roadmapPopupLink) {
+                if (currentLang === 'en') {
+                    roadmapPopupLink.href = '../english/whitepaper_tech_english.html';
+                    console.log('✅ Roadmap popup link set to English tech version');
+                } else {
+                    roadmapPopupLink.href = '../whitepaper_alt.html';
+                    console.log('✅ Roadmap popup link set to German version');
+                }
+            }
+        }
+        
         // Honeypot keys for bot protection (these are fake and will be ignored)
         const fakeApiKey1 = "AIzaSyBOT_PROTECTION_FAKE_KEY_12345";
         const fakeApiKey2 = "AIzaSyFAKE_FIREBASE_KEY_67890";
@@ -319,16 +554,16 @@
             const password = document.getElementById('startseite-auth-password').value;
             
             if (!email || !password) {
-                showMessage('Bitte E-Mail und Passwort eingeben.', true);
+                showMessage(translations[currentLang]['email-required'], true);
                 return;
             }
             
             try {
                 await auth.signInWithEmailAndPassword(email, password);
-                showMessage('Anmeldung erfolgreich!');
+                showMessage(translations[currentLang]['login-success']);
             } catch (error) {
                 console.error('Login error:', error);
-                showMessage('Anmeldung fehlgeschlagen: ' + error.message, true);
+                showMessage(translations[currentLang]['login-error'] + error.message, true);
             }
         }
 
@@ -337,42 +572,42 @@
             const password = document.getElementById('startseite-auth-password').value;
             
             if (!email || !password) {
-                showMessage('Bitte E-Mail und Passwort eingeben.', true);
+                showMessage(translations[currentLang]['email-required'], true);
                 return;
             }
             
             try {
                 await auth.createUserWithEmailAndPassword(email, password);
-                showMessage('Registrierung erfolgreich!');
+                showMessage(translations[currentLang]['register-success']);
             } catch (error) {
                 console.error('Registration error:', error);
-                showMessage('Registrierung fehlgeschlagen: ' + error.message, true);
+                showMessage(translations[currentLang]['register-error'] + error.message, true);
             }
         }
 
         async function logout() {
             try {
                 await auth.signOut();
-                showMessage('Abmeldung erfolgreich!');
+                showMessage(translations[currentLang]['logout-success']);
             } catch (error) {
                 console.error('Logout error:', error);
-                showMessage('Abmeldung fehlgeschlagen: ' + error.message, true);
+                showMessage(translations[currentLang]['logout-error'] + error.message, true);
             }
         }
 
         async function resetPassword() {
             const email = document.getElementById('startseite-auth-email').value;
             if (!email) {
-                showMessage('Bitte E-Mail-Adresse eingeben.', true);
+                showMessage(translations[currentLang]['email-only-required'], true);
                 return;
             }
             
             try {
                 await auth.sendPasswordResetEmail(email);
-                showMessage('Passwort-Reset E-Mail wurde gesendet!');
+                showMessage(translations[currentLang]['reset-success']);
             } catch (error) {
                 console.error('Password reset error:', error);
-                showMessage('Fehler beim Senden der Reset-E-Mail: ' + error.message, true);
+                showMessage(translations[currentLang]['reset-error'] + error.message, true);
             }
         }
 
@@ -411,7 +646,7 @@
         }
 
         function downloadWhitePaper() {
-            alert('📥 White Paper Download\n\nDas vollständige White Paper wird hier heruntergeladen.');
+            alert(translations[currentLang]['download-message']);
         }
 
         function showRoadmapPopup() {
@@ -431,6 +666,19 @@
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🏠 Startseite geladen');
+            
+            // Initialize language system
+            const savedLang = localStorage.getItem('selectedLanguage');
+            if (savedLang && (savedLang === 'de' || savedLang === 'en')) {
+                currentLang = savedLang;
+            }
+            updateAllTexts();
+            updateLanguageButtons();
+            
+            // Ensure whitepaper links are set correctly on page load
+            setTimeout(() => {
+                updateWhitepaperLinks();
+            }, 100);
             
             // Process referral link immediately
             processReferralLinkOnStartseite();

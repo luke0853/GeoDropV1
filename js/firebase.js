@@ -264,6 +264,13 @@ function setupAuthListener() {
             // Set global currentUser for other functions
             window.currentUser = user;
             
+            // Starte automatisches tägliches Reset-System
+            if (typeof window.initDailyResetSystem === 'function') {
+                setTimeout(() => {
+                    window.initDailyResetSystem();
+                }, 2000); // 2 Sekunden warten bis alles geladen ist
+            }
+            
             // Set user ID for Firebase Analytics cross-device tracking
             if (window.analytics) {
                 window.analytics.setUserId(user.uid);

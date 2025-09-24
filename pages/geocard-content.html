@@ -1,14 +1,14 @@
 <div class="max-w-6xl mx-auto p-6">
-    <h2 class="text-3xl font-bold text-white mb-8">🗺️ GeoCard</h2>
+    <h2 class="text-3xl font-bold text-white mb-8" data-translate="geocard-title">🗺️ GeoCard</h2>
     
     <!-- Map Container -->
     <div class="bg-gray-700 rounded-lg p-6 mb-6">
-        <h3 class="text-xl font-semibold text-white mb-4">🌍 Interaktive Karte</h3>
+        <h3 class="text-xl font-semibold text-white mb-4" data-translate="interactive-map">🌍 Interaktive Karte</h3>
         <div id="mapid"></div>
         
         <!-- Map Legend Button -->
         <div class="mt-4 text-center">
-            <button onclick="showMapLegendPopup()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+            <button onclick="showMapLegendPopup()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors" data-translate="map-legend-button">
                 🗺️ Karten-Legende anzeigen
             </button>
         </div>
@@ -17,25 +17,25 @@
     <!-- Location & Photo Section -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-gray-700 rounded-lg p-6">
-            <h3 class="text-xl font-semibold text-white mb-4">📍 Standort</h3>
-            <button onclick="getUserLocation()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mb-4">
+            <h3 class="text-xl font-semibold text-white mb-4" data-translate="location-title">📍 Standort</h3>
+            <button onclick="getUserLocation()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors mb-4" data-translate="use-my-location">
                 📍 Meinen Standort verwenden
             </button>
             <div id="location-info" class="text-sm text-gray-300">
-                <p>Klicke auf den Button um deine aktuelle Position zu laden</p>
+                <p data-translate="location-info-default">Klicke auf den Button um deine aktuelle Position zu laden</p>
             </div>
         </div>
         
         <div class="bg-gray-700 rounded-lg p-6">
-            <h3 class="text-xl font-semibold text-white mb-4">📸 Foto-Upload</h3>
+            <h3 class="text-xl font-semibold text-white mb-4" data-translate="photo-upload-title">📸 Foto-Upload</h3>
             
             <!-- Drop Selection -->
             <div class="mb-4">
-                <label for="geocard-drop-select" class="block text-sm font-medium text-gray-300 mb-2">
+                <label for="geocard-drop-select" class="block text-sm font-medium text-gray-300 mb-2" data-translate="select-geodrop">
                     GeoDrop auswählen:
                 </label>
                 <select id="geocard-drop-select" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white" onchange="updateClaimButton()">
-                    <option value="">Lade GeoDrops...</option>
+                    <option value="">Loading GeoDrops...</option>
                 </select>
                 <!-- Hidden input for drop ID -->
                 <input type="hidden" id="selected-drop-id" value="">
@@ -59,11 +59,11 @@
                 <button onclick="setDevTestCoordinates()" class="w-full px-3 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm">
                     📍 Test-Koordinaten setzen
                 </button>
-                <p class="text-yellow-300 text-sm mt-1">⚠️ Nur für Dev-Tests - normale User sehen dies nicht!</p>
+                <p class="text-yellow-300 text-sm mt-1">⚠️ Only for Dev tests - normal users don't see this!</p>
             </div>
             
             <input type="file" id="photo-input" accept="image/*" capture="environment" class="hidden" onchange="handlePhotoFileSelect()">
-            <button onclick="handlePhotoCapture()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4">
+            <button onclick="handlePhotoCapture()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mb-4" data-translate="take-photo">
                 📸 Foto aufnehmen
             </button>
             
@@ -122,22 +122,100 @@
             </div>
         </div>
         
-        <!-- Dev GeoDrops Table -->
-        <div id="dev-drops-section">
-            <div id="geodrops-table" class="mt-4">
-                <div class="text-center text-gray-400 py-4">
-                    <p>Lade Dev GeoDrops-Tabelle...</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- User GeoDrops Table -->
-        <div id="user-drops-section" style="display: none;">
-            <div id="user-drops-table" class="mt-4">
-                <div class="text-center text-gray-400 py-4">
-                    <p>Lade User GeoDrops-Tabelle...</p>
-                </div>
-            </div>
+        <div id="drops-container" class="space-y-4">
         </div>
     </div>
 </div>
+
+<script>
+(function(){
+    // Interner Speicher für die Drops
+    window._drops = window._drops || [];
+    window.currentLanguage = window.currentLanguage || 'de';
+
+    // Normalisiert ein Drop-Objekt, egal wie die Quelldaten aussehen
+    function normalizeDrop(drop) {
+        if (!drop) return null;
+        const id = drop.id || ('drop_' + Math.random().toString(36).slice(2, 9));
+        const labels = drop.labels || {};
+        const de_title = labels.de || drop.title_de || drop.title || 'Unbenannter Drop';
+        const en_title = labels.en || drop.title_en || de_title;
+        const de_desc = (drop.desc && drop.desc.de) || '';
+        const en_desc = (drop.desc && drop.desc.en) || de_desc;
+
+        return {
+            id,
+            image: drop.image || null,
+            labels: { de: de_title, en: en_title },
+            desc: { de: de_desc, en: en_desc }
+        };
+    }
+
+    // Erstellt das HTML-Element für einen einzelnen Drop
+    function createDropElement(drop) {
+        const lang = window.currentLanguage;
+        const el = document.createElement('div');
+        el.className = 'bg-gray-800 bg-opacity-70 p-4 rounded-lg backdrop-blur-sm';
+        el.dataset.dropId = drop.id;
+
+        const title = document.createElement('h3');
+        title.className = 'text-xl font-semibold text-white mb-2 drop-title';
+        title.textContent = drop.labels[lang];
+        el.appendChild(title);
+
+        const desc = document.createElement('p');
+        desc.className = 'text-gray-300 drop-desc';
+        desc.textContent = drop.desc[lang];
+        el.appendChild(desc);
+        
+        // Hier könnten weitere Elemente wie Buttons hinzugefügt werden
+        return el;
+    }
+
+    // Rendert alle Drops in den Container
+    window.renderDrops = function() {
+        const container = document.getElementById('drops-container');
+        if (!container) return;
+        
+        container.innerHTML = ''; // Container leeren
+        const frag = document.createDocumentFragment();
+        window._drops.forEach(dropData => {
+            const drop = normalizeDrop(dropData);
+            if (drop) {
+                frag.appendChild(createDropElement(drop));
+            }
+        });
+        container.appendChild(frag);
+    };
+
+    // Öffentliche API, um Drops zu verwalten
+    window.setDrops = function(newDrops) {
+        window._drops = Array.isArray(newDrops) ? newDrops : [];
+        window.renderDrops();
+    };
+
+    // Sprachumschaltung patchen, damit die Drops neu gerendert werden
+    const originalToggleLanguage = window.toggleLanguage;
+    window.toggleLanguage = function() {
+        if (originalToggleLanguage) {
+            originalToggleLanguage();
+        } else {
+            window.currentLanguage = window.currentLanguage === 'de' ? 'en' : 'de';
+        }
+        window.renderDrops();
+    };
+
+    // Beim Laden der Seite die Drops rendern
+    document.addEventListener('DOMContentLoaded', function() {
+        // Beispiel-Daten (diese würden von deiner App geladen)
+        const exampleDrops = [
+            { id: 1, labels: { de: 'Interaktive Karte', en: 'Interactive Map' }, desc: { de: 'Klicke, um deine Position zu laden.', en: 'Click to load your position.' } },
+            { id: 2, labels: { de: 'Foto-Upload', en: 'Photo Upload' }, desc: { de: 'Wähle einen GeoDrop aus und mache ein Foto.', en: 'Select a GeoDrop and take a photo.' } },
+            { id: 3, labels: { de: 'GeoDrops Übersicht', en: 'GeoDrops Overview' }, desc: { de: 'Hier siehst du alle verfügbaren GeoDrops.', en: 'Here you can see all available GeoDrops.' } }
+        ];
+        
+        // Initialisiere die Drops
+        window.setDrops(exampleDrops);
+    });
+})();
+</script>

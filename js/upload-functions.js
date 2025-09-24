@@ -94,7 +94,7 @@ window.claimGeoDrop = async function() {
     
     // Check if user is logged in
     if (!window.currentUser) {
-        const errorMsg = 'Bitte zuerst anmelden!';
+        const errorMsg = 'Please log in first!';
         showMessage(`❌ ${errorMsg}`, true);
         return { success: false, error: errorMsg };
     }
@@ -102,7 +102,7 @@ window.claimGeoDrop = async function() {
     // Get photo input
     const photoInput = document.getElementById('photo-input');
     if (!photoInput || !photoInput.files || photoInput.files.length === 0) {
-        const errorMsg = 'Bitte wähle ein Foto aus!';
+        const errorMsg = 'Please select a photo!';
         showMessage(`❌ ${errorMsg}`, true);
         return { success: false, error: errorMsg };
     }
@@ -110,7 +110,7 @@ window.claimGeoDrop = async function() {
     // Get selected drop
     const selectedDropId = document.getElementById('selected-drop-id')?.value;
     if (!selectedDropId) {
-        const errorMsg = 'Bitte wähle einen GeoDrop aus!';
+        const errorMsg = 'Please select a GeoDrop!';
         showMessage(`❌ ${errorMsg}`, true);
         return { success: false, error: errorMsg };
     }
@@ -118,32 +118,32 @@ window.claimGeoDrop = async function() {
     const file = photoInput.files[0];
     
     try {
-        showMessage('📸 Verarbeite Foto und Koordinaten...', false);
+        showMessage('📸 Processing photo and coordinates...', false);
         
         // 0. Client-side file validation
         if (!file) {
-            showMessage('❌ Bitte wähle eine Datei aus!', true);
+            showMessage('❌ Please select a file!', true);
             return { success: false, error: 'No file selected' };
         }
         
         // Check file format
         const supportedFormats = ['image/jpeg', 'image/png', 'image/webp'];
         if (!supportedFormats.includes(file.type)) {
-            showMessage(`❌ Unsupported Dateiformat: ${file.type}. Erlaubt: JPEG, PNG, WebP`, true);
+            showMessage(`❌ Unsupported file format: ${file.type}. Allowed: JPEG, PNG, WebP`, true);
             return { success: false, error: 'Unsupported file format' };
         }
         
         // Check file size (5MB limit)
         const maxSize = 5 * 1024 * 1024; // 5MB
         if (file.size > maxSize) {
-            showMessage(`❌ Datei zu groß: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum: 5MB`, true);
+            showMessage(`❌ File too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum: 5MB`, true);
             return { success: false, error: 'File too large' };
         }
         
         // 1. Get current location with high accuracy
         let location = await getCurrentLocationWithAccuracy();
         if (!location) {
-            const errorMsg = 'Standort konnte nicht ermittelt werden!';
+            const errorMsg = 'Location could not be determined!';
             showMessage(`❌ ${errorMsg}`, true);
             return { success: false, error: errorMsg };
         }
@@ -173,12 +173,12 @@ window.claimGeoDrop = async function() {
         const filename = `user_upload_${selectedDropId}_${window.currentUser.uid}_${timestamp}.jpg`;
         const storageRef = storage.ref(`user_uploads/${filename}`);
         
-        showMessage('📤 Lade Foto hoch...', false);
+        showMessage('📤 Uploading photo...', false);
         const snapshot = await storageRef.put(file);
         const downloadURL = await snapshot.ref.getDownloadURL();
         
         if (!downloadURL) {
-            throw new Error('Foto-Upload fehlgeschlagen - keine Download-URL erhalten');
+            throw new Error('Photo upload failed - no download URL received');
         }
         
         console.log('✅ Photo upload successful:', downloadURL);
@@ -202,7 +202,7 @@ window.claimGeoDrop = async function() {
         // 5. Get drop document
         const dropDoc = await db.collection(dropCollection).doc(selectedDropId).get();
         if (!dropDoc.exists) {
-            throw new Error('GeoDrop nicht gefunden!');
+            throw new Error('GeoDrop not found!');
         }
         
         const drop = dropDoc.data();
@@ -218,7 +218,7 @@ window.claimGeoDrop = async function() {
         // 7. Check if user is close enough (within 50 meters for normal users, unlimited for Dev users)
         const maxDistance = window.isDevLoggedIn ? Infinity : 50; // Unlimited for Dev, 50m for normal users
         if (distance > maxDistance) {
-            const errorMsg = `Zu weit entfernt! Du bist ${distance.toFixed(0)}m vom GeoDrop entfernt. Maximal ${maxDistance === Infinity ? 'unbegrenzt (Dev)' : '50m'} erlaubt.`;
+            const errorMsg = `Too far away! You are ${distance.toFixed(0)}m from the GeoDrop. Maximum ${maxDistance === Infinity ? 'unlimited (Dev)' : '50m'} allowed.`;
             showMessage(`❌ ${errorMsg}`, true);
             return { success: false, error: errorMsg };
         }
@@ -231,7 +231,7 @@ window.claimGeoDrop = async function() {
         // 7.5. Validate image matches the GeoDrop (basic validation)
         const imageValidation = await validateImageForGeoDrop(file, drop);
         if (!imageValidation.valid) {
-            const errorMsg = imageValidation.error || 'Das Foto entspricht nicht dem GeoDrop. Bitte mache ein Foto vom richtigen Ort!';
+            const errorMsg = imageValidation.error || 'The photo does not match the GeoDrop. Please take a photo of the correct location!';
             showMessage(`❌ ${errorMsg}`, true);
             return { success: false, error: errorMsg };
         }
@@ -241,7 +241,7 @@ window.claimGeoDrop = async function() {
         const lastClaimDate = drop.lastClaimDate ? drop.lastClaimDate.toDate().toDateString() : null;
         
         if (lastClaimDate === today && drop.claimedBy === window.currentUser.uid) {
-            const errorMsg = 'Du hast diesen GeoDrop heute bereits gesammelt! Komm morgen wieder.';
+            const errorMsg = 'You have already collected this GeoDrop today! Come back tomorrow.';
             showMessage(`❌ ${errorMsg}`, true);
             return { success: false, error: errorMsg };
         }
@@ -297,7 +297,7 @@ window.claimGeoDrop = async function() {
         }
         
         // 12. Show success message
-        showMessage(`✅ GeoDrop erfolgreich gesammelt! +${reward} PixelDrops`, false);
+        showMessage(`✅ GeoDrop successfully collected! +${reward} PixelDrops`, false);
         
         // 13. Create visual effects
         if (typeof createFloatingElement === 'function') {
@@ -351,11 +351,11 @@ window.claimGeoDrop = async function() {
         console.error('❌ Error claiming GeoDrop:', error);
         
         // Create user-friendly error message
-        let errorMsg = 'GPS Position oder Bild falsch!';
+        let errorMsg = 'GPS position or image incorrect!';
         
         // Check for specific error types and provide better messages
         if (error.message.includes('Cannot access')) {
-            errorMsg = 'GPS Position oder Bild falsch!';
+            errorMsg = 'GPS position or image incorrect!';
         } else if (error.message.includes('Zu weit entfernt')) {
             errorMsg = error.message; // Keep distance message as is
         } else if (error.message.includes('Bild enthält keine GPS-Daten')) {
@@ -368,7 +368,7 @@ window.claimGeoDrop = async function() {
             errorMsg = error.message; // Keep daily claim message as is
         } else {
             // For technical errors, show generic message
-            errorMsg = 'GPS Position oder Bild falsch!';
+            errorMsg = 'GPS position or image incorrect!';
         }
         
         showMessage(`❌ ${errorMsg}`, true);
@@ -509,23 +509,23 @@ window.uploadPhoto = function() {
         const fileSize = file.size / 1024 / 1024; // Size in MB
         
         if (fileSize > 10) {
-            showMessage('❌ Datei zu groß! Maximal 10MB erlaubt.', true);
+            showMessage('❌ File too large! Maximum 10MB allowed.', true);
             return;
         }
         
         if (!file.type.startsWith('image/')) {
-            showMessage('❌ Bitte wähle eine Bilddatei aus!', true);
+            showMessage('❌ Please select an image file!', true);
             return;
         }
         
-        showMessage('📸 Foto ausgewählt! Bereit zum Hochladen.', false);
+        showMessage('📸 Photo selected! Ready to upload.', false);
         console.log('📸 Photo selected:', {
             name: file.name,
             size: fileSize.toFixed(2) + 'MB',
             type: file.type
         });
     } else {
-        showMessage('❌ Bitte wähle ein Foto aus', true);
+        showMessage('❌ Please select a photo', true);
     }
 };
 
@@ -535,7 +535,7 @@ window.adjustCoordinates = function() {
     const lngInput = document.getElementById('adjust-lng');
     
     if (!latInput || !lngInput) {
-        showMessage('❌ Koordinaten-Eingabefelder nicht gefunden!', true);
+        showMessage('❌ Coordinate input fields not found!', true);
         return;
     }
     
@@ -543,17 +543,17 @@ window.adjustCoordinates = function() {
     const newLng = parseFloat(lngInput.value);
     
     if (isNaN(newLat) || isNaN(newLng)) {
-        showMessage('❌ Bitte gültige Koordinaten eingeben!', true);
+        showMessage('❌ Please enter valid coordinates!', true);
         return;
     }
     
     if (newLat < -90 || newLat > 90) {
-        showMessage('❌ Breitengrad muss zwischen -90 und 90 liegen!', true);
+        showMessage('❌ Latitude must be between -90 and 90!', true);
         return;
     }
     
     if (newLng < -180 || newLng > 180) {
-        showMessage('❌ Längengrad muss zwischen -180 und 180 liegen!', true);
+        showMessage('❌ Longitude must be between -180 and 180!', true);
         return;
     }
     
@@ -592,7 +592,7 @@ window.adjustCoordinates = function() {
         `).openPopup();
     }
     
-    showMessage(`✅ Koordinaten angepasst: ${newLat.toFixed(6)}, ${newLng.toFixed(6)}`, false);
+    showMessage(`✅ Coordinates adjusted: ${newLat.toFixed(6)}, ${newLng.toFixed(6)}`, false);
     console.log('📍 Coordinates adjusted:', { lat: newLat, lng: newLng });
 };
 

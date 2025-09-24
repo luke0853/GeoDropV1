@@ -100,18 +100,32 @@ window.loadPageContent = function(pageId, container) {
             container.innerHTML = html;
             console.log('✅ Content loaded for:', pageId);
             
+            // Apply translations after content is loaded
+            if (typeof window.updateAllTexts === 'function') {
+                setTimeout(() => {
+                    console.log('🔄 Applying translations to loaded content...');
+                    window.updateAllTexts();
+                }, 100);
+            }
+            
             // Initialize map for geocard
             if (pageId === 'geocard') {
                 setTimeout(() => {
                     console.log('🗺️ Loading GeoCard page, initializing map...');
                     if (typeof initGeoMap === 'function') {
-                        initGeoMap();
+                        initGeoMap('mapid');
                         
                         // Load GeoDrops after map is initialized
                         setTimeout(() => {
                             console.log('🔍 Checking loadGeoDrops function availability...');
                             console.log('🔍 typeof loadGeoDrops:', typeof loadGeoDrops);
                             console.log('🔍 typeof window.loadGeoDrops:', typeof window.loadGeoDrops);
+                            
+                            // Apply translations again after map initialization
+                            if (typeof window.updateAllTexts === 'function') {
+                                console.log('🔄 Applying translations after map initialization...');
+                                window.updateAllTexts();
+                            }
                             
                             if (typeof loadGeoDrops === 'function') {
                                 console.log('🎯 Loading GeoDrops...');
@@ -147,6 +161,12 @@ window.loadPageContent = function(pageId, container) {
                         setTimeout(() => {
                             console.log('🔄 Loading all drop lists on GeoCard page load...');
                             
+                            // Apply translations after all content is loaded
+                            if (typeof window.updateAllTexts === 'function') {
+                                console.log('🔄 Applying translations after all content loaded...');
+                                window.updateAllTexts();
+                            }
+                            
                             // Load Dev Drops for upload
                             if (typeof loadDevDropsForUpload === 'function') {
                                 console.log('🔄 Loading Dev Drops for upload...');
@@ -173,6 +193,12 @@ window.loadPageContent = function(pageId, container) {
                             
                             console.log('✅ All drop lists loaded on GeoCard page load');
                             
+                            // Apply translations after all drop lists are loaded
+                            if (typeof window.updateAllTexts === 'function') {
+                                console.log('🔄 Applying translations after all drop lists loaded...');
+                                window.updateAllTexts();
+                            }
+                            
                             // CRITICAL: Load GeoDrops for map after all lists are loaded
                             setTimeout(() => {
                                 console.log('🗺️ Loading GeoDrops for map after all lists loaded...');
@@ -183,6 +209,14 @@ window.loadPageContent = function(pageId, container) {
                                 } else {
                                     console.error('❌ window.loadGeoDrops not available');
                                 }
+                                
+                                // Apply translations after map GeoDrops are loaded
+                                setTimeout(() => {
+                                    if (typeof window.updateAllTexts === 'function') {
+                                        console.log('🔄 Applying translations after map GeoDrops loaded...');
+                                        window.updateAllTexts();
+                                    }
+                                }, 500);
                             }, 1000);
                         }, 3000);
                         
@@ -190,21 +224,33 @@ window.loadPageContent = function(pageId, container) {
                         setTimeout(() => {
                             console.log('🔄 Force reloading all drop lists on GeoCard switch...');
                             if (typeof window.reloadAllDropLists === 'function') {
-                                window.reloadAllDropLists();
+                                window.reloadAllDropLists().then(() => {
+                                    // Apply translations after force reload
+                                    if (typeof window.updateAllTexts === 'function') {
+                                        console.log('🔄 Applying translations after force reload...');
+                                        window.updateAllTexts();
+                                    }
+                                });
                             }
                         }, 5000);
                         
                     } else {
                         console.log('⏳ Waiting for initGeoMap function...');
                         setTimeout(() => {
-                            if (typeof initGeoMap === 'function') {
-                                initGeoMap();
+                        if (typeof initGeoMap === 'function') {
+                            initGeoMap('mapid');
                                 
                                 // Load GeoDrops after map is initialized
                                 setTimeout(() => {
                                     if (typeof loadGeoDrops === 'function') {
                                         console.log('🎯 Loading GeoDrops...');
                                         loadGeoDrops();
+                                    }
+                                    
+                                    // Apply translations after delayed map initialization
+                                    if (typeof window.updateAllTexts === 'function') {
+                                        console.log('🔄 Applying translations after delayed map initialization...');
+                                        window.updateAllTexts();
                                     }
                                 }, 2000);
                             }
@@ -228,6 +274,12 @@ window.loadPageContent = function(pageId, container) {
                         }, 500);
                     }
                     
+                    // Apply translations after bonus system initialization
+                    if (typeof window.updateAllTexts === 'function') {
+                        console.log('🔄 Applying translations after bonus system initialization...');
+                        window.updateAllTexts();
+                    }
+                    
                     // CRITICAL: Update referral link with user's actual ID
                     setTimeout(() => {
                         console.log('🔗 Updating referral link on bonus page load...');
@@ -235,6 +287,12 @@ window.loadPageContent = function(pageId, container) {
                             window.updateReferralLink();
                         } else {
                             console.log('❌ updateReferralLink function not found');
+                        }
+                        
+                        // Apply translations after referral link update
+                        if (typeof window.updateAllTexts === 'function') {
+                            console.log('🔄 Applying translations after referral link update...');
+                            window.updateAllTexts();
                         }
                     }, 2000);
                     
@@ -252,6 +310,12 @@ window.loadPageContent = function(pageId, container) {
                                 bonusAvailable.style.display = 'block';
                                 bonusClaimed.style.display = 'none';
                             }
+                        }
+                        
+                        // Apply translations after fallback
+                        if (typeof window.updateAllTexts === 'function') {
+                            console.log('🔄 Applying translations after fallback...');
+                            window.updateAllTexts();
                         }
                     }, 2000);
                 }, 100);
@@ -274,6 +338,12 @@ window.loadPageContent = function(pageId, container) {
                 if (typeof window.updateMiningStats === 'function') {
                     window.updateMiningStats();
                 }
+                
+                // Apply translations after mining page initialization
+                if (typeof window.updateAllTexts === 'function') {
+                    console.log('🔄 Applying translations after mining page initialization...');
+                    window.updateAllTexts();
+                }
             }
                     
             // Initialize geoboard with real data
@@ -288,6 +358,12 @@ window.loadPageContent = function(pageId, container) {
                     }
                     if (typeof loadGlobalStats === 'function') {
                         loadGlobalStats();
+                    }
+                    
+                    // Apply translations after geoboard data loading
+                    if (typeof window.updateAllTexts === 'function') {
+                        console.log('🔄 Applying translations after geoboard data loading...');
+                        window.updateAllTexts();
                     }
                     
                     // Initialize Colloseum tabs - DIRECT APPROACH
@@ -334,6 +410,12 @@ window.loadPageContent = function(pageId, container) {
                             };
                             
                             console.log('✅ Colloseum tabs setup complete');
+                            
+                            // Apply translations after colloseum tabs setup
+                            if (typeof window.updateAllTexts === 'function') {
+                                console.log('🔄 Applying translations after colloseum tabs setup...');
+                                window.updateAllTexts();
+                            }
                         } else {
                             console.error('❌ Colloseum elements not found:', {
                                 geoboardTab: !!geoboardTab,
@@ -356,6 +438,12 @@ window.loadPageContent = function(pageId, container) {
                     if (typeof window.updateChatStats === 'function') {
                         window.updateChatStats();
                     }
+                    
+                    // Apply translations after geochat initialization
+                    if (typeof window.updateAllTexts === 'function') {
+                        console.log('🔄 Applying translations after geochat initialization...');
+                        window.updateAllTexts();
+                    }
                 }, 100);
             }
             
@@ -372,6 +460,12 @@ window.loadPageContent = function(pageId, container) {
                     setTimeout(() => {
                         updateTradingWalletStatus();
                     }, 200);
+                    
+                    // Apply translations after trading initialization
+                    if (typeof window.updateAllTexts === 'function') {
+                        console.log('🔄 Applying translations after trading initialization...');
+                        window.updateAllTexts();
+                    }
                 }, 100);
             }
             
@@ -401,12 +495,24 @@ window.loadPageContent = function(pageId, container) {
                         }, 1000);
                     }
                     
+                    // Apply translations after mehr page initialization
+                    if (typeof window.updateAllTexts === 'function') {
+                        console.log('🔄 Applying translations after mehr page initialization...');
+                        window.updateAllTexts();
+                    }
+                    
                     // CRITICAL: Force update dashboard content if showMehrTab doesn't work
                     setTimeout(() => {
                         const mehrContent = document.getElementById('mehr-tab-content');
                         if (mehrContent && mehrContent.innerHTML.trim() === '') {
                             console.log('🔧 Mehr tab content is empty, forcing dashboard load...');
                             window.showMehrTab('dashboard');
+                        }
+                        
+                        // Apply translations after force update
+                        if (typeof window.updateAllTexts === 'function') {
+                            console.log('🔄 Applying translations after force update...');
+                            window.updateAllTexts();
                         }
                     }, 1000);
                 }, 100);
@@ -442,6 +548,12 @@ window.loadPageContent = function(pageId, container) {
                         }, 500);
                     }
                     
+                    // Apply translations after dev page initialization
+                    if (typeof window.updateAllTexts === 'function') {
+                        console.log('🔄 Applying translations after dev page initialization...');
+                        window.updateAllTexts();
+                    }
+                    
                 }, 100);
             }
             
@@ -452,6 +564,12 @@ window.loadPageContent = function(pageId, container) {
                     console.log('⛏️ Initializing Mining page...');
                     if (typeof window.updateMiningStats === 'function') {
                         window.updateMiningStats();
+                    }
+                    
+                    // Apply translations after mining page initialization
+                    if (typeof window.updateAllTexts === 'function') {
+                        console.log('🔄 Applying translations after mining page initialization...');
+                        window.updateAllTexts();
                     }
                 }, 100);
             }
@@ -464,6 +582,12 @@ window.loadPageContent = function(pageId, container) {
                     <p class="text-gray-300">Die Seite "${pageId}" konnte nicht geladen werden.</p>
                 </div>
             `;
+            
+            // Apply translations after error handling
+            if (typeof window.updateAllTexts === 'function') {
+                console.log('🔄 Applying translations after error handling...');
+                window.updateAllTexts();
+            }
         });
 };
 
@@ -701,7 +825,11 @@ window.loadReferralsData = async function() {
                 </div>
             `;
         });
-        list.innerHTML = html;
+        if (list) {
+            list.innerHTML = html;
+        } else {
+            console.log('❌ referrals-list element not found');
+        }
     }
 };
 
