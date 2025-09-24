@@ -563,6 +563,9 @@ window.switchLanguage = function(language) {
     // Update current language
     currentLanguage = language;
     
+    // Update global language variables
+    window.currentLang = language;
+    
     // Save to localStorage
     try {
         localStorage.setItem('geodrop-language', currentLanguage);
@@ -587,6 +590,28 @@ window.switchLanguage = function(language) {
         console.log('🔄 Radio buttons updated after delay');
     }, 500);
     
+    // Update language container visibility
+    updateLanguageContainers(language);
+    
+    // Update Firebase translations system
+    if (window.firebaseTranslations) {
+        window.firebaseTranslations.switchLanguage(language);
+    }
+    
+    // Update modal placeholders if function exists
+    if (window.updateModalPlaceholders) {
+        setTimeout(() => {
+            window.updateModalPlaceholders();
+        }, 200);
+    }
+    
+    // Update marker popups if function exists
+    if (window.updateMarkerPopups) {
+        setTimeout(() => {
+            window.updateMarkerPopups();
+        }, 300);
+    }
+    
     // Show success message
     const message = t('common.language-changed');
     if (typeof window.showMessage === 'function') {
@@ -606,6 +631,9 @@ window.toggleLanguage = function() {
     
     // Update current language
     currentLanguage = newLanguage;
+    
+    // Update global language variables
+    window.currentLang = newLanguage;
     
     // Save to localStorage
     try {
@@ -627,7 +655,132 @@ window.toggleLanguage = function() {
         console.log('🔄 Radio buttons updated after toggle delay');
     }, 500);
     
+    // Update language container visibility
+    updateLanguageContainers(newLanguage);
+    
+    // Update Firebase translations system
+    if (window.firebaseTranslations) {
+        window.firebaseTranslations.switchLanguage(newLanguage);
+    }
+    
+    // Update modal placeholders if function exists
+    if (window.updateModalPlaceholders) {
+        setTimeout(() => {
+            window.updateModalPlaceholders();
+        }, 200);
+    }
+    
+    // Update marker popups if function exists
+    if (window.updateMarkerPopups) {
+        setTimeout(() => {
+            window.updateMarkerPopups();
+        }, 300);
+    }
+    
     console.log('✅ Language toggled to:', currentLanguage);
+};
+
+// Update language container visibility / Sprache-Container-Sichtbarkeit aktualisieren
+window.updateLanguageContainers = function(language) {
+    console.log('🔄 Updating language containers for:', language);
+    
+    // Get current page
+    const currentPage = window.getCurrentPage();
+    console.log('📄 Current page:', currentPage);
+    
+    // Define container IDs for each page and language
+    const containerConfig = {
+        'startseite': {
+            de: ['startseite-content-de'],
+            en: ['startseite-content-en']
+        },
+        'geocard': {
+            de: ['geocard-content-de'],
+            en: ['geocard-content-en']
+        },
+        'geoboard': {
+            de: ['geoboard-content-de'],
+            en: ['geoboard-content-en']
+        },
+        'machines': {
+            de: ['machines-content-de'],
+            en: ['machines-content-en']
+        },
+        'bonus': {
+            de: ['bonus-content-de'],
+            en: ['bonus-content-en']
+        },
+        'geochat': {
+            de: ['geochat-content-de'],
+            en: ['geochat-content-en']
+        },
+        'trading': {
+            de: ['trading-content-de'],
+            en: ['trading-content-en']
+        },
+        'mehr': {
+            de: ['mehr-content-de'],
+            en: ['mehr-content-en']
+        },
+        'dev': {
+            de: ['dev-content-de'],
+            en: ['dev-content-en']
+        }
+    };
+    
+    // Get containers for current page
+    const pageContainers = containerConfig[currentPage];
+    if (!pageContainers) {
+        console.log('⚠️ No container configuration found for page:', currentPage);
+        return;
+    }
+    
+    // Hide all language containers for this page
+    const allContainers = [...pageContainers.de, ...pageContainers.en];
+    allContainers.forEach(containerId => {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.style.display = 'none';
+            console.log('🙈 Hidden container:', containerId);
+        }
+    });
+    
+    // Show containers for current language
+    const currentLanguageContainers = pageContainers[language] || [];
+    currentLanguageContainers.forEach(containerId => {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.style.display = 'block';
+            console.log('👁️ Shown container:', containerId);
+        } else {
+            console.log('⚠️ Container not found:', containerId);
+        }
+    });
+    
+    console.log('✅ Language containers updated for', currentPage, '(' + language + ')');
+};
+
+// Get current page ID
+window.getCurrentPage = function() {
+    // Check for active page
+    const activePage = document.querySelector('.page[style*="block"]');
+    if (activePage) {
+        return activePage.id;
+    }
+    
+    // Check for active nav button
+    const activeNavBtn = document.querySelector('.nav-btn.active');
+    if (activeNavBtn) {
+        const onclick = activeNavBtn.getAttribute('onclick');
+        if (onclick && onclick.includes('showPage(')) {
+            const match = onclick.match(/showPage\('([^']+)'\)/);
+            if (match) {
+                return match[1];
+            }
+        }
+    }
+    
+    return 'startseite'; // Default page
 };
 
 // Test language switch function / Sprachtest-Funktion

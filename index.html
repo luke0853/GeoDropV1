@@ -178,6 +178,18 @@
                 'user-drops': '👤 User Drops',
                 'dev-drops': '🎯 Dev Drops',
                 'select-dev-geodrop': 'Dev GeoDrop auswählen...',
+                'select-user-geodrop': 'User GeoDrop auswählen...',
+                'dev-drop-1': '🎯 Dev GeoDrop1 - 100 PixelDrops',
+                'dev-drop-2': '🎯 Dev GeoDrop2 - 100 PixelDrops',
+                'dev-drop-3': '🎯 Dev GeoDrop3 - 100 PixelDrops',
+                'dev-drop-4': '🎯 Dev GeoDrop4 - 100 PixelDrops',
+                'dev-drop-5': '🎯 Dev GeoDrop5 - 100 PixelDrops',
+                'dev-drop-6': '🎯 Dev GeoDrop6 - 100 PixelDrops',
+                'dev-drop-7': '🎯 Dev GeoDrop7 - 100 PixelDrops',
+                'dev-drop-8': '🎯 Dev GeoDrop8 - 100 PixelDrops',
+                'map-legend-title': '🗺️ Karten-Legende',
+                'your-location': 'Dein Standort',
+                'your-location-desc': 'Deine aktuelle GPS-Position',
                 'take-photo': '📸 Foto aufnehmen',
                 'upload-debug': '🔍 Upload Debug',
                 
@@ -466,7 +478,19 @@
                 'select-geodrop': 'Select GeoDrop:',
                 'user-drops': '👤 User Drops',
                 'dev-drops': '🎯 Dev Drops',
-                'select-dev-geodrop': 'Select Dev GeoDrop...',
+                'select-dev-geodrop': 'Choose Dev GeoDrop...',
+                'select-user-geodrop': 'Choose User GeoDrop...',
+                'dev-drop-1': '🎯 Dev GeoDrop1 - 100 PixelDrops',
+                'dev-drop-2': '🎯 Dev GeoDrop2 - 100 PixelDrops',
+                'dev-drop-3': '🎯 Dev GeoDrop3 - 100 PixelDrops',
+                'dev-drop-4': '🎯 Dev GeoDrop4 - 100 PixelDrops',
+                'dev-drop-5': '🎯 Dev GeoDrop5 - 100 PixelDrops',
+                'dev-drop-6': '🎯 Dev GeoDrop6 - 100 PixelDrops',
+                'dev-drop-7': '🎯 Dev GeoDrop7 - 100 PixelDrops',
+                'dev-drop-8': '🎯 Dev GeoDrop8 - 100 PixelDrops',
+                'map-legend-title': '🗺️ Map Legend',
+                'your-location': 'Your Location',
+                'your-location-desc': 'Your current GPS position',
                 'take-photo': '📸 Take Photo',
                 'upload-debug': '🔍 Upload Debug',
                 
@@ -620,6 +644,13 @@
             updateAllTexts();
             updateLanguageButtons();
             
+            // Update marker popups if function exists
+            if (window.updateMarkerPopups) {
+                setTimeout(() => {
+                    window.updateMarkerPopups();
+                }, 300);
+            }
+            
             // Force update all texts again after a longer delay to catch all dynamically loaded content
             setTimeout(() => {
                 console.log('🔄 Force updating texts after 500ms...');
@@ -635,6 +666,11 @@
         
         // Make switchLanguage globally available
         window.switchLanguage = switchLanguage;
+        
+        // Make getCurrentLanguage globally available
+        window.getCurrentLanguage = function() {
+            return currentLang;
+        };
         
         // Helper function to get translated text
         function getTranslatedText(key) {

@@ -100,13 +100,22 @@ window.loadPageContent = function(pageId, container) {
             container.innerHTML = html;
             console.log('✅ Content loaded for:', pageId);
             
-            // Apply translations after content is loaded
-            if (typeof window.updateAllTexts === 'function') {
-                setTimeout(() => {
-                    console.log('🔄 Applying translations to loaded content...');
-                    window.updateAllTexts();
-                }, 100);
-            }
+        // Apply translations after content is loaded
+        if (typeof window.updateAllTexts === 'function') {
+            setTimeout(() => {
+                console.log('🔄 Applying translations to loaded content...');
+                window.updateAllTexts();
+            }, 100);
+        }
+        
+        // Update language containers after content is loaded
+        if (typeof window.updateLanguageContainers === 'function') {
+            setTimeout(() => {
+                console.log('🔄 Updating language containers after page load...');
+                const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'de';
+                window.updateLanguageContainers(currentLang);
+            }, 200);
+        }
             
             // Initialize map for geocard
             if (pageId === 'geocard') {

@@ -10,6 +10,7 @@
     <script src="../config/config-secure.js"></script>
     <script src="../config/config-secrets-public.js"></script>
     <script src="../js/firebase.js"></script>
+    <script src="../js/firebase-translations.js"></script>
     <script src="../js/common.js"></script>
     <script src="../js/dev-functions.js"></script>
     <script src="../js/upload-functions.js"></script>
@@ -26,7 +27,171 @@
             currentLang = window.currentLang;
         }
         
-        // Get translations from parent window (index.html)
+        // Function to update translations from parent window
+        function updateTranslationsFromParent() {
+            if (window.translations) {
+                console.log('🔄 Updating translations from parent window...');
+                // REPLACE local translations with parent translations
+                translations.de = { ...translations.de, ...window.translations.de };
+                translations.en = { ...translations.en, ...window.translations.en };
+                console.log('✅ Translations updated from parent window');
+            }
+        }
+        
+        // Update translations when page loads
+        updateTranslationsFromParent();
+        
+        // Force update translations every 200ms
+        setInterval(updateTranslationsFromParent, 200);
+        
+        // Function to apply translations to elements
+        function applyTranslations() {
+            console.log('🔄 Applying translations to geocard elements...');
+            const elements = document.querySelectorAll('[data-translate]');
+            let updatedCount = 0;
+            
+            elements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                const translation = translations[currentLang] && translations[currentLang][key];
+                
+                if (translation) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        if (element.type === 'button' || element.type === 'submit') {
+                            element.value = translation;
+                        } else {
+                            element.placeholder = translation;
+                        }
+                    } else if (element.tagName === 'OPTION') {
+                        // Special handling for option elements
+                        element.textContent = translation;
+                    } else {
+                        element.textContent = translation;
+                    }
+                    updatedCount++;
+                } else {
+                    console.log('⚠️ No translation found for key:', key, 'in language:', currentLang);
+                }
+            });
+            
+            console.log(`✅ Applied ${updatedCount} translations to geocard elements`);
+        }
+        
+        // Apply translations when page loads
+        setTimeout(() => {
+            applyTranslations();
+        }, 100);
+        
+        // Make functions globally available
+        window.updateTranslationsFromParent = updateTranslationsFromParent;
+        window.applyTranslations = applyTranslations;
+        
+        // NUCLEAR DROPDOWN TRANSLATION - COMPLETE REPLACEMENT
+        function nuclearDropdownTranslation() {
+            const dropdown = document.getElementById('geocard-drop-select');
+            if (dropdown) {
+                const globalLang = window.currentLang || (window.getCurrentLanguage ? window.getCurrentLanguage() : 'de');
+                const translation = globalLang === 'en' ? 'Choose Dev GeoDrop...' : 'Dev GeoDrop auswählen...';
+                
+                // Get the first option
+                const firstOption = dropdown.querySelector('option[value=""]');
+                if (firstOption && firstOption.textContent !== translation) {
+                    // COMPLETELY REPLACE the first option
+                    const newOption = document.createElement('option');
+                    newOption.value = '';
+                    newOption.id = 'dropdown-first-option';
+                    newOption.textContent = translation;
+                    
+                    // Replace the old option
+                    firstOption.parentNode.replaceChild(newOption, firstOption);
+                    
+                    console.log('💥💥💥 NUCLEAR DROPDOWN REPLACED:', translation, 'for language:', globalLang);
+                }
+            }
+        }
+        
+        // Run nuclear translation every 50ms
+        setInterval(nuclearDropdownTranslation, 50);
+        
+        // Override ALL translation functions to call nuclear translation first
+        const originalUpdateAllTexts = window.updateAllTexts;
+        window.updateAllTexts = function() {
+            nuclearDropdownTranslation();
+            if (originalUpdateAllTexts) {
+                originalUpdateAllTexts();
+            }
+        };
+        
+        const originalApplyTranslations = window.applyTranslations;
+        window.applyTranslations = function() {
+            nuclearDropdownTranslation();
+            if (originalApplyTranslations) {
+                originalApplyTranslations();
+            }
+        };
+        
+        const originalSwitchLanguage = window.switchLanguage;
+        window.switchLanguage = function(lang) {
+            nuclearDropdownTranslation();
+            if (originalSwitchLanguage) {
+                originalSwitchLanguage(lang);
+            }
+            setTimeout(nuclearDropdownTranslation, 10);
+        };
+        
+        // Function to monitor and fix translations
+        function monitorTranslations() {
+            const elements = document.querySelectorAll('[data-translate]');
+            let fixedCount = 0;
+            
+            elements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                const translation = translations[currentLang] && translations[currentLang][key];
+                
+                if (translation) {
+                    const currentText = element.textContent || element.placeholder || element.value;
+                    const expectedText = translation;
+                    
+                    // If text doesn't match expected translation, fix it
+                    if (currentText !== expectedText) {
+                        console.log('🔧 Fixing translation for:', key, 'from:', currentText, 'to:', expectedText);
+                        if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                            if (element.type === 'button' || element.type === 'submit') {
+                                element.value = translation;
+                            } else {
+                                element.placeholder = translation;
+                            }
+                        } else if (element.tagName === 'OPTION') {
+                            // Special handling for option elements
+                            element.textContent = translation;
+                        } else {
+                            element.textContent = translation;
+                        }
+                        fixedCount++;
+                    }
+                }
+            });
+            
+            if (fixedCount > 0) {
+                console.log(`🔧 Fixed ${fixedCount} translations`);
+            }
+        }
+        
+        // Monitor translations every 100ms (more frequent)
+        setInterval(monitorTranslations, 100);
+        
+        // Also monitor when DOM changes
+        const observer = new MutationObserver(() => {
+            setTimeout(monitorTranslations, 50);
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['data-translate']
+        });
+        
+        // Get translations from parent window (index.html) or use local translations
         const translations = window.translations || {
             de: {
                 // Main Title
@@ -48,6 +213,16 @@
                 'user-drops': '👤 User Drops',
                 'dev-drops': '🔧 Dev Drops',
                 'select-dev-geodrop': 'Dev GeoDrop auswählen...',
+                'select-user-geodrop': 'User GeoDrop auswählen...',
+                'loading-user-drops': 'User Drops werden geladen...',
+                'dev-drop-1': '🎯 Dev GeoDrop1 - 100 PixelDrops',
+                'dev-drop-2': '🎯 Dev GeoDrop2 - 100 PixelDrops',
+                'dev-drop-3': '🎯 Dev GeoDrop3 - 100 PixelDrops',
+                'dev-drop-4': '🎯 Dev GeoDrop4 - 100 PixelDrops',
+                'dev-drop-5': '🎯 Dev GeoDrop5 - 100 PixelDrops',
+                'dev-drop-6': '🎯 Dev GeoDrop6 - 100 PixelDrops',
+                'dev-drop-7': '🎯 Dev GeoDrop7 - 100 PixelDrops',
+                'dev-drop-8': '🎯 Dev GeoDrop8 - 100 PixelDrops',
                 'dev-test-coordinates': '🔧 DEV: Test-Koordinaten eingeben:',
                 'set-test-coordinates': '📍 Test-Koordinaten setzen',
                 'create-test-melk': '🏛️ Test-Drop: Stift Melk erstellen',
@@ -195,7 +370,17 @@
                 'select-geodrop': 'Select GeoDrop:',
                 'user-drops': '👤 User Drops',
                 'dev-drops': '🔧 Dev Drops',
-                'select-dev-geodrop': 'Select Dev GeoDrop...',
+                'select-dev-geodrop': 'Choose Dev GeoDrop...',
+                'select-user-geodrop': 'Choose User GeoDrop...',
+                'loading-user-drops': 'Loading User Drops...',
+                'dev-drop-1': '🎯 Dev GeoDrop1 - 100 PixelDrops',
+                'dev-drop-2': '🎯 Dev GeoDrop2 - 100 PixelDrops',
+                'dev-drop-3': '🎯 Dev GeoDrop3 - 100 PixelDrops',
+                'dev-drop-4': '🎯 Dev GeoDrop4 - 100 PixelDrops',
+                'dev-drop-5': '🎯 Dev GeoDrop5 - 100 PixelDrops',
+                'dev-drop-6': '🎯 Dev GeoDrop6 - 100 PixelDrops',
+                'dev-drop-7': '🎯 Dev GeoDrop7 - 100 PixelDrops',
+                'dev-drop-8': '🎯 Dev GeoDrop8 - 100 PixelDrops',
                 'dev-test-coordinates': '🔧 DEV: Enter Test Coordinates:',
                 'set-test-coordinates': '📍 Set Test Coordinates',
                 'create-test-melk': '🏛️ Create Test Drop: Melk Abbey',
@@ -330,6 +515,19 @@
         function switchLanguage(lang) {
             console.log('🔄 GeoCard switchLanguage called with:', lang);
             
+            // Update local currentLang
+            currentLang = lang;
+            
+            // FORCE UPDATE TRANSLATIONS IMMEDIATELY
+            if (window.translations) {
+                translations.de = { ...translations.de, ...window.translations.de };
+                translations.en = { ...translations.en, ...window.translations.en };
+                console.log('🔄 FORCE UPDATED TRANSLATIONS FROM PARENT');
+            }
+            
+            // Apply translations to geocard elements IMMEDIATELY
+            applyTranslations();
+            
             if (window.switchLanguage) {
                 console.log('📞 Calling global switchLanguage function');
                 window.switchLanguage(lang);
@@ -342,6 +540,12 @@
                     if (window.updateModalPlaceholders) {
                         window.updateModalPlaceholders();
                     }
+                    
+                    // FORCE RE-APPLY TRANSLATIONS AFTER GLOBAL FUNCTION
+                    setTimeout(() => {
+                        console.log('🔄 FORCE RE-APPLYING TRANSLATIONS AFTER GLOBAL FUNCTION...');
+                        applyTranslations();
+                    }, 200);
                 }, 100);
             } else {
                 console.log('📝 Using local switchLanguage function');
@@ -884,9 +1088,7 @@
                 
                 <!-- Drop Selection -->
                 <div class="mb-4">
-                    <label for="geocard-drop-select" class="block text-sm font-medium text-gray-300 mb-2" data-translate="select-geodrop">
-                        GeoDrop auswählen:
-                    </label>
+                    <label for="geocard-drop-select" class="block text-sm font-medium text-gray-300 mb-2" data-translate="select-geodrop"></label>
                 
                 <!-- Upload List Type Toggle -->
                 <div class="mb-3">
@@ -903,22 +1105,22 @@
                 <!-- Dev Drops Select -->
                 <div id="upload-dev-drops-section">
                     <select id="geocard-drop-select" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white" onchange="updateClaimButton()">
-                        <option value="" data-translate="select-dev-geodrop">Dev GeoDrop auswählen...</option>
-                        <option value="devDrops:dev1">🎯 Dev GeoDrop1 - 100 PixelDrops</option>
-                        <option value="devDrops:dev2">🎯 Dev GeoDrop2 - 100 PixelDrops</option>
-                        <option value="devDrops:dev3">🎯 Dev GeoDrop3 - 100 PixelDrops</option>
-                        <option value="devDrops:dev4">🎯 Dev GeoDrop4 - 100 PixelDrops</option>
-                        <option value="devDrops:dev5">🎯 Dev GeoDrop5 - 100 PixelDrops</option>
-                        <option value="devDrops:dev6">🎯 Dev GeoDrop6 - 100 PixelDrops</option>
-                        <option value="devDrops:dev7">🎯 Dev GeoDrop7 - 100 PixelDrops</option>
-                        <option value="devDrops:dev8">🎯 Dev GeoDrop8 - 100 PixelDrops</option>
+                        <option value="" id="dropdown-first-option">Dev GeoDrop auswählen...</option>
+                        <option value="devDrops:dev1" data-translate="dev-drop-1">🎯 Dev GeoDrop1 - 100 PixelDrops</option>
+                        <option value="devDrops:dev2" data-translate="dev-drop-2">🎯 Dev GeoDrop2 - 100 PixelDrops</option>
+                        <option value="devDrops:dev3" data-translate="dev-drop-3">🎯 Dev GeoDrop3 - 100 PixelDrops</option>
+                        <option value="devDrops:dev4" data-translate="dev-drop-4">🎯 Dev GeoDrop4 - 100 PixelDrops</option>
+                        <option value="devDrops:dev5" data-translate="dev-drop-5">🎯 Dev GeoDrop5 - 100 PixelDrops</option>
+                        <option value="devDrops:dev6" data-translate="dev-drop-6">🎯 Dev GeoDrop6 - 100 PixelDrops</option>
+                        <option value="devDrops:dev7" data-translate="dev-drop-7">🎯 Dev GeoDrop7 - 100 PixelDrops</option>
+                        <option value="devDrops:dev8" data-translate="dev-drop-8">🎯 Dev GeoDrop8 - 100 PixelDrops</option>
                     </select>
                 </div>
                 
                 <!-- User Drops Select -->
                 <div id="upload-user-drops-section" style="display: none;">
                     <select id="geocard-user-drop-select" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white" onchange="updateClaimButton()">
-                        <option value="">Lade User GeoDrops...</option>
+                        <option value="" data-translate="select-user-geodrop"></option>
                     </select>
                 </div>
                 
@@ -929,54 +1131,42 @@
                 <!-- Dev Coordinates Input (nur für Dev-User) -->
                 <div id="dev-drop-selection" class="mb-4 p-3 bg-yellow-900 border border-yellow-600 rounded" style="display: none;">
                     <label class="block text-sm font-medium text-yellow-300 mb-2 font-bold" data-translate="dev-test-coordinates">
-                        🔧 DEV: Test-Koordinaten eingeben:
                     </label>
                     <div class="grid grid-cols-2 gap-2 mb-2">
                         <div>
-                            <label for="dev-test-lat" class="block text-xs text-yellow-300 mb-1" data-translate="latitude">Breitengrad:</label>
+                            <label for="dev-test-lat" class="block text-xs text-yellow-300 mb-1" data-translate="latitude"></label>
                             <input type="number" id="dev-test-lat" step="0.000001" placeholder="52.123456" class="w-full p-2 bg-gray-600 border border-yellow-500 rounded text-white text-sm" onkeypress="if(event.key === 'Enter') setDevTestCoordinates()">
                         </div>
                         <div>
-                            <label for="dev-test-lng" class="block text-xs text-yellow-300 mb-1" data-translate="longitude">Längengrad:</label>
+                            <label for="dev-test-lng" class="block text-xs text-yellow-300 mb-1" data-translate="longitude"></label>
                             <input type="number" id="dev-test-lng" step="0.000001" placeholder="13.123456" class="w-full p-2 bg-gray-600 border border-yellow-500 rounded text-white text-sm" onkeypress="if(event.key === 'Enter') setDevTestCoordinates()">
                         </div>
                     </div>
                     <button onclick="setDevTestCoordinates()" class="w-full px-3 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm" data-translate="set-test-coordinates">
-                        📍 Test-Koordinaten setzen
                     </button>
-                    <p class="text-yellow-300 text-sm mt-1" data-translate="dev-test-warning">⚠️ Nur für Dev-Tests - normale User sehen dies nicht!</p>
+                    <p class="text-yellow-300 text-sm mt-1" data-translate="dev-test-warning"></p>
                     
                     <!-- Test Drop Buttons -->
                     <div class="mt-3 space-y-2">
                         <button onclick="createTestMelkDrop()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm" data-translate="create-test-melk">
-                            🏛️ Test-Drop: Stift Melk erstellen
                         </button>
                         <button onclick="createTestAustriaDrop()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm" data-translate="create-test-schonbrunn">
-                            🏰 Test-Drop: Schloss Schönbrunn erstellen
                         </button>
                         <button onclick="createAllAustrianStateDrops()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm" data-translate="create-all-states">
-                            🇦🇹 Alle 9 Bundesländer-Drops erstellen
                         </button>
                         <button onclick="createRemainingAustrianDrops()" class="w-full px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm" data-translate="create-remaining-states">
-                            🚀 Restliche 8 Bundesländer-Drops erstellen
                         </button>
                         <button onclick="reloadAllDropLists()" class="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm" data-translate="reload-all-lists">
-                            🔄 Alle Listen neu laden
                         </button>
                         <button onclick="clearUserDropLists()" class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm" data-translate="clear-user-drops">
-                            🧹 User Drop Listen leeren
                         </button>
                         <button onclick="restoreUserDropLists()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm" data-translate="restore-user-drops">
-                            🔄 User Drop Listen wiederherstellen
                         </button>
                         <button onclick="checkUserDropCount()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm" data-translate="check-user-drop-count">
-                            📊 User Drop Anzahl prüfen
                         </button>
                         <button onclick="cleanupDuplicateUserDrops()" class="w-full px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm" data-translate="cleanup-duplicates">
-                            🧹 Duplikate bereinigen
                         </button>
                         <button onclick="createMissingDrop1()" class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
-                            🏛️ Drop Nr. 1 (Stift Melk) erstellen
                         </button>
                     </div>
                 </div>
@@ -988,7 +1178,6 @@
                 
                 <!-- Dev-only: Bild auswählen Button -->
                 <button id="dev-select-image-btn" onclick="handleDevImageSelect()" class="w-full px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors mb-4" style="display: none;">
-                    🖼️ Bild auswählen (Dev)
                 </button>
                 
                 <!-- Debug Button -->
@@ -1002,15 +1191,15 @@
         
         <!-- Dev Coordinate Adjustment Section -->
         <div class="bg-gray-700 rounded-lg p-6 mt-6">
-            <h3 class="text-xl font-semibold text-white mb-4" data-translate="dev-coordinate-adjustment">🎯 Dev Koordinaten-Anpassung</h3>
+            <h3 class="text-xl font-semibold text-white mb-4" data-translate="dev-coordinate-adjustment"></h3>
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2" data-translate="latitude-lat">Breitengrad (Lat)</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2" data-translate="latitude-lat"></label>
                         <input type="number" id="dev-lat-input" step="0.000001" class="w-full px-3 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="z.B. 52.520008" data-translate="latitude-placeholder">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2" data-translate="longitude-lng">Längengrad (Lng)</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2" data-translate="longitude-lng"></label>
                         <input type="number" id="dev-lng-input" step="0.000001" class="w-full px-3 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" placeholder="z.B. 13.404954" data-translate="longitude-placeholder">
                     </div>
                 </div>

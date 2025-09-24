@@ -1,5 +1,25 @@
 // GeoCard Functions - Map and Location Functions
 
+// Get drop description based on current language and Firebase dual-language fields
+function getDropDescription(drop, currentLang) {
+    // If dual language fields exist, use them
+    if (currentLang === 'de' && drop.description_de) {
+        return drop.description_de;
+    } else if (currentLang === 'en' && drop.description_en) {
+        return drop.description_en;
+    }
+    
+    // Fallback to original description or photoDescription
+    if (drop.description) {
+        return drop.description;
+    } else if (drop.photoDescription) {
+        return drop.photoDescription;
+    }
+    
+    // Final fallback
+    return currentLang === 'en' ? 'The object or scene at this location' : 'Das Objekt oder die Szene an diesem Standort';
+}
+
 // Manual reload function for drop lists
 window.reloadAllDropLists = async function() {
     console.log('🔄 Manually reloading all drop lists...');
@@ -741,6 +761,9 @@ async function createSingleStateDrop(stateName, placeName, lat, lng, dropNumber)
             return;
         }
         
+        // Get current language
+        const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'de';
+        
         // Create drop document
         const dropData = {
             name: `UserDrop${dropNumber}_${stateName.replace('ö', 'oe').replace('ä', 'ae').replace('ü', 'ue')}`,
@@ -760,7 +783,13 @@ async function createSingleStateDrop(stateName, placeName, lat, lng, dropNumber)
             isActive: true,
             dropType: 'user',
             state: stateName,
-            place: placeName
+            place: placeName,
+            // Dual language fields
+            language: currentLang,
+            description_de: currentLang === 'de' ? `Test-Drop für ${stateName}: ${placeName}` : null,
+            description_en: currentLang === 'en' ? `Test Drop for ${stateName}: ${placeName}` : null,
+            photoDescription_de: currentLang === 'de' ? `Fotografiere ${placeName} in ${stateName}. Das Objekt sollte vollständig sichtbar sein.` : null,
+            photoDescription_en: currentLang === 'en' ? `Photograph ${placeName} in ${stateName}. The object should be fully visible.` : null
         };
         
         await db.collection('userDrops').add(dropData);
@@ -1773,6 +1802,9 @@ window.createUserDrop = async function() {
             return;
         }
 
+        // Get current language
+        const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'de';
+        
         const userDropData = {
             name: userDropName, // Use auto-generated name
             description: description,
@@ -1791,7 +1823,13 @@ window.createUserDrop = async function() {
             collection: 'userDrops',
             referenceImage: referenceImage ? finalFilename : null, // Use consistent filename
             referenceImageUrl: referenceImageUrl,
-            referenceImageHash: referenceImageHash
+            referenceImageHash: referenceImageHash,
+            // Dual language fields
+            language: currentLang,
+            description_de: currentLang === 'de' ? description : null,
+            description_en: currentLang === 'en' ? description : null,
+            photoDescription_de: currentLang === 'de' ? description : null,
+            photoDescription_en: currentLang === 'en' ? description : null
         };
         
         console.log('💾 Saving user drop data:', userDropData);
@@ -3370,16 +3408,21 @@ window.addDropMarkersToMap = function(drops) {
             const marker = L.marker([drop.lat, drop.lng], { icon: markerIconElement })
                 .addTo(window.geoMap);
             
+            // Store drop data in marker for later use
+            marker.dropData = drop;
+            
             // console.log(`🗺️ Marker added to map: ${marker._leaflet_id}`);
             
-            // Create popup content with current language using window.t()
+            // Create popup content with current language
+            const photographText = currentLang === 'en' ? 'Photograph:' : 'Fotografiere:';
+            const deleteText = currentLang === 'en' ? 'Delete' : 'Löschen';
             const rewardLabelText = currentLang === 'en' ? 'Reward:' : 'Reward:';
             const statusLabelText = currentLang === 'en' ? 'Status:' : 'Status:';
             const coordinatesLabelText = currentLang === 'en' ? 'Coordinates:' : 'Koordinaten:';
             const pixeldropsText = currentLang === 'en' ? 'PixelDrops' : 'PixelDrops';
-            const photographText = currentLang === 'en' ? 'Photograph:' : 'Fotografiere:';
-            const deleteText = currentLang === 'en' ? 'Delete' : 'Löschen';
-            const defaultDescription = currentLang === 'en' ? 'The object or scene at this location' : 'Das Objekt oder die Szene an diesem Standort';
+            
+            // Get description from Firebase dual-language fields
+            const dropDescription = getDropDescription(drop, currentLang);
             
             marker.bindPopup(`
                     <div class="text-sm" style="min-width: 200px;">
@@ -3387,7 +3430,7 @@ window.addDropMarkersToMap = function(drops) {
                         <div style="margin: 8px 0; padding: 8px; background: #f0f0f0; border-radius: 4px; border-left: 3px solid #10b981;">
                             <strong>📸 ${photographText}</strong><br>
                             <span style="color: #374151; font-size: 12px;">
-                                ${drop.description || drop.photoDescription || defaultDescription}
+                                ${dropDescription}
                             </span>
                         </div>
                         <div style="margin: 4px 0;">
@@ -3457,81 +3500,50 @@ window.updateMarkerPopups = function() {
     
     // Update drop markers popups
     if (window.dropMarkers && window.dropMarkers.length > 0) {
+        const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'de';
+        console.log(`🔄 Updating ${window.dropMarkers.length} drop markers with language: ${currentLang}`);
+        
         window.dropMarkers.forEach((marker, index) => {
             if (marker && marker.getPopup()) {
-                const popup = marker.getPopup();
-                const content = popup.getContent();
-                if (content) {
-                    // Extract drop information from existing popup
-                    const dropTypeMatch = content.match(/(🎯|👤|🌍) (Dev|User|Normal)/);
-                    const rewardMatch = content.match(/💰.*?(\d+).*?PixelDrops/);
-                    const statusMatch = content.match(/(⏰|✅) (.*?)</);
-                    const coordMatch = content.match(/(Koordinaten|Coordinates).*?(\d+\.\d+), (\d+\.\d+)/);
+                // Get drop data from marker (if stored)
+                const dropData = marker.dropData;
+                if (dropData) {
+                    console.log(`🔍 Updating marker ${index + 1} with drop data:`, dropData);
                     
-                    if (dropTypeMatch && rewardMatch && statusMatch && coordMatch) {
-                        const dropType = dropTypeMatch[2];
-                        const reward = rewardMatch[1];
-                        const status = statusMatch[2];
-                        const lat = coordMatch[2];
-                        const lng = coordMatch[3];
-                        
-                        // Get translated texts
-                        const devDropText = window.t ? window.t('geocard.dev-drop') : 'Dev';
-                        const userDropText = window.t ? window.t('geocard.user-drop') : 'User';
-                        const normalDropText = window.t ? window.t('geocard.normal-drop') : 'Normal';
-                        const rewardLabelText = window.t ? window.t('geocard.reward') : 'Reward:';
-                        const statusLabelText = window.t ? window.t('geocard.status') : 'Status:';
-                        const coordinatesLabelText = window.t ? window.t('geocard.coordinates') : 'Coordinates:';
-                        const pixeldropsText = window.t ? window.t('geocard.pixeldrops') : 'PixelDrops';
-                        
-                        // Determine drop type text
-                        let dropTypeText;
-                        if (dropType === 'Dev') {
-                            dropTypeText = `🎯 ${devDropText}`;
-                        } else if (dropType === 'User') {
-                            dropTypeText = `👤 ${userDropText}`;
-                        } else {
-                            dropTypeText = `🌍 ${normalDropText}`;
-                        }
-                        
-                        // Determine status text
-                        let statusText;
-                        if (status.includes('gesammelt') || status.includes('Collected')) {
-                            const collectedTodayText = window.t ? window.t('geocard.collected-today') : 'Collected Today';
-                            statusText = `⏰ ${collectedTodayText}`;
-                        } else {
-                            const availableText = window.t ? window.t('geocard.available') : 'Available';
-                            statusText = `✅ ${availableText}`;
-                        }
-                        
-                        // Extract drop number from content
-                        const dropNumberMatch = content.match(/GeoDrop(\d+|\w+)/);
-                        const dropNumber = dropNumberMatch ? dropNumberMatch[1] : '';
-                        
-                        // Extract description from content
-                        const descriptionMatch = content.match(/<span[^>]*>(.*?)<\/span>/);
-                        const description = descriptionMatch ? descriptionMatch[1] : 'Das Objekt oder die Szene an diesem Standort';
-                        
-                        const newContent = `
-                            <div class="text-sm" style="min-width: 200px;">
-                                <strong>${dropTypeText} GeoDrop${dropNumber}</strong><br>
-                                <div style="margin: 8px 0; padding: 8px; background: #f0f0f0; border-radius: 4px; border-left: 3px solid #10b981;">
-                                    <strong>📸 ${window.t ? window.t('geocard.photograph') : 'Fotografiere:'}</strong><br>
-                                    <span style="color: #374151; font-size: 12px;">
-                                        ${description}
-                                    </span>
-                                </div>
-                                <div style="margin: 4px 0;">
-                                    <strong>💰 ${rewardLabelText}</strong> ${reward} ${pixeldropsText}<br>
-                                    <strong>📊 ${statusLabelText}</strong> ${statusText}<br>
-                                    <strong>📍 ${coordinatesLabelText}</strong> ${lat}, ${lng}
-                                </div>
+                    // Recreate popup with current language using drop data
+                    const dropTypeText = dropData.type === 'dev' ? '🎯 Dev' : dropData.type === 'user' ? '👤 User' : '🌍 Normal';
+                    const photographText = currentLang === 'en' ? 'Photograph:' : 'Fotografiere:';
+                    const rewardLabelText = currentLang === 'en' ? 'Reward:' : 'Reward:';
+                    const statusLabelText = currentLang === 'en' ? 'Status:' : 'Status:';
+                    const coordinatesLabelText = currentLang === 'en' ? 'Coordinates:' : 'Koordinaten:';
+                    const pixeldropsText = currentLang === 'en' ? 'PixelDrops' : 'PixelDrops';
+                    const availableText = currentLang === 'en' ? 'Available' : 'Verfügbar';
+                    
+                    // Get description from Firebase dual-language fields
+                    const dropDescription = getDropDescription(dropData, currentLang);
+                    console.log(`📝 Drop description for ${currentLang}:`, dropDescription);
+                    
+                    const newContent = `
+                        <div class="text-sm" style="min-width: 200px;">
+                            <strong>${dropTypeText} GeoDrop${dropData.geodropNumber || dropData.id}</strong><br>
+                            <div style="margin: 8px 0; padding: 8px; background: #f0f0f0; border-radius: 4px; border-left: 3px solid #10b981;">
+                                <strong>📸 ${photographText}</strong><br>
+                                <span style="color: #374151; font-size: 12px;">
+                                    ${dropDescription}
+                                </span>
                             </div>
-                        `;
-                        
-                        marker.setPopupContent(newContent);
-                        console.log(`✅ Drop marker ${index + 1} popup updated`);
-                    }
+                            <div style="margin: 4px 0;">
+                                <strong>💰 ${rewardLabelText}</strong> ${dropData.reward || 100} ${pixeldropsText}<br>
+                                <strong>📊 ${statusLabelText}</strong> ✅ ${availableText}<br>
+                                <strong>📍 ${coordinatesLabelText}</strong> ${dropData.lat.toFixed(6)}, ${dropData.lng.toFixed(6)}
+                            </div>
+                        </div>
+                    `;
+                    
+                    marker.setPopupContent(newContent);
+                    console.log(`✅ Drop marker ${index + 1} popup updated with language: ${currentLang}`);
+                } else {
+                    console.log(`⚠️ No drop data found for marker ${index + 1}`);
                 }
             }
         });
@@ -4646,6 +4658,110 @@ window.addDropDescriptions = async function() {
     } catch (error) {
         console.error('❌ Error adding descriptions:', error);
         alert('❌ Fehler beim Hinzufügen der Beschreibungen: ' + error.message);
+    }
+};
+
+// Function to add dual-language fields to existing drops
+window.addDualLanguageFieldsToExistingDrops = async function() {
+    console.log('🔄 Adding dual-language fields to existing drops...');
+    
+    try {
+        const db = window.firebase.firestore();
+        let totalUpdateCount = 0;
+        
+        // Update user drops first
+        console.log('🔄 Updating user drops...');
+        const userDropsSnapshot = await db.collection('userDrops').get();
+        const userBatch = db.batch();
+        let userUpdateCount = 0;
+        
+        userDropsSnapshot.docs.forEach(doc => {
+            const drop = doc.data();
+            if (!drop.description_de && !drop.description_en) {
+                const description = drop.description || drop.photoDescription || 'Das Objekt oder die Szene an diesem Standort';
+                userBatch.update(doc.ref, {
+                    description_de: description,
+                    description_en: 'The object or scene at this location',
+                    photoDescription_de: drop.photoDescription || description,
+                    photoDescription_en: 'The object or scene at this location'
+                });
+                userUpdateCount++;
+            }
+        });
+        
+        if (userUpdateCount > 0) {
+            await userBatch.commit();
+            console.log(`✅ Updated ${userUpdateCount} user drops`);
+            totalUpdateCount += userUpdateCount;
+        }
+        
+        // Update dev drops
+        console.log('🔄 Updating dev drops...');
+        const devDropsSnapshot = await db.collection('devDrops').get();
+        const devBatch = db.batch();
+        let devUpdateCount = 0;
+        
+        devDropsSnapshot.docs.forEach(doc => {
+            const drop = doc.data();
+            if (!drop.description_de && !drop.description_en) {
+                const description = drop.description || drop.photoDescription || 'Entwickler-Drop für Tests';
+                devBatch.update(doc.ref, {
+                    description_de: description,
+                    description_en: 'Developer Drop for Tests',
+                    photoDescription_de: drop.photoDescription || description,
+                    photoDescription_en: 'Developer Drop for Tests'
+                });
+                devUpdateCount++;
+            }
+        });
+        
+        if (devUpdateCount > 0) {
+            await devBatch.commit();
+            console.log(`✅ Updated ${devUpdateCount} dev drops`);
+            totalUpdateCount += devUpdateCount;
+        }
+        
+        // Update normal geodrops
+        console.log('🔄 Updating normal geodrops...');
+        const geodropsSnapshot = await db.collection('geodrops').get();
+        const geoBatch = db.batch();
+        let geoUpdateCount = 0;
+        
+        geodropsSnapshot.docs.forEach(doc => {
+            const drop = doc.data();
+            if (!drop.description_de && !drop.description_en) {
+                const description = drop.description || drop.photoDescription || 'Das Objekt oder die Szene an diesem Standort';
+                geoBatch.update(doc.ref, {
+                    description_de: description,
+                    description_en: 'The object or scene at this location',
+                    photoDescription_de: drop.photoDescription || description,
+                    photoDescription_en: 'The object or scene at this location'
+                });
+                geoUpdateCount++;
+            }
+        });
+        
+        if (geoUpdateCount > 0) {
+            await geoBatch.commit();
+            console.log(`✅ Updated ${geoUpdateCount} normal geodrops`);
+            totalUpdateCount += geoUpdateCount;
+        }
+        
+        if (totalUpdateCount > 0) {
+            alert(`✅ ${totalUpdateCount} Drops wurden mit dual-language Feldern aktualisiert!`);
+            console.log(`✅ Added dual-language fields to ${totalUpdateCount} drops`);
+            
+            // Reload the map to show updated descriptions
+            if (typeof window.loadGeoDrops === 'function') {
+                window.loadGeoDrops();
+            }
+        } else {
+            alert('ℹ️ Alle Drops haben bereits dual-language Felder!');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error adding dual-language fields:', error);
+        alert('❌ Fehler beim Hinzufügen der dual-language Felder: ' + error.message);
     }
 };
 

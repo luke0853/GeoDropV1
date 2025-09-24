@@ -345,6 +345,9 @@ window.createDevDrop = async function() {
         return;
     }
     
+        // Get current language
+        const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'de';
+        
         // Create dev drop
         const dropData = {
             id: `dev_${Date.now()}`,
@@ -356,7 +359,11 @@ window.createDevDrop = async function() {
             createdBy: window.currentUser.uid,
             createdAt: new Date(),
             type: 'dev',
-            isActive: true
+            isActive: true,
+            // Dual language fields
+            language: currentLang,
+            description_de: currentLang === 'de' ? 'Entwickler-Drop für Tests' : null,
+            description_en: currentLang === 'en' ? 'Developer Drop for Tests' : null
         };
         
         // Save to Firebase
@@ -979,6 +986,9 @@ window.uploadDevImageWithDrop = async function() {
                     // Get download URL
                     const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
                     
+                    // Get current language
+                    const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'de';
+                    
                     // Create drop data
                     const dropData = {
                         id: `drop_${Date.now()}`,
@@ -999,7 +1009,11 @@ window.uploadDevImageWithDrop = async function() {
                         awsImageHash: window.currentUploadAWSHash || null,
                         awsMigrated: window.currentUploadAWSHash ? true : false,
                         awsMigrationDate: window.currentUploadAWSHash ? new Date() : null,
-                        newHashMethod: window.currentUploadAWSHash ? 'aws-rekognition' : 'local-fallback'
+                        newHashMethod: window.currentUploadAWSHash ? 'aws-rekognition' : 'local-fallback',
+                        // Dual language fields
+                        language: currentLang,
+                        description_de: currentLang === 'de' ? description : null,
+                        description_en: currentLang === 'en' ? description : null
                     };
                     
                     // Save to Firebase
