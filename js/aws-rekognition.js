@@ -371,7 +371,18 @@ class AWSRekognitionService {
             }
             
             const devDropsSnapshot = await window.db.collection('devDrops').get();
-            return devDropsSnapshot.size;
+            
+            // Count only real GeoDrops (starting with "GeoDrop"), not pattern drops like "devDrop1"
+            let realGeoDropsCount = 0;
+            devDropsSnapshot.forEach(doc => {
+                const data = doc.data();
+                if (data.name && data.name.startsWith('GeoDrop')) {
+                    realGeoDropsCount++;
+                }
+            });
+            
+            console.log(`🔒 AWS real count: ${devDropsSnapshot.size} total, ${realGeoDropsCount} real GeoDrops`);
+            return realGeoDropsCount;
         } catch (error) {
             console.error('❌ Error getting real dev drops count:', error);
             return 0;

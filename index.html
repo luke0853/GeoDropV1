@@ -208,6 +208,12 @@
                 'error-loading-dev-drops': 'Fehler beim Laden der Dev GeoDrops',
                 'legend-collected-today': 'Heute gesammelt',
                 'legend-collected-today-desc': 'Graue Dart-Scheibe - Heute bereits gesammelt',
+                'legend-normal-drops': 'Normale GeoDrops',
+                'legend-normal-drops-desc': 'Kleine Dart-Scheibe - Offizielle GeoDrops',
+                'legend-user-drops': 'User GeoDrops',
+                'legend-user-drops-desc': 'Mittlere Größe - Von Spielern erstellte GeoDrops',
+                'legend-dev-drops': 'Dev GeoDrop',
+                'legend-dev-drops-desc': 'Größere Dart-Scheibe (2.5x größer) - Entwickler-Test-Drops',
                 'dev-drops-legend': '🎯 Dev GeoDrops',
                 'user-drops-legend': '🌍 User GeoDrops',
                 
@@ -509,6 +515,12 @@
                 'error-loading-dev-drops': 'Error loading Dev GeoDrops',
                 'legend-collected-today': 'Collected Today',
                 'legend-collected-today-desc': 'Gray dart board - Already collected today',
+                'legend-normal-drops': 'Normal GeoDrops',
+                'legend-normal-drops-desc': 'Small dart board - Official GeoDrops',
+                'legend-user-drops': 'User GeoDrops',
+                'legend-user-drops-desc': 'Medium size - Player-created GeoDrops',
+                'legend-dev-drops': 'Dev GeoDrop',
+                'legend-dev-drops-desc': 'Larger dart board (2.5x bigger) - Developer test drops',
                 'dev-drops-legend': '🎯 Dev GeoDrops',
                 'user-drops-legend': '🌍 User GeoDrops',
                 
@@ -649,6 +661,13 @@
                 setTimeout(() => {
                     window.updateMarkerPopups();
                 }, 300);
+            }
+            
+            // Update dropdown language if function exists
+            if (window.updateDropdownLanguage) {
+                setTimeout(() => {
+                    window.updateDropdownLanguage();
+                }, 100);
             }
             
             // Force update all texts again after a longer delay to catch all dynamically loaded content
@@ -1599,6 +1618,7 @@
                     <h1 class="text-4xl font-bold text-white mb-2" data-translate="geodrop-title">🌍 GeoDrop</h1>
                     <p class="text-gray-300 text-lg" data-translate="geodrop-subtitle">Welcome to the Future of Geo-Mining</p>
                 </div>
+                
                 
                 <div id="user-info" class="bg-gray-800 bg-opacity-70 rounded-lg p-4 mb-6 backdrop-blur-sm" style="display: none; max-width: 400px; width: fit-content; margin: 0 auto 1.5rem auto;">
                     <h3 class="text-xl font-semibold text-white mb-4" data-translate="user-info">👤 User Info</h3>
@@ -3450,5 +3470,6 @@
 
     
     </script>
+    
 </body>
 </html>

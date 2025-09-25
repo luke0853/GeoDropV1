@@ -16,6 +16,10 @@
     <script src="../js/upload-functions.js"></script>
     <script src="../js/geocard.js"></script>
     <script src="../js/user-drop-functions.js"></script>
+    <script src="../js/firebase-repair.js"></script>
+    <script src="../js/repair-now.js"></script>
+    <script src="../js/repair-dev-drops.js"></script>
+    <script src="../js/repair-now-simple.js"></script>
     
     <!-- Dev Functions -->
     <script>
@@ -81,62 +85,245 @@
             applyTranslations();
         }, 100);
         
-        // Make functions globally available
-        window.updateTranslationsFromParent = updateTranslationsFromParent;
-        window.applyTranslations = applyTranslations;
-        
-        // NUCLEAR DROPDOWN TRANSLATION - COMPLETE REPLACEMENT
-        function nuclearDropdownTranslation() {
-            const dropdown = document.getElementById('geocard-drop-select');
-            if (dropdown) {
-                const globalLang = window.currentLang || (window.getCurrentLanguage ? window.getCurrentLanguage() : 'de');
-                const translation = globalLang === 'en' ? 'Choose Dev GeoDrop...' : 'Dev GeoDrop auswählen...';
+        // RICHTIGE FIREBASE-STRUKTUR FÜR DEV DROPS BAUEN (basierend auf user drops Muster)
+        async function buildCorrectFirebaseStructure() {
+            console.log('🔧 Baue richtige Firebase-Struktur für Dev Drops basierend auf User Drops Muster...');
+            
+            try {
+                const db = firebase.firestore();
                 
-                // Get the first option
-                const firstOption = dropdown.querySelector('option[value=""]');
-                if (firstOption && firstOption.textContent !== translation) {
-                    // COMPLETELY REPLACE the first option
-                    const newOption = document.createElement('option');
-                    newOption.value = '';
-                    newOption.id = 'dropdown-first-option';
-                    newOption.textContent = translation;
-                    
-                    // Replace the old option
-                    firstOption.parentNode.replaceChild(newOption, firstOption);
-                    
-                    console.log('💥💥💥 NUCLEAR DROPDOWN REPLACED:', translation, 'for language:', globalLang);
-                }
-            }
+                // Dev Drops mit vollständiger Struktur wie User Drops erstellen
+                    { 
+                        id: 'dev1', 
+                        name: 'GeoDrop1', 
+                        geodropNumber: '1', 
+                        reward: 100, 
+                        lat: 48.2082, 
+                        lng: 16.3738, 
+                        isActive: true,
+                        description: 'Entwickler GeoDrop 1 - Test Location',
+                        photoDescription: 'Entwickler GeoDrop 1 - Test Location',
+                        createdBy: 'dev-system',
+                        createdByName: 'Dev System',
+                        createdByEmail: 'dev@geodrop.com',
+                        ersteller: 'Dev System',
+                        isAvailable: true,
+                        collection: 'devDrops',
+                        referenceImage: null,
+                        referenceImageUrl: null,
+                        referenceImageHash: null,
+                        language: 'de',
+                        description_de: 'Entwickler GeoDrop 1 - Test Location',
+                        description_en: null,
+                        photoDescription_de: 'Entwickler GeoDrop 1 - Test Location',
+                        photoDescription_en: null,
+                        claimedBy: null,
+                        lastClaimDate: null
+                    },
+                    { 
+                        id: 'dev2', 
+                        name: 'GeoDrop2', 
+                        geodropNumber: '2', 
+                        reward: 100, 
+                        lat: 48.2100, 
+                        lng: 16.3750, 
+                        isActive: true,
+                        description: 'Entwickler GeoDrop 2 - Test Location',
+                        photoDescription: 'Entwickler GeoDrop 2 - Test Location',
+                        createdBy: 'dev-system',
+                        createdByName: 'Dev System',
+                        createdByEmail: 'dev@geodrop.com',
+                        ersteller: 'Dev System',
+                        isAvailable: true,
+                        collection: 'devDrops',
+                        referenceImage: null,
+                        referenceImageUrl: null,
+                        referenceImageHash: null,
+                        language: 'de',
+                        description_de: 'Entwickler GeoDrop 2 - Test Location',
+                        description_en: null,
+                        photoDescription_de: 'Entwickler GeoDrop 2 - Test Location',
+                        photoDescription_en: null,
+                        claimedBy: null,
+                        lastClaimDate: null
+                    },
+                    { 
+                        id: 'dev3', 
+                        name: 'GeoDrop3', 
+                        geodropNumber: '3', 
+                        reward: 100, 
+                        lat: 48.2120, 
+                        lng: 16.3770, 
+                        isActive: true,
+                        description: 'Entwickler GeoDrop 3 - Test Location',
+                        photoDescription: 'Entwickler GeoDrop 3 - Test Location',
+                        createdBy: 'dev-system',
+                        createdByName: 'Dev System',
+                        createdByEmail: 'dev@geodrop.com',
+                        ersteller: 'Dev System',
+                        isAvailable: true,
+                        collection: 'devDrops',
+                        referenceImage: null,
+                        referenceImageUrl: null,
+                        referenceImageHash: null,
+                        language: 'de',
+                        description_de: 'Entwickler GeoDrop 3 - Test Location',
+                        description_en: null,
+                        photoDescription_de: 'Entwickler GeoDrop 3 - Test Location',
+                        photoDescription_en: null,
+                        claimedBy: null,
+                        lastClaimDate: null
+                    },
+                    { 
+                        id: 'dev4', 
+                        name: 'GeoDrop4', 
+                        geodropNumber: '4', 
+                        reward: 100, 
+                        lat: 48.2140, 
+                        lng: 16.3790, 
+                        isActive: true,
+                        description: 'Entwickler GeoDrop 4 - Test Location',
+                        photoDescription: 'Entwickler GeoDrop 4 - Test Location',
+                        createdBy: 'dev-system',
+                        createdByName: 'Dev System',
+                        createdByEmail: 'dev@geodrop.com',
+                        ersteller: 'Dev System',
+                        isAvailable: true,
+                        collection: 'devDrops',
+                        referenceImage: null,
+                        referenceImageUrl: null,
+                        referenceImageHash: null,
+                        language: 'de',
+                        description_de: 'Entwickler GeoDrop 4 - Test Location',
+                        description_en: null,
+                        photoDescription_de: 'Entwickler GeoDrop 4 - Test Location',
+                        photoDescription_en: null,
+                        claimedBy: null,
+                        lastClaimDate: null
+                    },
+                    { 
+                        id: 'dev5', 
+                        name: 'GeoDrop5', 
+                        geodropNumber: '5', 
+                        reward: 100, 
+                        lat: 48.2160, 
+                        lng: 16.3810, 
+                        isActive: true,
+                        description: 'Entwickler GeoDrop 5 - Test Location',
+                        photoDescription: 'Entwickler GeoDrop 5 - Test Location',
+                        createdBy: 'dev-system',
+                        createdByName: 'Dev System',
+                        createdByEmail: 'dev@geodrop.com',
+                        ersteller: 'Dev System',
+                        isAvailable: true,
+                        collection: 'devDrops',
+                        referenceImage: null,
+                        referenceImageUrl: null,
+                        referenceImageHash: null,
+                        language: 'de',
+                        description_de: 'Entwickler GeoDrop 5 - Test Location',
+                        description_en: null,
+                        photoDescription_de: 'Entwickler GeoDrop 5 - Test Location',
+                        photoDescription_en: null,
+                        claimedBy: null,
+                        lastClaimDate: null
+                    },
+                    { 
+                        id: 'dev6', 
+                        name: 'GeoDrop6', 
+                        geodropNumber: '6', 
+                        reward: 100, 
+                        lat: 48.2180, 
+                        lng: 16.3830, 
+                        isActive: true,
+                        description: 'Entwickler GeoDrop 6 - Test Location',
+                        photoDescription: 'Entwickler GeoDrop 6 - Test Location',
+                        createdBy: 'dev-system',
+                        createdByName: 'Dev System',
+                        createdByEmail: 'dev@geodrop.com',
+                        ersteller: 'Dev System',
+                        isAvailable: true,
+                        collection: 'devDrops',
+                        referenceImage: null,
+                        referenceImageUrl: null,
+                        referenceImageHash: null,
+                        language: 'de',
+                        description_de: 'Entwickler GeoDrop 6 - Test Location',
+                        description_en: null,
+                        photoDescription_de: 'Entwickler GeoDrop 6 - Test Location',
+                        photoDescription_en: null,
+                        claimedBy: null,
+                        lastClaimDate: null
+                    },
+                    { 
+                        id: 'dev7', 
+                        name: 'GeoDrop7', 
+                        geodropNumber: '7', 
+                        reward: 100, 
+                        lat: 48.2200, 
+                        lng: 16.3850, 
+                        isActive: true,
+                        description: 'Entwickler GeoDrop 7 - Test Location',
+                        photoDescription: 'Entwickler GeoDrop 7 - Test Location',
+                        createdBy: 'dev-system',
+                        createdByName: 'Dev System',
+                        createdByEmail: 'dev@geodrop.com',
+                        ersteller: 'Dev System',
+                        isAvailable: true,
+                        collection: 'devDrops',
+                        referenceImage: null,
+                        referenceImageUrl: null,
+                        referenceImageHash: null,
+                        language: 'de',
+                        description_de: 'Entwickler GeoDrop 7 - Test Location',
+                        description_en: null,
+                        photoDescription_de: 'Entwickler GeoDrop 7 - Test Location',
+                        photoDescription_en: null,
+                        claimedBy: null,
+                        lastClaimDate: null
+                    },
+                    { 
+                        id: 'dev8', 
+                        name: 'GeoDrop8', 
+                        geodropNumber: '8', 
+                        reward: 100, 
+                        lat: 48.2220, 
+                        lng: 16.3870, 
+                        isActive: true,
+                        description: 'Entwickler GeoDrop 8 - Test Location',
+                        photoDescription: 'Entwickler GeoDrop 8 - Test Location',
+                        createdBy: 'dev-system',
+                        createdByName: 'Dev System',
+                        createdByEmail: 'dev@geodrop.com',
+                        ersteller: 'Dev System',
+                        isAvailable: true,
+                        collection: 'devDrops',
+                        referenceImage: null,
+                        referenceImageUrl: null,
+                        referenceImageHash: null,
+                        language: 'de',
+                        description_de: 'Entwickler GeoDrop 8 - Test Location',
+                        description_en: null,
+                        photoDescription_de: 'Entwickler GeoDrop 8 - Test Location',
+                        photoDescription_en: null,
+                        claimedBy: null,
+                        lastClaimDate: null
+                    }
+                
+                // Alte Dev Drops löschen
+                console.log('🗑️ Lösche alte Dev Drops...');
+                const oldDevDrops = await db.collection('devDrops').get();
+                const deletePromises = oldDevDrops.docs.map(doc => doc.ref.delete());
+                await Promise.all(deletePromises);
+                console.log(`🗑️ ${oldDevDrops.size} alte Dev Drops gelöscht`);
+                
+        
+        // Firebase-Struktur beim Laden der Seite aufbauen (nur einmal)
+        if (!sessionStorage.getItem('firebaseStructureBuilt')) {
+            setTimeout(buildCorrectFirebaseStructure, 2000);
+            sessionStorage.setItem('firebaseStructureBuilt', 'true');
         }
         
-        // Run nuclear translation every 50ms
-        setInterval(nuclearDropdownTranslation, 50);
-        
-        // Override ALL translation functions to call nuclear translation first
-        const originalUpdateAllTexts = window.updateAllTexts;
-        window.updateAllTexts = function() {
-            nuclearDropdownTranslation();
-            if (originalUpdateAllTexts) {
-                originalUpdateAllTexts();
-            }
-        };
-        
-        const originalApplyTranslations = window.applyTranslations;
-        window.applyTranslations = function() {
-            nuclearDropdownTranslation();
-            if (originalApplyTranslations) {
-                originalApplyTranslations();
-            }
-        };
-        
-        const originalSwitchLanguage = window.switchLanguage;
-        window.switchLanguage = function(lang) {
-            nuclearDropdownTranslation();
-            if (originalSwitchLanguage) {
-                originalSwitchLanguage(lang);
-            }
-            setTimeout(nuclearDropdownTranslation, 10);
-        };
         
         // Function to monitor and fix translations
         function monitorTranslations() {
@@ -176,20 +363,9 @@
             }
         }
         
-        // Monitor translations every 100ms (more frequent)
-        setInterval(monitorTranslations, 100);
+        // ALLE INTERVALS ENTFERNT
         
-        // Also monitor when DOM changes
-        const observer = new MutationObserver(() => {
-            setTimeout(monitorTranslations, 50);
-        });
-        
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['data-translate']
-        });
+        // ALLE OBSERVER ENTFERNT
         
         // Get translations from parent window (index.html) or use local translations
         const translations = window.translations || {
@@ -212,17 +388,10 @@
                 'select-geodrop': 'GeoDrop auswählen:',
                 'user-drops': '👤 User Drops',
                 'dev-drops': '🔧 Dev Drops',
-                'select-dev-geodrop': 'Dev GeoDrop auswählen...',
-                'select-user-geodrop': 'User GeoDrop auswählen...',
+                'select-dev-geodrop': 'auswählen',
+                'select-user-geodrop': 'auswählen',
                 'loading-user-drops': 'User Drops werden geladen...',
-                'dev-drop-1': '🎯 Dev GeoDrop1 - 100 PixelDrops',
-                'dev-drop-2': '🎯 Dev GeoDrop2 - 100 PixelDrops',
-                'dev-drop-3': '🎯 Dev GeoDrop3 - 100 PixelDrops',
-                'dev-drop-4': '🎯 Dev GeoDrop4 - 100 PixelDrops',
-                'dev-drop-5': '🎯 Dev GeoDrop5 - 100 PixelDrops',
-                'dev-drop-6': '🎯 Dev GeoDrop6 - 100 PixelDrops',
-                'dev-drop-7': '🎯 Dev GeoDrop7 - 100 PixelDrops',
-                'dev-drop-8': '🎯 Dev GeoDrop8 - 100 PixelDrops',
+                // DROPS WERDEN DYNAMISCH AUS FIREBASE GELADEN - KEINE HART CODERTEN ÜBERSETZUNGEN
                 'dev-test-coordinates': '🔧 DEV: Test-Koordinaten eingeben:',
                 'set-test-coordinates': '📍 Test-Koordinaten setzen',
                 'create-test-melk': '🏛️ Test-Drop: Stift Melk erstellen',
@@ -370,17 +539,10 @@
                 'select-geodrop': 'Select GeoDrop:',
                 'user-drops': '👤 User Drops',
                 'dev-drops': '🔧 Dev Drops',
-                'select-dev-geodrop': 'Choose Dev GeoDrop...',
-                'select-user-geodrop': 'Choose User GeoDrop...',
+                'select-dev-geodrop': 'choose',
+                'select-user-geodrop': 'choose',
                 'loading-user-drops': 'Loading User Drops...',
-                'dev-drop-1': '🎯 Dev GeoDrop1 - 100 PixelDrops',
-                'dev-drop-2': '🎯 Dev GeoDrop2 - 100 PixelDrops',
-                'dev-drop-3': '🎯 Dev GeoDrop3 - 100 PixelDrops',
-                'dev-drop-4': '🎯 Dev GeoDrop4 - 100 PixelDrops',
-                'dev-drop-5': '🎯 Dev GeoDrop5 - 100 PixelDrops',
-                'dev-drop-6': '🎯 Dev GeoDrop6 - 100 PixelDrops',
-                'dev-drop-7': '🎯 Dev GeoDrop7 - 100 PixelDrops',
-                'dev-drop-8': '🎯 Dev GeoDrop8 - 100 PixelDrops',
+                // DROPS WERDEN DYNAMISCH AUS FIREBASE GELADEN - KEINE HART CODERTEN ÜBERSETZUNGEN
                 'dev-test-coordinates': '🔧 DEV: Enter Test Coordinates:',
                 'set-test-coordinates': '📍 Set Test Coordinates',
                 'create-test-melk': '🏛️ Create Test Drop: Melk Abbey',
@@ -824,7 +986,6 @@
                     'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&auto=format',
                     'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop',
                     'https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80'
-                ];
                 
                 let imageLoaded = false;
                 for (const url of imageUrls) {
@@ -1046,14 +1207,22 @@
             cursor: not-allowed;
             transform: none;
         }
+        
+        /* Google Translate Widget komplett entfernt */
     </style>
+    
+    <!-- ZWEI SEPARATE DROPDOWN-MENÜS - DEUTSCH UND ENGLISCH -->
 </head>
 <body class="bg-gray-900 text-white">
     <div class="max-w-6xl mx-auto p-6">
         
+        <!-- Google Translate Widget komplett entfernt -->
+        
         <h2 class="text-3xl font-bold text-white mb-8">
             <span style="background: rgba(0, 0, 0, 0.7); padding: 8px 12px; border-radius: 8px; display: inline-block;" data-translate="geocard-title">🗺️ GeoCard</span>
         </h2>
+        
+        </script>
         
         <!-- Map Container -->
         <div class="bg-gray-700 rounded-lg p-6 mb-6">
@@ -1102,26 +1271,30 @@
                     </div>
                 </div>
                 
-                <!-- Dev Drops Select -->
-                <div id="upload-dev-drops-section">
-                    <select id="geocard-drop-select" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white" onchange="updateClaimButton()">
-                        <option value="" id="dropdown-first-option">Dev GeoDrop auswählen...</option>
-                        <option value="devDrops:dev1" data-translate="dev-drop-1">🎯 Dev GeoDrop1 - 100 PixelDrops</option>
-                        <option value="devDrops:dev2" data-translate="dev-drop-2">🎯 Dev GeoDrop2 - 100 PixelDrops</option>
-                        <option value="devDrops:dev3" data-translate="dev-drop-3">🎯 Dev GeoDrop3 - 100 PixelDrops</option>
-                        <option value="devDrops:dev4" data-translate="dev-drop-4">🎯 Dev GeoDrop4 - 100 PixelDrops</option>
-                        <option value="devDrops:dev5" data-translate="dev-drop-5">🎯 Dev GeoDrop5 - 100 PixelDrops</option>
-                        <option value="devDrops:dev6" data-translate="dev-drop-6">🎯 Dev GeoDrop6 - 100 PixelDrops</option>
-                        <option value="devDrops:dev7" data-translate="dev-drop-7">🎯 Dev GeoDrop7 - 100 PixelDrops</option>
-                        <option value="devDrops:dev8" data-translate="dev-drop-8">🎯 Dev GeoDrop8 - 100 PixelDrops</option>
+                <!-- GeoDrop Selection Dropdowns -->
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-300 mb-2">🎯 GeoDrop auswählen:</label>
+                    
+                    <!-- German Dropdown -->
+                    <select id="geocard-drop-select-de" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white" onchange="updateClaimButton()">
+                        <option value="">Bitte Dev/User Drops auswählen</option>
+                        <!-- Options will be loaded when user selects Dev/User Drops -->
+                    </select>
+                    
+                    <!-- English Dropdown -->
+                    <select id="geocard-drop-select-en" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white" onchange="updateClaimButton()" style="display: none;">
+                        <option value="">Please select Dev/User Drops</option>
+                        <!-- Options will be loaded when user selects Dev/User Drops -->
                     </select>
                 </div>
                 
-                <!-- User Drops Select -->
+                <!-- Dev Drops Section -->
+                <div id="upload-dev-drops-section">
+                </div>
+                
+                <!-- User Drops Section -->
                 <div id="upload-user-drops-section" style="display: none;">
-                    <select id="geocard-user-drop-select" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white" onchange="updateClaimButton()">
-                        <option value="" data-translate="select-user-geodrop"></option>
-                    </select>
+                    <p class="text-sm text-gray-400 mb-4">👤 User Drops sind oben im Dropdown verfügbar</p>
                 </div>
                 
                     <!-- Hidden input for drop ID -->
@@ -1385,22 +1558,22 @@
                     <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: #4B5563; border-radius: 6px;">
                         <span style="font-size: 20px; margin-right: 12px;">🎯</span>
                         <div>
-                            <div style="color: white; font-weight: bold;">Normale GeoDrops</div>
-                            <div style="color: #9CA3AF; font-size: 14px;">Kleine Dart-Scheibe - Offizielle GeoDrops</div>
+                            <div style="color: white; font-weight: bold;" data-translate="legend-normal-drops">Normale GeoDrops</div>
+                            <div style="color: #9CA3AF; font-size: 14px;" data-translate="legend-normal-drops-desc">Kleine Dart-Scheibe - Offizielle GeoDrops</div>
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: #4B5563; border-radius: 6px;">
                         <span style="font-size: 24px; margin-right: 12px;">👤</span>
                         <div>
-                            <div style="color: white; font-weight: bold;">User GeoDrops</div>
-                            <div style="color: #9CA3AF; font-size: 14px;">Mittlere Größe - Von Spielern erstellte GeoDrops</div>
+                            <div style="color: white; font-weight: bold;" data-translate="legend-user-drops">User GeoDrops</div>
+                            <div style="color: #9CA3AF; font-size: 14px;" data-translate="legend-user-drops-desc">Mittlere Größe - Von Spielern erstellte GeoDrops</div>
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: #4B5563; border-radius: 6px;">
                         <span style="font-size: 28px; margin-right: 12px;">🎯</span>
                         <div>
-                            <div style="color: white; font-weight: bold;">Dev GeoDrop</div>
-                            <div style="color: #9CA3AF; font-size: 14px;">Größere Dart-Scheibe (2.5x größer) - Entwickler-Test-Drops</div>
+                            <div style="color: white; font-weight: bold;" data-translate="legend-dev-drops">Dev GeoDrop</div>
+                            <div style="color: #9CA3AF; font-size: 14px;" data-translate="legend-dev-drops-desc">Größere Dart-Scheibe (2.5x größer) - Entwickler-Test-Drops</div>
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: #4B5563; border-radius: 6px;">
@@ -1412,7 +1585,7 @@
                     </div>
                 </div>
                 <div style="text-align: center; margin-top: 20px;">
-                    <button onclick="closeMapLegendPopup()" style="background: #6B7280; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold;">Schließen</button>
+                    <button onclick="closeMapLegendPopup()" style="background: #6B7280; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold;" data-translate="common.close">Schließen</button>
                 </div>
             </div>
         </div>
@@ -2116,7 +2289,7 @@
                 devDropsSnapshot.size = devDropsSnapshot.docs.length;
                 console.log('📊 Dev drops snapshot:', devDropsSnapshot.size, 'drops found');
                 
-                const devDrops = [];
+];
                 devDropsSnapshot.forEach(doc => {
                     devDrops.push({ id: doc.id, ...doc.data(), collection: 'devDrops' });
                 });
@@ -2130,19 +2303,46 @@
                     return numA - numB;
                 });
                 
-                // Update dev drops select - GENAU WIE DIE FUNKTIONIERENDE LISTE
-                const select = document.getElementById('geocard-drop-select');
-                console.log('🔍 Select element found:', !!select);
+                // Update dev drops select - BEIDE DROPDOWNS (DE UND EN)
+                const selectDE = document.getElementById('geocard-drop-select-de');
+                const selectEN = document.getElementById('geocard-drop-select-en');
+                console.log('🔍 Select elements found:', !!selectDE, !!selectEN);
                 
-                if (select && devDrops.length > 0) {
-                    select.innerHTML = '<option value="">Dev GeoDrop auswählen...</option>';
-                    devDrops.forEach(drop => {
-                        const option = document.createElement('option');
-                        option.value = `${drop.collection}:${drop.id}`;
-                        option.textContent = `🎯 Dev GeoDrop${drop.geodropNumber || drop.id} - ${drop.reward || 100} PixelDrops`;
-                        select.appendChild(option);
-                    });
-                    console.log(`✅ Loaded ${devDrops.length} Dev Drops for Upload (KOPIERTE LÖSUNG)`);
+                if (selectDE) {
+                    // Clear dropdown completely
+                    selectDE.innerHTML = '';
+                    selectDE.innerHTML = '<option value="">auswählen</option>';
+                    if (devDrops.length > 0) {
+                        devDrops.forEach(drop => {
+                            const option = document.createElement('option');
+                            option.value = `${drop.collection}:${drop.id}`;
+                            // Verwende echte Firebase-Daten - keine Fake-Scheiße
+                            option.textContent = `🎯 Dev ${drop.name || `GeoDrop${drop.geodropNumber || drop.id}`} - ${drop.reward || 100} PixelDrops`;
+                            selectDE.appendChild(option);
+                        });
+                    } else {
+                        selectDE.innerHTML = '<option value="">Keine Dev Drops verfügbar</option>';
+                    }
+                }
+                
+                if (selectEN) {
+                    // Clear dropdown completely
+                    selectEN.innerHTML = '';
+                    selectEN.innerHTML = '<option value="">choose</option>';
+                    if (devDrops.length > 0) {
+                        devDrops.forEach(drop => {
+                            const option = document.createElement('option');
+                            option.value = `${drop.collection}:${drop.id}`;
+                            // Verwende echte Firebase-Daten - keine Fake-Scheiße
+                            option.textContent = `🎯 Dev ${drop.name || `GeoDrop${drop.geodropNumber || drop.id}`} - ${drop.reward || 100} PixelDrops`;
+                            selectEN.appendChild(option);
+                        });
+                    } else {
+                        selectEN.innerHTML = '<option value="">No Dev Drops available</option>';
+                    }
+                }
+                
+                console.log(`✅ Loaded ${devDrops.length} Dev Drops for Upload (BEHINDERTENGERECHT SYSTEM)`);
                 } else if (select) {
                     select.innerHTML = '<option value="">Keine Dev Drops verfügbar</option>';
                     console.log('❌ No dev drops found for upload');
@@ -2160,9 +2360,9 @@
             }
         };
         
-        // Load User Drops for Upload
+        // Load User Drops for Upload - ORIGINAL WORKING VERSION
         window.loadUserDropsForUpload = async function() {
-            console.log('👤 Loading User Drops for Upload...');
+            console.log('👤 Loading User Drops for Upload (ORIGINAL)...');
             try {
                 if (!window.firebase || !window.firebase.firestore()) {
                     console.log('❌ Firebase not available');
@@ -2170,31 +2370,11 @@
                 }
                 
                 const db = window.firebase.firestore();
-                // Load all user drops and filter out claimed ones
+                // Load ALL user drops - no filtering for now
                 const allUserDropsSnapshot = await db.collection('userDrops').get();
                 
-                // Filter for active drops and exclude claimed drops for today
-                const today = new Date().toDateString();
-                const currentUser = window.currentUser || window.auth?.currentUser;
-                
-                const userDropsSnapshot = {
-                    docs: allUserDropsSnapshot.docs.filter(doc => {
-                        const data = doc.data();
-                        const isActive = data.isActive === true;
-                        
-                        // Check if claimed today by current user
-                        const lastClaimDate = data.lastClaimDate ? data.lastClaimDate.toDate().toDateString() : null;
-                        const isClaimedToday = lastClaimDate === today && data.claimedBy === currentUser?.uid;
-                        
-                        // Only include drops that are active AND not claimed today
-                        return isActive && !isClaimedToday;
-                    }),
-                    size: 0
-                };
-                userDropsSnapshot.size = userDropsSnapshot.docs.length;
-                
                 const userDrops = [];
-                userDropsSnapshot.forEach(doc => {
+                allUserDropsSnapshot.forEach(doc => {
                     userDrops.push({ id: doc.id, ...doc.data(), collection: 'userDrops' });
                 });
                 
@@ -2205,19 +2385,43 @@
                     return numA - numB;
                 });
                 
-                // Update user drops select
-                const select = document.getElementById('geocard-user-drop-select');
-                if (select) {
-                    select.innerHTML = '<option value="">User GeoDrop auswählen...</option>';
-                    userDrops.forEach(drop => {
-                        const option = document.createElement('option');
-                        option.value = `${drop.collection}:${drop.id}`;
-                        option.textContent = `👤 User GeoDrop${drop.geodropNumber || drop.id} - ${drop.reward || 100} PixelDrops`;
-                        select.appendChild(option);
-                    });
+                // Update user drops select - BEIDE DROPDOWNS (DE UND EN)
+                const selectDE = document.getElementById('geocard-drop-select-de');
+                const selectEN = document.getElementById('geocard-drop-select-en');
+                
+                if (selectDE) {
+                    // Clear dropdown completely
+                    selectDE.innerHTML = '';
+                    selectDE.innerHTML = '<option value="">auswählen</option>';
+                    if (userDrops.length > 0) {
+                        userDrops.forEach(drop => {
+                            const option = document.createElement('option');
+                            option.value = `${drop.collection}:${drop.id}`;
+                            option.textContent = `👤 User ${drop.name || `GeoDrop${drop.geodropNumber || drop.id}`} - ${drop.reward || 100} PixelDrops`;
+                            selectDE.appendChild(option);
+                        });
+                    } else {
+                        selectDE.innerHTML = '<option value="">Keine User Drops verfügbar</option>';
+                    }
                 }
                 
-                console.log(`✅ Loaded ${userDrops.length} User Drops for Upload`);
+                if (selectEN) {
+                    // Clear dropdown completely
+                    selectEN.innerHTML = '';
+                    selectEN.innerHTML = '<option value="">choose</option>';
+                    if (userDrops.length > 0) {
+                        userDrops.forEach(drop => {
+                            const option = document.createElement('option');
+                            option.value = `${drop.collection}:${drop.id}`;
+                            option.textContent = `👤 User ${drop.name || `GeoDrop${drop.geodropNumber || drop.id}`} - ${drop.reward || 100} PixelDrops`;
+                            selectEN.appendChild(option);
+                        });
+                    } else {
+                        selectEN.innerHTML = '<option value="">No User Drops available</option>';
+                    }
+                }
+                
+                console.log(`✅ Loaded ${userDrops.length} User Drops for Upload (ORIGINAL VERSION)`);
             } catch (error) {
                 console.error('❌ Error loading User Drops for Upload:', error);
                 showMessage('Fehler beim Laden der User Drops für Upload', true);
@@ -2236,7 +2440,7 @@
                 const db = window.firebase.firestore();
                 const devDropsSnapshot = await db.collection('devDrops').where('isAvailable', '==', true).get();
                 
-                const devDrops = [];
+];
                 devDropsSnapshot.forEach(doc => {
                     devDrops.push({ id: doc.id, ...doc.data(), collection: 'devDrops' });
                 });
@@ -2270,7 +2474,8 @@
                         const statusText = isClaimedToday ? getTranslatedText('status-claimed-today') : getTranslatedText('status-available');
                         const rowClass = isClaimedToday ? 'border-b border-gray-700 bg-gray-800 opacity-60' : 'border-b border-gray-700';
                         const textClass = isClaimedToday ? 'text-gray-500' : 'text-white';
-                        tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${drop.geodropNumber || drop.id}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;
+                        // Verwende echte Firebase-Daten - keine Fake-Scheiße
+                        tableHTML += `<tr class="${rowClass}"><td class="p-2 ${textClass}">${drop.name || `GeoDrop${drop.geodropNumber || drop.id}`}</td><td class="p-2 ${textClass}">${drop.reward || 100}</td><td class="p-2 ${textClass}">${statusText}</td><td class="p-2 ${textClass}">🎯 Dev</td><td class="p-2 text-center"><span class="text-2xl">🎯</span></td><td class="p-2 text-xs ${textClass}">${coords}</td></tr>`;
                     });
                     tableHTML += '</tbody></table></div>';
                     table.innerHTML = tableHTML;
@@ -2580,6 +2785,7 @@
                                     ❌ Abbrechen
                                 </button>
                             </div>
+                            
                         </div>
                     </div>
                 `;

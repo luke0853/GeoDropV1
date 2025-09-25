@@ -1611,9 +1611,9 @@ window.switchToUploadListType = function(type) {
         userSection.style.display = 'none';
         window.currentUploadListType = 'dev';
         
-        // Load dev drops for upload
-        if (typeof loadDevDropsForUpload === 'function') {
-            loadDevDropsForUpload();
+        // Load dev drops for upload (this will update the dropdown)
+        if (typeof window.loadDevDropsForUpload === 'function') {
+            window.loadDevDropsForUpload();
         }
         
         showMessage('🎯 Dev Drops für Upload ausgewählt', false);
@@ -1627,9 +1627,9 @@ window.switchToUploadListType = function(type) {
         userSection.style.display = 'block';
         window.currentUploadListType = 'user';
         
-        // Load user drops for upload
-        if (typeof loadUserDropsForUpload === 'function') {
-            loadUserDropsForUpload();
+        // Load user drops for upload (this will update the dropdown)
+        if (typeof window.loadUserDropsForUpload === 'function') {
+            window.loadUserDropsForUpload();
         }
         
         showMessage('👤 User Drops für Upload ausgewählt', false);
@@ -2106,18 +2106,15 @@ window.loadUserDropsForUpload = async function() {
         });
         
         // Update user drops select
-        const userSelect = document.getElementById('geocard-user-drop-select');
+        const userSelectDe = document.getElementById('geocard-user-drop-select-de');
+        const userSelectEn = document.getElementById('geocard-user-drop-select-en');
         
-        let userSelectText;
-        if (currentLang === 'en') {
-            userSelectText = 'Select User GeoDrop...';
-        } else {
-            userSelectText = 'User GeoDrop auswählen...';
-        }
+        const userSelectTextDe = 'User GeoDrop auswählen...';
+        const userSelectTextEn = 'Select User GeoDrop...';
         
-        // Update user dropdown
-        if (userSelect) {
-            userSelect.innerHTML = `<option value="">${userSelectText}</option>`;
+        // Update German dropdown
+        if (userSelectDe) {
+            userSelectDe.innerHTML = `<option value="">${userSelectTextDe}</option>`;
             userDrops.forEach(drop => {
                 const option = document.createElement('option');
                 option.value = `userDrops:${drop.id}`;
@@ -2138,27 +2135,25 @@ window.loadUserDropsForUpload = async function() {
                 creatorName = drop.ersteller || drop.createdByName || 'Unknown';
                 console.log(`✅ Using ${creatorName} for drop ${drop.name}`);
                 const dropNumber = drop.geodropNumber || drop.name?.match(/UserDrop(\d+)/)?.[1] || 'N/A';
-                const userDropText = currentLang === 'en' ? 'User GeoDrop' : 'User GeoDrop';
+                const userDropText = 'User GeoDrop';
                 const pixeldropsText = 'PixelDrops';
                 // Sicherheitsprüfung: creatorName und reward validieren
                 const safeCreatorName = creatorName || 'Unknown';
                 const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
                 option.textContent = `👤 ${userDropText}${dropNumber} (${safeCreatorName}) - ${safeReward} ${pixeldropsText}`;
-                userSelect.appendChild(option);
+                userSelectDe.appendChild(option);
             });
         }
         
-        
-        // Legacy support for old select element
-        const select = document.getElementById('geocard-user-drop-select');
-        if (select) {
-            select.innerHTML = `<option value="">${userSelectText}</option>`;
+        // Update English dropdown
+        if (userSelectEn) {
+            userSelectEn.innerHTML = `<option value="">${userSelectTextEn}</option>`;
             userDrops.forEach(drop => {
                 const option = document.createElement('option');
                 option.value = `userDrops:${drop.id}`;
                 // Use displayName first, then email, then fallback
                 // Get the real username from Firebase Auth, not from stored data
-                let creatorName = 'Unbekannt';
+                let creatorName = 'Unknown';
                 
                 // Check if this is the current user's drop
                 let currentUser = window.currentUser;
@@ -2173,15 +2168,16 @@ window.loadUserDropsForUpload = async function() {
                 creatorName = drop.ersteller || drop.createdByName || 'Unknown';
                 console.log(`✅ Using ${creatorName} for drop ${drop.name}`);
                 const dropNumber = drop.geodropNumber || drop.name?.match(/UserDrop(\d+)/)?.[1] || 'N/A';
-                const userDropText = currentLang === 'en' ? 'User GeoDrop' : 'User GeoDrop';
+                const userDropText = 'User GeoDrop';
                 const pixeldropsText = 'PixelDrops';
                 // Sicherheitsprüfung: creatorName und reward validieren
                 const safeCreatorName = creatorName || 'Unknown';
                 const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
                 option.textContent = `👤 ${userDropText}${dropNumber} (${safeCreatorName}) - ${safeReward} ${pixeldropsText}`;
-                select.appendChild(option);
+                userSelectEn.appendChild(option);
             });
         }
+        
         
         console.log(`✅ Loaded ${userDrops.length} User Drops for Upload`);
     } catch (error) {
@@ -3278,8 +3274,14 @@ window.loadGeoDrops = async function() {
             return numA - numB;
         });
         
-        // NOTE: Dropdown update removed - it was overwriting the upload dropdown
-        // The upload dropdown is managed by loadDevDropsForUpload() and loadUserDropsForUpload()
+        // Update main dropdown (not upload dropdown)
+        // Update main dropdown with all drops (show all initially)
+        updateMainDropdown(allDrops);
+        
+        // Don't load any specific drops initially - let user choose
+        
+        // Also update upload dropdowns if they exist
+        updateUploadDropdowns(allDrops);
         
         console.log('🔍 Total drops to add to map:', allDrops.length);
         console.log('🔍 All drops data:', allDrops);
@@ -3316,6 +3318,166 @@ window.loadGeoDrops = async function() {
         }
     }
 };
+
+// Update main dropdown with all drops
+function updateMainDropdown(allDrops) {
+    console.log('📋 Updating main dropdown with', allDrops.length, 'drops');
+    
+    // Update German dropdown
+    const mainDropdownDe = document.getElementById('geocard-drop-select-de');
+    if (mainDropdownDe) {
+        mainDropdownDe.innerHTML = '<option value="">auswählen</option>';
+        
+        // Add all drops to German dropdown
+        allDrops.forEach(drop => {
+            const option = document.createElement('option');
+            option.value = drop.id;
+            const dropNumber = drop.geodropNumber || drop.name?.match(/(\d+)/)?.[1] || 'N/A';
+            const creatorName = drop.ersteller || drop.createdByName || 'Unknown';
+            const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+            const dropType = drop.collection === 'devDrops' ? 'Dev' : 'User';
+            option.textContent = `${dropType} GeoDrop${dropNumber} (${creatorName}) - ${safeReward} PixelDrops`;
+            option.dataset.collection = drop.collection;
+            mainDropdownDe.appendChild(option);
+        });
+    }
+    
+    // Update English dropdown
+    const mainDropdownEn = document.getElementById('geocard-drop-select-en');
+    if (mainDropdownEn) {
+        mainDropdownEn.innerHTML = '<option value="">choose</option>';
+        
+        // Add all drops to English dropdown
+        allDrops.forEach(drop => {
+            const option = document.createElement('option');
+            option.value = drop.id;
+            const dropNumber = drop.geodropNumber || drop.name?.match(/(\d+)/)?.[1] || 'N/A';
+            const creatorName = drop.ersteller || drop.createdByName || 'Unknown';
+            const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+            const dropType = drop.collection === 'devDrops' ? 'Dev' : 'User';
+            option.textContent = `${dropType} GeoDrop${dropNumber} (${creatorName}) - ${safeReward} PixelDrops`;
+            option.dataset.collection = drop.collection;
+            mainDropdownEn.appendChild(option);
+        });
+    }
+    
+    console.log('✅ Main dropdowns updated with', allDrops.length, 'drops');
+    
+    // Update dropdown language based on current global language
+    updateDropdownLanguage();
+}
+
+// Update upload dropdowns with all drops
+function updateUploadDropdowns(allDrops) {
+    console.log('📋 Updating upload dropdowns with', allDrops.length, 'drops');
+    
+    // Update user drops upload dropdown (both language versions)
+    const userUploadSelectDe = document.getElementById('geocard-user-drop-select-de');
+    const userUploadSelectEn = document.getElementById('geocard-user-drop-select-en');
+    
+    if (userUploadSelectDe || userUploadSelectEn) {
+        const userSelectTextDe = 'User GeoDrop auswählen...';
+        const userSelectTextEn = 'Select User GeoDrop...';
+        
+        // Filter for user drops only
+        const userDrops = allDrops.filter(drop => drop.collection === 'userDrops');
+        
+        // Update German dropdown
+        if (userUploadSelectDe) {
+            userUploadSelectDe.innerHTML = `<option value="">${userSelectTextDe}</option>`;
+            userDrops.forEach(drop => {
+                const option = document.createElement('option');
+                option.value = `userDrops:${drop.id}`;
+                const dropNumber = drop.geodropNumber || drop.name?.match(/UserDrop(\d+)/)?.[1] || 'N/A';
+                const creatorName = drop.ersteller || drop.createdByName || 'Unknown';
+                const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+                option.textContent = `👤 User GeoDrop${dropNumber} (${creatorName}) - ${safeReward} PixelDrops`;
+                userUploadSelectDe.appendChild(option);
+            });
+        }
+        
+        // Update English dropdown
+        if (userUploadSelectEn) {
+            userUploadSelectEn.innerHTML = `<option value="">${userSelectTextEn}</option>`;
+            userDrops.forEach(drop => {
+                const option = document.createElement('option');
+                option.value = `userDrops:${drop.id}`;
+                const dropNumber = drop.geodropNumber || drop.name?.match(/UserDrop(\d+)/)?.[1] || 'N/A';
+                const creatorName = drop.ersteller || drop.createdByName || 'Unknown';
+                const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+                option.textContent = `👤 User GeoDrop${dropNumber} (${creatorName}) - ${safeReward} PixelDrops`;
+                userUploadSelectEn.appendChild(option);
+            });
+        }
+        
+        console.log('✅ User upload dropdowns updated with', userDrops.length, 'user drops');
+    }
+    
+    // Update dev drops upload dropdown (both language versions)
+    const devUploadSelectDe = document.getElementById('geocard-drop-select-de');
+    const devUploadSelectEn = document.getElementById('geocard-drop-select-en');
+    
+    if (devUploadSelectDe || devUploadSelectEn) {
+        const devSelectTextDe = 'Dev GeoDrop auswählen...';
+        const devSelectTextEn = 'Select Dev GeoDrop...';
+        
+        // Filter for dev drops only
+        const devDrops = allDrops.filter(drop => drop.collection === 'devDrops');
+        
+        // Update German dropdown
+        if (devUploadSelectDe) {
+            devUploadSelectDe.innerHTML = `<option value="">${devSelectTextDe}</option>`;
+            devDrops.forEach(drop => {
+                const option = document.createElement('option');
+                option.value = `devDrops:${drop.id}`;
+                const dropNumber = drop.geodropNumber || drop.name?.match(/GeoDrop(\d+)/)?.[1] || 'N/A';
+                const creatorName = drop.ersteller || drop.createdByName || 'Dev System';
+                const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+                option.textContent = `🔧 Dev GeoDrop${dropNumber} (${creatorName}) - ${safeReward} PixelDrops`;
+                devUploadSelectDe.appendChild(option);
+            });
+        }
+        
+        // Update English dropdown
+        if (devUploadSelectEn) {
+            devUploadSelectEn.innerHTML = `<option value="">${devSelectTextEn}</option>`;
+            devDrops.forEach(drop => {
+                const option = document.createElement('option');
+                option.value = `devDrops:${drop.id}`;
+                const dropNumber = drop.geodropNumber || drop.name?.match(/GeoDrop(\d+)/)?.[1] || 'N/A';
+                const creatorName = drop.ersteller || drop.createdByName || 'Dev System';
+                const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+                option.textContent = `🔧 Dev GeoDrop${dropNumber} (${creatorName}) - ${safeReward} PixelDrops`;
+                devUploadSelectEn.appendChild(option);
+            });
+        }
+        
+        console.log('✅ Dev upload dropdowns updated with', devDrops.length, 'dev drops');
+    }
+}
+
+// Update dropdown language based on global language switch
+window.updateDropdownLanguage = function() {
+    const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'de';
+    console.log('🌍 Updating dropdown language to:', currentLang);
+    
+    // Show/hide dropdowns based on current language
+    const dropdownDe = document.getElementById('geocard-drop-select-de');
+    const dropdownEn = document.getElementById('geocard-drop-select-en');
+    
+    if (dropdownDe && dropdownEn) {
+        if (currentLang === 'de') {
+            dropdownDe.style.display = 'block';
+            dropdownEn.style.display = 'none';
+        } else {
+            dropdownDe.style.display = 'none';
+            dropdownEn.style.display = 'block';
+        }
+    }
+    
+    console.log('✅ Dropdown language updated to:', currentLang);
+};
+
 
 // Add drop markers to map
 window.addDropMarkersToMap = function(drops) {

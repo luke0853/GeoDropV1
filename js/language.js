@@ -195,6 +195,12 @@ const translations = {
     'your-location-desc': 'Verwende meinen Standort',
     'interactive-map': 'Interaktive Karte',
     'map-legend-button': 'Karten-Legende anzeigen',
+    'legend-normal-drops': 'Normale GeoDrops',
+    'legend-normal-drops-desc': 'Kleine Dart-Scheibe - Offizielle GeoDrops',
+    'legend-user-drops': 'User GeoDrops',
+    'legend-user-drops-desc': 'Mittlere Größe - Von Spielern erstellte GeoDrops',
+    'legend-dev-drops': 'Dev GeoDrop',
+    'legend-dev-drops-desc': 'Größere Dart-Scheibe (2.5x größer) - Entwickler-Test-Drops',
     'location-title': 'Standort',
     'use-my-location': 'Meinen Standort verwenden',
     'location-info-default': 'Klicke auf den Button um deine aktuelle Position zu laden',
@@ -410,6 +416,12 @@ const translations = {
     'your-location-desc': 'Use My Location',
     'interactive-map': 'Interactive Map',
     'map-legend-button': 'Show Map Legend',
+    'legend-normal-drops': 'Normal GeoDrops',
+    'legend-normal-drops-desc': 'Small dart board - Official GeoDrops',
+    'legend-user-drops': 'User GeoDrops',
+    'legend-user-drops-desc': 'Medium size - Player-created GeoDrops',
+    'legend-dev-drops': 'Dev GeoDrop',
+    'legend-dev-drops-desc': 'Larger dart board (2.5x bigger) - Developer test drops',
     'location-title': 'Location',
     'use-my-location': 'Use My Location',
     'location-info-default': 'Click the button to load your current position',
@@ -612,6 +624,13 @@ window.switchLanguage = function(language) {
         }, 300);
     }
     
+    // Update dropdown language if function exists
+    if (window.updateDropdownLanguage) {
+        setTimeout(() => {
+            window.updateDropdownLanguage();
+        }, 100);
+    }
+    
     // Show success message
     const message = t('common.language-changed');
     if (typeof window.showMessage === 'function') {
@@ -675,6 +694,13 @@ window.toggleLanguage = function() {
         setTimeout(() => {
             window.updateMarkerPopups();
         }, 300);
+    }
+    
+    // Update dropdown language if function exists
+    if (window.updateDropdownLanguage) {
+        setTimeout(() => {
+            window.updateDropdownLanguage();
+        }, 100);
     }
     
     console.log('✅ Language toggled to:', currentLanguage);

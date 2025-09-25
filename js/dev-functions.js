@@ -267,7 +267,18 @@ window.getDevDropsCount = async function() {
         }
         
         const devDropsSnapshot = await window.db.collection('devDrops').get();
-        return devDropsSnapshot.size;
+        
+        // Count only real GeoDrops (starting with "GeoDrop"), not pattern drops like "devDrop1"
+        let realGeoDropsCount = 0;
+        devDropsSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.name && data.name.startsWith('GeoDrop')) {
+                realGeoDropsCount++;
+            }
+        });
+        
+        console.log(`📊 Dev drops count: ${devDropsSnapshot.size} total, ${realGeoDropsCount} real GeoDrops`);
+        return realGeoDropsCount;
     } catch (error) {
         console.error('❌ Error getting dev drops count:', error);
         return 0;
@@ -952,6 +963,16 @@ window.uploadDevImageWithDrop = async function() {
         const filename = filenameInput.value;
         const description = descriptionInput.value || 'Ein mysteriöser GeoDrop wartet auf dich!';
         
+        // Get all form fields (multilingual)
+        const photoDescriptionDe = document.getElementById('dev-photo-description-de')?.value || description;
+        const photoDescriptionEn = document.getElementById('dev-photo-description-en')?.value || description;
+        const placeDe = document.getElementById('dev-place-de')?.value || 'GeoDrop Location';
+        const placeEn = document.getElementById('dev-place-en')?.value || 'GeoDrop Location';
+        const stateDe = document.getElementById('dev-state-de')?.value || 'Active';
+        const stateEn = document.getElementById('dev-state-en')?.value || 'Active';
+        const reward = parseInt(document.getElementById('dev-reward')?.value) || 100;
+        const ersteller = document.getElementById('dev-ersteller')?.value || (window.userProfile?.username || window.currentUser?.displayName || 'KryptoGuru');
+        
         // Get coordinates
         let lat, lng;
         if (latInput.value && lngInput.value) {
@@ -989,35 +1010,53 @@ window.uploadDevImageWithDrop = async function() {
                     // Get current language
                     const currentLang = window.getCurrentLanguage ? window.getCurrentLanguage() : 'de';
                     
-                    // Create drop data
+                    // Create drop data with complete structure like devDrop1
                     const dropData = {
-                        id: `drop_${Date.now()}`,
-                        name: filename,
-                        description: description,
-                        imageUrl: downloadURL,
-                        lat: lat,
-                        lng: lng,
-                        reward: 100,
+                        // Basic fields
+                        coordinates: [lng, lat],
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                         createdBy: window.currentUser?.uid || 'dev',
                         createdByName: window.userProfile?.username || window.currentUser?.displayName || 'KryptoGuru',
                         createdByEmail: window.currentUser?.email || null,
-                        createdAt: new Date(),
-                        type: 'dev',
+                        description: description,
+                        dropType: 'dev',
+                        ersteller: ersteller,
+                        geodropNumber: filename.replace('GeoDrop', ''),
+                        imageHash: window.currentUploadAWSHash || null,
+                        imageUrl: downloadURL,
                         isActive: true,
-                        dropNumber: `dev_${Date.now()}`,
+                        lat: lat,
+                        lng: lng,
+                        name: filename,
+                        photoDescription: currentLang === 'de' ? photoDescriptionDe : photoDescriptionEn,
+                        place: currentLang === 'de' ? placeDe : placeEn,
+                        reward: reward,
+                        state: currentLang === 'de' ? stateDe : stateEn,
+                        
                         // AWS data (if available)
                         awsImageHash: window.currentUploadAWSHash || null,
                         awsMigrated: window.currentUploadAWSHash ? true : false,
                         awsMigrationDate: window.currentUploadAWSHash ? new Date() : null,
                         newHashMethod: window.currentUploadAWSHash ? 'aws-rekognition' : 'local-fallback',
+                        
                         // Dual language fields
                         language: currentLang,
                         description_de: currentLang === 'de' ? description : null,
-                        description_en: currentLang === 'en' ? description : null
+                        description_en: currentLang === 'en' ? description : null,
+                        photoDescription_de: photoDescriptionDe,
+                        photoDescription_en: photoDescriptionEn,
+                        place_de: placeDe,
+                        place_en: placeEn,
+                        state_de: stateDe,
+                        state_en: stateEn,
+                        
+                        // Claim fields
+                        claimedBy: null,
+                        lastClaimDate: null
                     };
                     
-                    // Save to Firebase
-                    await db.collection('devDrops').doc(dropData.id).set(dropData);
+                    // Save to Firebase using the drop name as document ID
+                    await db.collection('devDrops').doc(dropData.name).set(dropData);
                     
                     showMessage('✅ Bild hochgeladen und Drop erstellt!', false);
                     console.log('🔧 Dev drop created:', dropData);
@@ -1043,6 +1082,14 @@ window.uploadDevImageWithDrop = async function() {
                     // Clear form
                     fileInput.value = '';
                     descriptionInput.value = '';
+                    document.getElementById('dev-photo-description-de').value = '';
+                    document.getElementById('dev-photo-description-en').value = '';
+                    document.getElementById('dev-place-de').value = '';
+                    document.getElementById('dev-place-en').value = '';
+                    document.getElementById('dev-state-de').value = '';
+                    document.getElementById('dev-state-en').value = '';
+                    document.getElementById('dev-reward').value = '100';
+                    document.getElementById('dev-ersteller').value = '';
                     latInput.value = '';
                     lngInput.value = '';
         
@@ -1268,44 +1315,85 @@ window.createTestDevDrops = async function() {
         
         const testDrops = [
             {
-                name: 'Test Drop 1',
+                coordinates: [48.2082, 16.3738],
+                createdBy: window.currentUser?.uid || 'dev',
+                createdByName: window.currentUser?.email || 'dev@test.com',
                 description: 'Ein Test-Drop für Entwicklung',
+                description_de: 'Ein Test-Drop für Entwicklung',
+                description_en: 'A test drop for development',
+                dropType: 'dev',
+                ersteller: 'Dev User',
+                geodropNumber: 'test1',
+                imageHash: null,
+                imageUrl: null,
+                isActive: true,
                 lat: 48.2082,
                 lng: 16.3738,
+                name: 'testDrop1',
+                photoDescription: 'Fotografiere die Test Location für Entwickler Test Drop 1.',
+                photoDescription_de: 'Fotografiere die Test Location für Entwickler Test Drop 1.',
+                photoDescription_en: 'Photograph the test location for developer test drop 1.',
+                place: 'Wien Test Location 1',
                 reward: 100,
-                type: 'dev'
+                state: 'Wien'
             },
             {
-                name: 'Test Drop 2',
+                coordinates: [48.2100, 16.3750],
+                createdBy: window.currentUser?.uid || 'dev',
+                createdByName: window.currentUser?.email || 'dev@test.com',
                 description: 'Zweiter Test-Drop',
+                description_de: 'Zweiter Test-Drop',
+                description_en: 'Second test drop',
+                dropType: 'dev',
+                ersteller: 'Dev User',
+                geodropNumber: 'test2',
+                imageHash: null,
+                imageUrl: null,
+                isActive: true,
                 lat: 48.2100,
                 lng: 16.3750,
+                name: 'testDrop2',
+                photoDescription: 'Fotografiere die Test Location für Entwickler Test Drop 2.',
+                photoDescription_de: 'Fotografiere die Test Location für Entwickler Test Drop 2.',
+                photoDescription_en: 'Photograph the test location for developer test drop 2.',
+                place: 'Wien Test Location 2',
                 reward: 100,
-                type: 'dev'
+                state: 'Wien'
             },
             {
-                name: 'Test Drop 3',
+                coordinates: [48.2050, 16.3700],
+                createdBy: window.currentUser?.uid || 'dev',
+                createdByName: window.currentUser?.email || 'dev@test.com',
                 description: 'Dritter Test-Drop',
+                description_de: 'Dritter Test-Drop',
+                description_en: 'Third test drop',
+                dropType: 'dev',
+                ersteller: 'Dev User',
+                geodropNumber: 'test3',
+                imageHash: null,
+                imageUrl: null,
+                isActive: true,
                 lat: 48.2050,
                 lng: 16.3700,
+                name: 'testDrop3',
+                photoDescription: 'Fotografiere die Test Location für Entwickler Test Drop 3.',
+                photoDescription_de: 'Fotografiere die Test Location für Entwickler Test Drop 3.',
+                photoDescription_en: 'Photograph the test location for developer test drop 3.',
+                place: 'Wien Test Location 3',
                 reward: 100,
-                type: 'dev'
+                state: 'Wien'
             }
         ];
         
         let created = 0;
         for (const dropData of testDrops) {
-            const dropId = `test_dev_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             const fullDropData = {
                 ...dropData,
-                id: dropId,
-                createdBy: window.currentUser?.uid || 'dev',
-                createdAt: new Date(),
-                isActive: true,
-                dropNumber: `test_${Date.now()}_${created + 1}`
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
             
-            await db.collection('devDrops').doc(dropId).set(fullDropData);
+            // Verwende den Namen als Dokument-ID
+            await db.collection('devDrops').doc(dropData.name).set(fullDropData);
             created++;
         }
         
@@ -1348,6 +1436,377 @@ function checkDevSession() {
     
     updateGlobalDevStatus();
     console.log('🔧 Dev session cleared - fresh login required');
+}
+
+// Load Dev Drops for Upload (for Dev Tab compatibility)
+window.loadDevDropsForUpload = async function() {
+    console.log('🎯 Loading Dev Drops for Upload (Dev Tab)...');
+    try {
+        if (!window.firebase || !window.firebase.firestore()) {
+            console.log('❌ Firebase not available');
+            return;
+        }
+        
+        const db = window.firebase.firestore();
+        // Load all dev drops (both isAvailable and isActive)
+        const allDevDropsSnapshot = await db.collection('devDrops').get();
+        
+        // Filter for active/available drops and exclude claimed drops for today
+        const today = new Date().toDateString();
+        const currentUser = window.currentUser || window.auth?.currentUser;
+        
+        const devDropsSnapshot = {
+            docs: allDevDropsSnapshot.docs.filter(doc => {
+                const data = doc.data();
+                const isActive = data.isActive === true || data.isAvailable === true;
+                
+                // Check if claimed today by current user
+                const lastClaimDate = data.lastClaimDate ? data.lastClaimDate.toDate().toDateString() : null;
+                const isClaimedToday = lastClaimDate === today && data.claimedBy === currentUser?.uid;
+                
+                // Only include drops that are active AND not claimed today
+                return isActive && !isClaimedToday;
+            }),
+            size: 0
+        };
+        devDropsSnapshot.size = devDropsSnapshot.docs.length;
+        
+        const devDrops = [];
+        devDropsSnapshot.docs.forEach(doc => {
+            devDrops.push({ id: doc.id, ...doc.data(), collection: 'devDrops' });
+        });
+        
+        // Sort drops by geodropNumber (extract number from name if needed)
+        devDrops.sort((a, b) => {
+            let numA = parseInt(a.geodropNumber) || 0;
+            let numB = parseInt(b.geodropNumber) || 0;
+            
+            // If no geodropNumber, try to extract from name
+            if (numA === 0 && a.name && a.name.includes('GeoDrop')) {
+                const match = a.name.match(/GeoDrop(\d+)/);
+                if (match) numA = parseInt(match[1]);
+            }
+            if (numB === 0 && b.name && b.name.includes('GeoDrop')) {
+                const match = b.name.match(/GeoDrop(\d+)/);
+                if (match) numB = parseInt(match[1]);
+            }
+            
+            return numA - numB;
+        });
+        
+        // Only update dropdowns if we're currently showing dev drops
+        if (window.currentUploadListType === 'dev') {
+            // Update dev drops select for both languages
+            const currentLang = window.currentLanguage || 'de';
+            const selectDe = document.getElementById('geocard-drop-select-de');
+            const selectEn = document.getElementById('geocard-drop-select-en');
+            
+            let selectText, devDropText, pixeldropsText;
+            if (currentLang === 'en') {
+                selectText = 'Select Dev GeoDrop...';
+                devDropText = 'Dev GeoDrop';
+                pixeldropsText = 'PixelDrops';
+            } else {
+                selectText = 'Dev GeoDrop auswählen...';
+                devDropText = 'Dev GeoDrop';
+                pixeldropsText = 'PixelDrops';
+            }
+            
+            // Update German dropdown
+            if (selectDe) {
+                selectDe.innerHTML = `<option value="">${selectText}</option>`;
+                devDrops.forEach(drop => {
+                    const option = document.createElement('option');
+                    option.value = drop.id;
+                    option.textContent = `${devDropText}${drop.geodropNumber || drop.id} - ${drop.reward || 100} ${pixeldropsText}`;
+                    selectDe.appendChild(option);
+                });
+            }
+            
+            // Update English dropdown
+            if (selectEn) {
+                selectEn.innerHTML = `<option value="">Select Dev GeoDrop...</option>`;
+                devDrops.forEach(drop => {
+                    const option = document.createElement('option');
+                    option.value = drop.id;
+                    option.textContent = `Dev GeoDrop${drop.geodropNumber || drop.id} - ${drop.reward || 100} PixelDrops`;
+                    selectEn.appendChild(option);
+                });
+            }
+            
+            // Legacy support for old select element
+            const select = document.getElementById('geocard-drop-select');
+            if (select) {
+                select.innerHTML = `<option value="">${selectText}</option>`;
+                devDrops.forEach(drop => {
+                    const option = document.createElement('option');
+                    option.value = `devDrops:${drop.id}`;
+                    // Extract number from name for display
+                    let displayNumber = drop.geodropNumber || drop.id;
+                    if (drop.name && drop.name.includes('GeoDrop')) {
+                        const match = drop.name.match(/GeoDrop(\d+)/);
+                        if (match) {
+                            displayNumber = match[1]; // Just the number
+                        }
+                    }
+                    // Sicherheitsprüfung: displayNumber und reward validieren
+                    const safeDisplayNumber = displayNumber || 'N/A';
+                    const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+                    option.textContent = `🎯 ${devDropText}${safeDisplayNumber} - ${safeReward} ${pixeldropsText}`;
+                    select.appendChild(option);
+                });
+            }
+        }
+        
+        console.log(`✅ Loaded ${devDrops.length} Dev Drops for Upload`);
+    } catch (error) {
+        console.error('❌ Error loading Dev Drops for Upload:', error);
+        if (error.code === 'permission-denied') {
+            console.log('🔒 User not logged in, skipping Dev Drops for Upload load');
+            showMessage('ℹ️ Bitte anmelden um Dev Drops zu sehen', false);
+        } else {
+            showMessage('Fehler beim Laden der Dev Drops', true);
+        }
+    }
+};
+
+// Load User Drops for Upload (for Dev Tab compatibility) - COPIED FROM WORKING VERSION
+window.loadUserDropsForUpload = async function() {
+    console.log('👤 Loading User Drops for Upload (Dev Tab)...');
+    
+    // Check if lists are cleared
+    if (window.userDropListsCleared) {
+        console.log('⏭️ User Drop lists are cleared, skipping load');
+        return;
+    }
+    
+    try {
+        if (!window.firebase || !window.firebase.firestore()) {
+            console.log('❌ Firebase not available');
+            return;
+        }
+        
+        const db = window.firebase.firestore();
+        // Load all user drops and filter out claimed ones
+        const allUserDropsSnapshot = await db.collection('userDrops').get();
+        
+        // Filter for active drops and exclude claimed drops for today
+        const today = new Date().toDateString();
+        const currentUser = window.currentUser || window.auth?.currentUser;
+        
+        const userDropsSnapshot = {
+            docs: allUserDropsSnapshot.docs.filter(doc => {
+                const data = doc.data();
+                const isActive = data.isActive === true;
+                
+                // Check if claimed today by current user
+                const lastClaimDate = data.lastClaimDate ? data.lastClaimDate.toDate().toDateString() : null;
+                const isClaimedToday = lastClaimDate === today && data.claimedBy === currentUser?.uid;
+                
+                // Only include drops that are active AND not claimed today
+                return isActive && !isClaimedToday;
+            }),
+            size: 0
+        };
+        userDropsSnapshot.size = userDropsSnapshot.docs.length;
+        
+        const userDrops = [];
+        userDropsSnapshot.docs.forEach(doc => {
+            userDrops.push({ id: doc.id, ...doc.data(), collection: 'userDrops' });
+        });
+        
+        // Sort drops by geodropNumber (1, 2, 3, ...)
+        userDrops.sort((a, b) => {
+            const numA = parseInt(a.geodropNumber) || parseInt(a.id) || 0;
+            const numB = parseInt(b.geodropNumber) || parseInt(b.id) || 0;
+            return numA - numB;
+        });
+        
+        // Only update dropdowns if we're currently showing user drops
+        if (window.currentUploadListType === 'user') {
+            // Update user drops select - USE SAME DROPDOWN IDs AS DEV DROPS IN DEV TAB
+            const userSelectDe = document.getElementById('geocard-drop-select-de');
+            const userSelectEn = document.getElementById('geocard-drop-select-en');
+            
+            const userSelectTextDe = 'User GeoDrop auswählen...';
+            const userSelectTextEn = 'Select User GeoDrop...';
+            
+            // Update German dropdown
+            if (userSelectDe) {
+                userSelectDe.innerHTML = `<option value="">${userSelectTextDe}</option>`;
+                userDrops.forEach(drop => {
+                    const option = document.createElement('option');
+                    option.value = `userDrops:${drop.id}`;
+                    // Use displayName first, then email, then fallback
+                    // Get the real username from Firebase Auth, not from stored data
+                    let creatorName = 'Unbekannt';
+                    
+                    // Check if this is the current user's drop
+                    let currentUser = window.currentUser;
+                    if (!currentUser && window.auth && window.auth.currentUser) {
+                        currentUser = window.auth.currentUser;
+                    }
+                    if (!currentUser && window.firebase && window.firebase.auth && window.firebase.auth().currentUser) {
+                        currentUser = window.firebase.auth().currentUser;
+                    }
+                    
+                    // Use the ersteller field from Firebase
+                    creatorName = drop.ersteller || drop.createdByName || 'Unknown';
+                    console.log(`✅ Using ${creatorName} for drop ${drop.name}`);
+                    const dropNumber = drop.geodropNumber || drop.name?.match(/UserDrop(\d+)/)?.[1] || 'N/A';
+                    const userDropText = 'User GeoDrop';
+                    const pixeldropsText = 'PixelDrops';
+                    // Sicherheitsprüfung: creatorName und reward validieren
+                    const safeCreatorName = creatorName || 'Unknown';
+                    const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+                    option.textContent = `👤 ${userDropText}${dropNumber} - ${safeReward} ${pixeldropsText} (${safeCreatorName})`;
+                    userSelectDe.appendChild(option);
+                });
+            }
+            
+            // Update English dropdown
+            if (userSelectEn) {
+                userSelectEn.innerHTML = `<option value="">${userSelectTextEn}</option>`;
+                userDrops.forEach(drop => {
+                    const option = document.createElement('option');
+                    option.value = `userDrops:${drop.id}`;
+                    let creatorName = 'Unknown';
+                    creatorName = drop.ersteller || drop.createdByName || 'Unknown';
+                    const dropNumber = drop.geodropNumber || drop.name?.match(/UserDrop(\d+)/)?.[1] || 'N/A';
+                    const userDropText = 'User GeoDrop';
+                    const pixeldropsText = 'PixelDrops';
+                    const safeCreatorName = creatorName || 'Unknown';
+                    const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+                    option.textContent = `👤 ${userDropText}${dropNumber} - ${safeReward} ${pixeldropsText} (${safeCreatorName})`;
+                    userSelectEn.appendChild(option);
+                });
+            }
+        }
+        
+        console.log(`✅ Loaded ${userDrops.length} User Drops for Upload`);
+    } catch (error) {
+        console.error('❌ Error loading User Drops for Upload:', error);
+        if (error.code === 'permission-denied') {
+            console.log('🔒 User not logged in, skipping User Drops for Upload load');
+            showMessage('ℹ️ Bitte anmelden um User Drops zu sehen', false);
+        } else {
+            showMessage('Fehler beim Laden der User Drops', true);
+        }
+    }
+};
+
+// Switch Upload List Type (for Dev Tab compatibility)
+window.switchToUploadListType = function(type) {
+    console.log(`🔄 Switching upload to ${type} drops list (Dev Tab)`);
+    
+    const devBtn = document.getElementById('upload-dev-drops-btn');
+    const userBtn = document.getElementById('upload-user-drops-btn');
+    const devSection = document.getElementById('upload-dev-drops-section');
+    const userSection = document.getElementById('upload-user-drops-section');
+    
+    if (type === 'dev') {
+        // Switch to dev drops for upload
+        if (devBtn) {
+            devBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-blue-600 text-white';
+            devBtn.innerHTML = '🎯 Dev Drops';
+        }
+        if (userBtn) {
+            userBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white';
+            userBtn.innerHTML = '👤 User Drops';
+        }
+        if (devSection) devSection.style.display = 'block';
+        if (userSection) userSection.style.display = 'none';
+        window.currentUploadListType = 'dev';
+        
+        // Load dev drops for upload (this will update the dropdown)
+        if (typeof window.loadDevDropsForUpload === 'function') {
+            window.loadDevDropsForUpload();
+        }
+        
+        showMessage('🎯 Dev Drops für Upload ausgewählt', false);
+    } else if (type === 'user') {
+        // Switch to user drops for upload
+        if (devBtn) {
+            devBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white';
+            devBtn.innerHTML = '🎯 Dev Drops';
+        }
+        if (userBtn) {
+            userBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-green-600 text-white';
+            userBtn.innerHTML = '👤 User Drops';
+        }
+        if (devSection) devSection.style.display = 'none';
+        if (userSection) userSection.style.display = 'block';
+        window.currentUploadListType = 'user';
+        
+        // Load user drops for upload (this will update the dropdown)
+        if (typeof window.loadUserDropsForUpload === 'function') {
+            window.loadUserDropsForUpload();
+        }
+        
+        showMessage('👤 User Drops für Upload ausgewählt', false);
+    }
+};
+
+// Debug function to check user drops
+window.debugUserDrops = async function() {
+    console.log('🔍 Debugging User Drops...');
+    
+    try {
+        if (!window.firebase || !window.firebase.firestore()) {
+            console.log('❌ Firebase not available');
+            return;
+        }
+        
+        const db = window.firebase.firestore();
+        const allUserDropsSnapshot = await db.collection('userDrops').get();
+        
+        console.log(`📊 Total User Drops in database: ${allUserDropsSnapshot.size}`);
+        
+        if (allUserDropsSnapshot.size === 0) {
+            console.log('❌ No User Drops found in database!');
+            showMessage('❌ Keine User Drops in der Datenbank gefunden!', true);
+            return;
+        }
+        
+        allUserDropsSnapshot.forEach(doc => {
+            const data = doc.data();
+            console.log(`👤 User Drop ${doc.id}:`, {
+                name: data.name,
+                geodropNumber: data.geodropNumber,
+                isActive: data.isActive,
+                isAvailable: data.isAvailable,
+                reward: data.reward,
+                createdBy: data.createdBy,
+                createdAt: data.createdAt
+            });
+        });
+        
+        showMessage(`✅ ${allUserDropsSnapshot.size} User Drops gefunden - Details in Konsole`, false);
+        
+    } catch (error) {
+        console.error('❌ Error debugging user drops:', error);
+        showMessage('❌ Fehler beim Debuggen der User Drops!', true);
+    }
+};
+
+// Show Message function (fallback if not available)
+if (typeof window.showMessage === 'undefined') {
+    window.showMessage = function(message, isError = false) {
+        console.log(isError ? '❌' : '✅', message);
+        
+        // Try to show in custom alert if available
+        const alertElement = document.getElementById('custom-alert');
+        if (alertElement) {
+            alertElement.textContent = message;
+            alertElement.className = `custom-alert ${isError ? 'bg-red-600' : 'bg-green-600'} text-white p-3 rounded-lg shadow-lg`;
+            alertElement.style.display = 'block';
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 3000);
+        }
+    };
 }
 
 // Initialize dev functions when page loads

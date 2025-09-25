@@ -390,6 +390,53 @@
                         </div>
 
 
+                        <!-- Drop Selection for Upload -->
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <h4 class="text-lg font-semibold text-green-400 mb-2">🎯 Drop-Auswahl für Upload</h4>
+                            <div class="space-y-3">
+                                
+                                <!-- Upload List Type Toggle -->
+                                <div class="mb-3">
+                                    <div class="flex bg-gray-600 rounded-lg p-1">
+                                        <button id="upload-dev-drops-btn" onclick="switchToUploadListType('dev')" class="flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-blue-600 text-white">
+                                            🎯 Dev Drops
+                                        </button>
+                                        <button id="upload-user-drops-btn" onclick="switchToUploadListType('user')" class="flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white">
+                                            👤 User Drops
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- GeoDrop Selection Dropdowns -->
+                                <div class="mb-3">
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">🎯 GeoDrop auswählen:</label>
+                                    
+                                    <!-- German Dropdown -->
+                                    <select id="geocard-drop-select-de" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white">
+                                        <option value="">Bitte Dev/User Drops auswählen</option>
+                                        <!-- Options will be loaded when user selects Dev/User Drops -->
+                                    </select>
+                                    
+                                    <!-- English Dropdown -->
+                                    <select id="geocard-drop-select-en" class="w-full p-3 bg-gray-600 border border-gray-500 rounded text-white" style="display: none;">
+                                        <option value="">Please select Dev/User Drops</option>
+                                        <!-- Options will be loaded when user selects Dev/User Drops -->
+                                    </select>
+                                </div>
+                                
+                                <!-- Dev Drops Section -->
+                                <div id="upload-dev-drops-section">
+                                    <p class="text-sm text-gray-400 mb-4">🎯 Dev Drops sind oben im Dropdown verfügbar</p>
+                                </div>
+                                
+                                <!-- User Drops Section -->
+                                <div id="upload-user-drops-section" style="display: none;">
+                                    <p class="text-sm text-gray-400 mb-4">👤 User Drops sind oben im Dropdown verfügbar</p>
+                                </div>
+                                
+                            </div>
+                        </div>
+
                         <!-- Bildupload Section -->
                         <div id="bildupload-section" class="bg-gray-600 rounded-lg p-4">
                             <h4 class="text-lg font-semibold text-cyan-400 mb-2">📸 Bild Upload mit Drop-Erstellung</h4>
@@ -406,6 +453,56 @@
                                     <label for="dev-drop-description" class="block text-sm font-medium text-gray-300 mb-1">📝 Beschreibung (was fotografiert werden soll):</label>
                                     <textarea id="dev-drop-description" placeholder="z.B. 'Das rote Gebäude mit dem blauen Dach' oder 'Die Statue vor dem Eingang'" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm" rows="2"></textarea>
                                     <p class="text-xs text-gray-400 mt-1">💡 Diese Beschreibung wird im Popup der Karte angezeigt</p>
+                                </div>
+                                
+                                <!-- Foto-Beschreibung (Deutsch) -->
+                                <div>
+                                    <label for="dev-photo-description-de" class="block text-sm font-medium text-gray-300 mb-1">📸 Foto-Beschreibung (Deutsch):</label>
+                                    <textarea id="dev-photo-description-de" placeholder="z.B. 'Fotografiere das rote Gebäude mit dem blauen Dach von der Straßenseite'" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm" rows="2"></textarea>
+                                    <p class="text-xs text-gray-400 mt-1">💡 Diese Anweisung bekommen deutsche Spieler beim Fotografieren</p>
+                                </div>
+                                
+                                <!-- Foto-Beschreibung (English) -->
+                                <div>
+                                    <label for="dev-photo-description-en" class="block text-sm font-medium text-gray-300 mb-1">📸 Foto-Beschreibung (English):</label>
+                                    <textarea id="dev-photo-description-en" placeholder="z.B. 'Photograph the red building with the blue roof from the street side'" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm" rows="2"></textarea>
+                                    <p class="text-xs text-gray-400 mt-1">💡 Diese Anweisung bekommen englische Spieler beim Fotografieren</p>
+                                </div>
+                                
+                                <!-- Ort/Place (Deutsch) -->
+                                <div>
+                                    <label for="dev-place-de" class="block text-sm font-medium text-gray-300 mb-1">🏢 Ort/Place (Deutsch):</label>
+                                    <input type="text" id="dev-place-de" placeholder="z.B. 'Stephansplatz Wien'" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm">
+                                </div>
+                                
+                                <!-- Ort/Place (English) -->
+                                <div>
+                                    <label for="dev-place-en" class="block text-sm font-medium text-gray-300 mb-1">🏢 Ort/Place (English):</label>
+                                    <input type="text" id="dev-place-en" placeholder="z.B. 'Central Park New York'" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm">
+                                </div>
+                                
+                                <!-- Bundesland/State (Deutsch) -->
+                                <div>
+                                    <label for="dev-state-de" class="block text-sm font-medium text-gray-300 mb-1">🗺️ Bundesland/State (Deutsch):</label>
+                                    <input type="text" id="dev-state-de" placeholder="z.B. 'Wien', 'Bayern'" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm">
+                                </div>
+                                
+                                <!-- Bundesland/State (English) -->
+                                <div>
+                                    <label for="dev-state-en" class="block text-sm font-medium text-gray-300 mb-1">🗺️ Bundesland/State (English):</label>
+                                    <input type="text" id="dev-state-en" placeholder="z.B. 'New York', 'California'" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm">
+                                </div>
+                                
+                                <!-- Belohnung/Reward -->
+                                <div>
+                                    <label for="dev-reward" class="block text-sm font-medium text-gray-300 mb-1">💰 Belohnung (Reward):</label>
+                                    <input type="number" id="dev-reward" placeholder="100" value="100" min="0" max="1000" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm">
+                                </div>
+                                
+                                <!-- Ersteller -->
+                                <div>
+                                    <label for="dev-ersteller" class="block text-sm font-medium text-gray-300 mb-1">👤 Ersteller (Creator):</label>
+                                    <input type="text" id="dev-ersteller" placeholder="z.B. 'Max Mustermann' oder 'GeoDrop Team'" class="w-full p-2 bg-gray-700 border border-gray-500 rounded text-white text-sm">
                                 </div>
                                 
                                 <!-- GPS Koordinaten (optional) -->
@@ -517,6 +614,10 @@
                         <div class="bg-gray-600 rounded-lg p-4">
                             <h4 class="text-lg font-semibold text-yellow-400 mb-2">🎯 Drop Tests</h4>
                             <div class="space-y-2">
+                                <button onclick="debugUserDrops()" class="w-full px-3 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+                                    🔍 User Drops Debug
+                                </button>
+                                <p class="text-xs text-gray-400">Zeigt alle User Drops in der Datenbank an</p>
                                 <button onclick="resetDailyClaims()" class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700">
                                     🔄 Tägliche Claims zurücksetzen
                                 </button>
@@ -669,6 +770,27 @@
                 updateNextFilenameDisplay();
             }
         }, 1000);
+        
+        // Auto-load upload dropdowns
+        setTimeout(() => {
+            // Load dev drops for upload by default
+            if (typeof window.loadDevDropsForUpload === 'function') {
+                console.log('🔄 Auto-loading Dev Drops for Upload in Dev Tab...');
+                window.loadDevDropsForUpload();
+            }
+            
+            // Set default upload list type to dev
+            window.currentUploadListType = 'dev';
+            
+            // Show dev drops section by default
+            const uploadDevSection = document.getElementById('upload-dev-drops-section');
+            const uploadUserSection = document.getElementById('upload-user-drops-section');
+            if (uploadDevSection && uploadUserSection) {
+                uploadDevSection.style.display = 'block';
+                uploadUserSection.style.display = 'none';
+                console.log('✅ Upload dev section shown by default in Dev Tab');
+            }
+        }, 1500);
         
         // Define showMessage function if not available
         if (typeof showMessage === 'undefined') {
