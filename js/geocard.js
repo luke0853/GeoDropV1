@@ -306,13 +306,13 @@ window.clearUserDropLists = function() {
     // Clear User Drops table
     const userDropsTable = document.getElementById('user-drops-table');
     if (userDropsTable) {
-        userDropsTable.innerHTML = '<div class="text-center text-gray-400 p-4">User Drop Liste geleert</div>';
+        userDropsTable.innerHTML = `<div class="text-center text-gray-400 p-4">${window.t ? window.t('geocard.user-drop-list-cleared') : 'User Drop Liste geleert'}</div>`;
     }
     
     // Clear All User Drops table
     const allUserDropsTable = document.getElementById('all-user-drops-table');
     if (allUserDropsTable) {
-        allUserDropsTable.innerHTML = '<div class="text-center text-gray-400 p-4">User Drop Liste geleert</div>';
+        allUserDropsTable.innerHTML = `<div class="text-center text-gray-400 p-4">${window.t ? window.t('geocard.user-drop-list-cleared') : 'User Drop Liste geleert'}</div>`;
     }
     
     // Clear User Drops select dropdown
@@ -1604,9 +1604,9 @@ window.switchToUploadListType = function(type) {
     if (type === 'dev') {
         // Switch to dev drops for upload
         devBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-blue-600 text-white';
-        devBtn.innerHTML = '🎯 Dev Drops';
+        devBtn.innerHTML = window.t ? window.t('geocard.dev-drops') : '🎯 Dev Drops';
         userBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white';
-        userBtn.innerHTML = '👤 User Drops';
+        userBtn.innerHTML = window.t ? window.t('geocard.user-drops') : '👤 User Drops';
         devSection.style.display = 'block';
         userSection.style.display = 'none';
         window.currentUploadListType = 'dev';
@@ -1620,9 +1620,9 @@ window.switchToUploadListType = function(type) {
     } else if (type === 'user') {
         // Switch to user drops for upload
         devBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white';
-        devBtn.innerHTML = '🎯 Dev Drops';
+        devBtn.innerHTML = window.t ? window.t('geocard.dev-drops') : '🎯 Dev Drops';
         userBtn.className = 'flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-green-600 text-white';
-        userBtn.innerHTML = '👤 User Drops';
+        userBtn.innerHTML = window.t ? window.t('geocard.user-drops') : '👤 User Drops';
         devSection.style.display = 'none';
         userSection.style.display = 'block';
         window.currentUploadListType = 'user';
@@ -1668,7 +1668,7 @@ window.createUserDrop = async function() {
             return;
         }
         createButton.disabled = true;
-        createButton.textContent = '🔄 Erstelle...';
+        createButton.textContent = window.t ? window.t('common.loading') : '🔄 Erstelle...';
         createButton.style.opacity = '0.6';
     }
     
@@ -1889,7 +1889,7 @@ window.createUserDrop = async function() {
         const createButton = document.querySelector('button[onclick="createUserDrop()"]');
         if (createButton) {
             createButton.disabled = false;
-            createButton.textContent = '✅ User Drop erstellen';
+            createButton.textContent = window.t ? window.t('geocard.create-user-drop') : '✅ User Drop erstellen';
             createButton.style.opacity = '1';
         }
     }

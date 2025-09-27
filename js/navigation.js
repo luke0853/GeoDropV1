@@ -33,8 +33,54 @@ window.showPage = function(pageId) {
         
         // Banner system removed
         
+        // Special handling for GeoBoard (content is already in HTML)
+        if (pageId === 'geoboard') {
+            // Load Firebase translations for GeoBoard
+            if (window.firebaseTranslations) {
+                console.log('🔄 Loading Firebase translations for GeoBoard...');
+                window.firebaseTranslations.loadTranslationsForCurrentPage();
+            }
+            
+            // Apply translations to GeoBoard content
+            setTimeout(() => {
+                console.log('🔄 Applying GeoBoard translations...');
+                const elements = selectedPage.querySelectorAll('[data-translate]');
+                let updatedCount = 0;
+                
+                elements.forEach(element => {
+                    const key = element.getAttribute('data-translate');
+                    const translation = window.t ? window.t(key) : null;
+                    
+                    if (translation) {
+                        if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                            if (element.type === 'button' || element.type === 'submit') {
+                                element.value = translation;
+                            } else {
+                                element.placeholder = translation;
+                            }
+                        } else {
+                            element.textContent = translation;
+                        }
+                        updatedCount++;
+                    } else {
+                        console.log('⚠️ No translation found for key:', key);
+                    }
+                });
+                
+                console.log(`✅ Applied ${updatedCount} GeoBoard translations`);
+                
+                // Initialize GeoBoard functions
+                if (typeof window.refreshLeaderboard === 'function') {
+                    window.refreshLeaderboard();
+                }
+                if (typeof window.refreshUserStats === 'function') {
+                    window.refreshUserStats();
+                }
+            }, 100);
+        }
+        
         // Load content via fetch for pages that need it
-        if (['geocard', 'machines', 'bonus', 'geochat', 'trading', 'mehr', 'geoboard', 'dev'].includes(pageId)) {
+        if (['geocard', 'machines', 'bonus', 'geochat', 'trading', 'mehr', 'dev'].includes(pageId)) {
             // Preserve DEV status when switching pages
             const currentDevStatus = window.isDevLoggedIn;
             const currentAdminStatus = window.isAdmin;
@@ -106,6 +152,37 @@ window.loadPageContent = function(pageId, container) {
                 console.log('🔄 Applying translations to loaded content...');
                 window.updateAllTexts();
             }, 100);
+        }
+        
+        // Special handling for GeoBoard translations
+        if (pageId === 'geoboard') {
+            setTimeout(() => {
+                console.log('🔄 Applying GeoBoard translations...');
+                const elements = container.querySelectorAll('[data-translate]');
+                let updatedCount = 0;
+                
+                elements.forEach(element => {
+                    const key = element.getAttribute('data-translate');
+                    const translation = window.t ? window.t(key) : null;
+                    
+                    if (translation) {
+                        if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                            if (element.type === 'button' || element.type === 'submit') {
+                                element.value = translation;
+                            } else {
+                                element.placeholder = translation;
+                            }
+                        } else {
+                            element.textContent = translation;
+                        }
+                        updatedCount++;
+                    } else {
+                        console.log('⚠️ No translation found for key:', key);
+                    }
+                });
+                
+                console.log(`✅ Applied ${updatedCount} GeoBoard translations`);
+            }, 200);
         }
         
         // Update language containers after content is loaded

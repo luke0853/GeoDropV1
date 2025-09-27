@@ -1,5 +1,54 @@
 // GeoBoard Functions - Load real data from Firebase
 
+// Update GeoBoard translations
+window.updateGeoBoardTranslations = function(language) {
+    console.log('🔄 Updating GeoBoard translations for language:', language);
+    
+    const elements = document.querySelectorAll('[data-translate]');
+    let updatedCount = 0;
+    
+    elements.forEach(element => {
+        const key = element.getAttribute('data-translate');
+        let translation = null;
+        
+        // Try window.t first
+        if (window.t && typeof window.t === 'function') {
+            translation = window.t(key);
+        }
+        
+        // Fallback to direct translations object
+        if (!translation && window.translations && window.translations[language]) {
+            translation = window.translations[language][key];
+        }
+        
+        if (translation) {
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                if (element.type === 'button' || element.type === 'submit') {
+                    element.value = translation;
+                } else {
+                    element.placeholder = translation;
+                }
+            } else {
+                element.textContent = translation;
+            }
+            updatedCount++;
+        } else {
+            console.log('⚠️ No translation found for key:', key);
+        }
+    });
+    
+    console.log(`✅ Updated ${updatedCount} GeoBoard translation elements`);
+};
+
+// Apply translations when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        if (window.updateGeoBoardTranslations) {
+            window.updateGeoBoardTranslations(window.getCurrentLanguage ? window.getCurrentLanguage() : 'de');
+        }
+    }, 500);
+});
+
 window.refreshLeaderboard = function() {
     const db = window.db || db;
     if (typeof db === 'undefined' || !db) {
@@ -10,7 +59,7 @@ window.refreshLeaderboard = function() {
     const leaderboard = document.getElementById('leaderboard');
     if (!leaderboard) return;
     
-    leaderboard.innerHTML = '<div class="text-center text-gray-400 p-4">Lade Rangliste...</div>';
+    leaderboard.innerHTML = `<div class="text-center text-gray-400 p-4">${window.t ? window.t('geoboard.loading-leaderboard') : 'Lade Rangliste...'}</div>`;
     
     // Load all users and sort by points (coins) - FIXED: Remove duplicate usernames (keep highest points)
     db.collection('users')
@@ -24,7 +73,7 @@ window.refreshLeaderboard = function() {
             
             querySnapshot.forEach(doc => {
                 const userData = doc.data();
-                const username = userData.username || userData.email?.split('@')[0] || 'Unbekannt';
+                const username = userData.username || userData.email?.split('@')[0] || (window.t ? window.t('common.not-available') : 'Unbekannt');
                 const points = userData.coins || 0;
                 const userId = doc.id;
                 
@@ -72,10 +121,10 @@ window.refreshLeaderboard = function() {
             // Don't show error to user if it's a permission issue (user not logged in)
             if (error.code === 'permission-denied' || error.message.includes('permissions')) {
                 console.log('🔒 User not logged in, skipping leaderboard load');
-                leaderboard.innerHTML = '<div class="text-center text-gray-400 p-4">Bitte zuerst anmelden</div>';
+                leaderboard.innerHTML = `<div class="text-center text-gray-400 p-4">${window.t ? window.t('colloseum.please-login') : 'Bitte zuerst anmelden'}</div>`;
                 return;
             }
-            leaderboard.innerHTML = '<div class="text-center text-red-400 p-4">Fehler beim Laden der Rangliste</div>';
+            leaderboard.innerHTML = `<div class="text-center text-red-400 p-4">${window.t ? window.t('common.error') : 'Fehler beim Laden der Rangliste'}</div>`;
         });
 };
 

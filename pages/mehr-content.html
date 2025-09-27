@@ -1148,7 +1148,184 @@
                 </div>
             
             <div class="page" id="geoboard" style="display: none;">
+                <!-- GeoBoard Content -->
+                <div class="max-w-6xl mx-auto p-6">
+                    <h2 class="text-3xl font-bold text-white mb-8">
+                        <span style="background: rgba(0, 0, 0, 0.7); padding: 8px 12px; border-radius: 8px; display: inline-block;" data-translate="geoboard.title">📊 GeoBoard</span>
+                    </h2>
+                    
+                    <!-- Tab Navigation -->
+                    <div class="mb-8">
+                        <div class="flex space-x-2">
+                            <button id="geoboard-tab" class="mehr-tab-btn active" data-tab="geoboard-content" onclick="switchToGeoBoard()" data-translate="geoboard.title">
+                                📊 GeoBoard
+                            </button>
+                            <button id="colloseum-tab" class="mehr-tab-btn" data-tab="colloseum-content" onclick="switchToColloseum()" data-translate="colloseum.title">
+                                🏛️ Colloseum
+                            </button>
+                            <button id="referrals-tab" class="mehr-tab-btn" data-tab="referrals-content" onclick="switchToReferrals()" data-translate="referrals.title">
+                                👥 Referrals
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- GeoBoard Content -->
+                    <div id="geoboard-content" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- Leaderboard -->
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-white mb-4" data-translate="geoboard.leaderboard">🏆 Rangliste</h3>
+                            <div id="leaderboard" class="space-y-3">
+                                <div class="text-center text-gray-400 p-4" data-translate="geoboard.loading-leaderboard">Lade Rangliste...</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Statistics -->
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-white mb-4" data-translate="geoboard.statistics">📈 Statistiken</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="geoboard.total-pixeldrops">Gesamt-PixelDrop:</span>
+                                    <span class="text-purple-400 font-bold" id="stats-coins">0</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="geoboard.total-tbnb">Gesamt-tBNB:</span>
+                                    <span class="text-yellow-400 font-bold" id="stats-tbnb">0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="geoboard.total-drops">Gesamt-Drops:</span>
+                                    <span class="text-blue-400 font-bold" id="stats-drops">0</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="geoboard.boost">Boost:</span>
+                                    <span class="text-green-400 font-bold" id="stats-boost">1.0x</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="geoboard.total-packages">Gesamt-Pakete:</span>
+                                    <span class="text-orange-400 font-bold" id="global-packages">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Colloseum Content -->
+                    <div id="colloseum-content" class="grid grid-cols-1 lg:grid-cols-2 gap-8" style="display: none;">
+                        <!-- Nomination Section -->
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-white mb-4" data-translate="colloseum.nomination">🎯 Nominierung</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="colloseum.nominations-today">Nominierungen heute:</span>
+                                    <span class="text-blue-400 font-bold" id="nominations-today">0</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="colloseum.reward-per-nomination">Belohnung pro Nominierung:</span>
+                                    <span class="text-green-400 font-bold" data-translate="colloseum.5-pixeldrops">5 PixelDrops</span>
+                                </div>
+                                <button id="nominate-btn" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" onclick="showNominationModal()" data-translate="colloseum.nominate-image">
+                                    🎯 Bild nominieren
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Rating Section -->
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-white mb-4" data-translate="colloseum.rating">⭐ Bewertung</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="colloseum.ratings-today">Bewertungen heute:</span>
+                                    <span class="text-purple-400 font-bold" id="ratings-today">0</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="colloseum.next-settlement">Nächste Abrechnung:</span>
+                                    <span class="text-yellow-400 font-bold" id="next-abrechnung" data-translate="colloseum.sunday-24">Sonntag 24:00</span>
+                                </div>
+                                <button id="rate-btn" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors" data-translate="colloseum.rate-images">
+                                    ⭐ Bilder bewerten
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Referrals Content -->
+                    <div id="referrals-content" class="grid grid-cols-1 lg:grid-cols-2 gap-8" style="display: none;">
+                        <!-- Referral Statistics -->
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-white mb-4" data-translate="referrals.statistics">📊 Referral Statistiken</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="referrals.direct-referrals">Direkte Referrals:</span>
+                                    <span class="text-blue-400 font-bold" id="direct-referrals">0</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="referrals.referral-earnings">Referral Einnahmen:</span>
+                                    <span class="text-green-400 font-bold" id="referral-earnings">0.00 tBNB</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="referrals.active-referrals">Aktive Referrals:</span>
+                                    <span class="text-purple-400 font-bold" id="active-referrals">0</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                                    <span class="text-gray-300" data-translate="referrals.your-referral-code">Dein Referral Code:</span>
+                                    <span class="text-yellow-400 font-bold" id="referral-code">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Referral Link -->
+                        <div class="bg-gray-700 rounded-lg p-6">
+                            <h3 class="text-xl font-semibold text-white mb-4" data-translate="referrals.your-referral-link">🔗 Dein Referral Link</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="text-gray-300 mb-2" data-translate="referrals.share-link">Teile diesen Link mit Freunden:</p>
+                                    <div class="flex space-x-2">
+                                        <input type="text" id="referral-link" class="flex-1 px-3 py-2 bg-gray-600 text-white rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none" readonly>
+                                        <button onclick="copyReferralLinkFromGeoBoard()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm" data-translate="referrals.copy">
+                                            📋 Kopieren
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Rewards Info -->
+                                <div class="mt-6">
+                                    <h4 class="text-green-400 font-semibold mb-2" data-translate="referrals.rewards">💰 Belohnungen</h4>
+                                    <div class="text-sm text-gray-300 space-y-1">
+                                        <p>• <span data-translate="referrals.direct-referrals-5">🎯 Direkte Referrals (5%):</span> Du erhältst 5% von allen Käufen deiner direkten Referrals</p>
+                                        <p>• <span data-translate="referrals.indirect-referrals-1">🔄 Indirekte Referrals (1%):</span> Du erhältst 1% von allen Käufen der Referrals deiner Referrals</p>
+                                        <p>• <span data-translate="referrals.automatic-system">⚡ Automatisches System:</span> Alle Belohnungen werden automatisch ausgezahlt</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- How it works -->
+                                <div class="mt-4">
+                                    <h4 class="text-blue-400 font-semibold mb-2" data-translate="referrals.how-it-works">📋 Wie funktioniert das Referral-System?</h4>
+                                    <div class="text-sm text-gray-300 space-y-1">
+                                        <p><strong data-translate="referrals.direct-referrals-5">🎯 Direkte Referrals (5%):</strong></p>
+                                        <p class="ml-4">Wenn jemand über deinen Link registriert und später Pakete kauft, erhältst du 5% der Kaufsumme als tBNB.</p>
+                                        
+                                        <p><strong data-translate="referrals.indirect-referrals-1">🔄 Indirekte Referrals (1%):</strong></p>
+                                        <p class="ml-4">Wenn deine Referrals selbst Leute werben, erhältst du 1% von deren Käufen.</p>
+                                        
+                                        <p><strong data-translate="referrals.automatic-system">⚡ Automatisches System:</strong></p>
+                                        <p class="ml-4">Alle Belohnungen werden automatisch auf dein Wallet ausgezahlt, sobald jemand kauft.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Your Referrals List -->
+                    <div class="mt-8">
+                        <h3 class="text-xl font-semibold text-white" data-translate="referrals.your-referrals">👥 Deine Referrals</h3>
+                        <button onclick="showIndirectReferralsModal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm" data-translate="referrals.indirect-referrals">
+                            🔄 Indirekte Referrals anzeigen
+                        </button>
+                        
+                        <div id="referrals-list" class="mt-4">
+                            <div class="text-center text-gray-400 p-8" data-translate="referrals.loading-referrals">Lade Referrals...</div>
+                        </div>
+                    </div>
                 </div>
+            </div>
             
             <div class="page" id="machines" style="display: none;">
                 </div>

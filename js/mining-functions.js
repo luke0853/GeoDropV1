@@ -191,28 +191,32 @@ window.updateMiningExpiryCountdown = function() {
         return;
     }
 
-    // FORCE RESET ONLY BASIC MINER (package_1) TO 7 DAYS - FIX FOR 32d BUG
-    console.log('🔧 EMERGENCY RESET: Setting ONLY Basic Miner to 7-day expiry...');
-    const resetDate = new Date();
-    resetDate.setDate(resetDate.getDate() + 7);
-    
-    // Only reset Basic Miner (machineId = 1)
+    // Check if Basic Miner needs expiry date (only if missing)
     const basicMinerCount = ownedMachines[1] || ownedMachines['machine1'] || 0;
     if (basicMinerCount > 0) {
         const packageKey = 'package_1';
-        userProfile[packageKey] = {
-            count: basicMinerCount,
-            expiry: resetDate.toISOString()
-        };
-        console.log(`🔧 RESET Basic Miner to 7 days: ${resetDate.toISOString()}`);
-        
-        // Save to Firebase
-        if (typeof window.updateUserProfile === 'function') {
-            window.updateUserProfile().then(() => {
-                console.log('✅ EMERGENCY RESET: Basic Miner set to 7 days and saved to Firebase');
-            }).catch(error => {
-                console.error('❌ Failed to save emergency reset:', error);
-            });
+        // Only set expiry if it doesn't exist or is invalid
+        if (!userProfile[packageKey] || !userProfile[packageKey].expiry) {
+            console.log('🔧 Setting Basic Miner expiry (missing): 7 days from now');
+            const resetDate = new Date();
+            resetDate.setDate(resetDate.getDate() + 7);
+            
+            userProfile[packageKey] = {
+                count: basicMinerCount,
+                expiry: resetDate.toISOString()
+            };
+            console.log(`🔧 Basic Miner expiry set to: ${resetDate.toISOString()}`);
+            
+            // Save to Firebase
+            if (typeof window.updateUserProfile === 'function') {
+                window.updateUserProfile().then(() => {
+                    console.log('✅ Basic Miner expiry saved to Firebase');
+                }).catch(error => {
+                    console.error('❌ Failed to save Basic Miner expiry:', error);
+                });
+            }
+        } else {
+            console.log('✅ Basic Miner expiry already exists:', userProfile[packageKey].expiry);
         }
     }
 
@@ -252,9 +256,104 @@ window.updateMiningExpiryCountdown = function() {
         }
     }
 
-    // Calculate time left for earliest expiring package
+    // REMOVE EXPIRED PACKAGES FIRST
+    console.log('🔍 Checking for expired packages...');
     const now = new Date();
-    const timeLeft = earliestExpiry - now;
+    let removedPackages = 0;
+    
+    machineTypes.forEach(machineId => {
+        const packageKey = `package_${machineId}`;
+        if (userProfile[packageKey] && userProfile[packageKey].packages) {
+            // Check individual packages
+            const expiredPackages = userProfile[packageKey].packages.filter(pkg => {
+                const expiryDate = new Date(pkg.expiry);
+                return expiryDate <= now;
+            });
+            
+            if (expiredPackages.length > 0) {
+                console.log(`⏰ Found ${expiredPackages.length} expired packages of type ${machineId}`);
+                
+                // Remove expired packages
+                userProfile[packageKey].packages = userProfile[packageKey].packages.filter(pkg => {
+                    const expiryDate = new Date(pkg.expiry);
+                    return expiryDate > now;
+                });
+                
+                // Update counts
+                userProfile[packageKey].count = userProfile[packageKey].packages.length;
+                
+                // Update ownedMachines count
+                if (ownedMachines[machineId]) {
+                    ownedMachines[machineId] = Math.max(0, ownedMachines[machineId] - expiredPackages.length);
+                } else if (ownedMachines[`machine${machineId}`]) {
+                    ownedMachines[`machine${machineId}`] = Math.max(0, ownedMachines[`machine${machineId}`] - expiredPackages.length);
+                }
+                
+                // If no packages left, remove the package entry
+                if (userProfile[packageKey].count === 0) {
+                    delete userProfile[packageKey];
+                    console.log(`🗑️ Removed all packages of type ${machineId} (all expired)`);
+                } else {
+                    // Update expiry to earliest remaining package
+                    const earliestExpiry = userProfile[packageKey].packages
+                        .map(p => new Date(p.expiry))
+                        .sort((a, b) => a - b)[0];
+                    userProfile[packageKey].expiry = earliestExpiry.toISOString();
+                }
+                
+                removedPackages += expiredPackages.length;
+                console.log(`🗑️ Removed ${expiredPackages.length} expired packages of type ${machineId}`);
+            }
+        } else if (userProfile[packageKey] && userProfile[packageKey].expiry) {
+            // Legacy format - single expiry date
+            const expiryDate = new Date(userProfile[packageKey].expiry);
+            if (expiryDate <= now) {
+                console.log(`⏰ Legacy package ${machineId} expired: ${expiryDate.toISOString()}`);
+                
+                // Remove all packages of this type (legacy behavior)
+                const currentCount = ownedMachines[machineId] || ownedMachines[`machine${machineId}`] || 0;
+                if (currentCount > 0) {
+                    if (ownedMachines[machineId]) {
+                        ownedMachines[machineId] = 0;
+                    } else if (ownedMachines[`machine${machineId}`]) {
+                        ownedMachines[`machine${machineId}`] = 0;
+                    }
+                    
+                    delete userProfile[packageKey];
+                    removedPackages += currentCount;
+                    console.log(`🗑️ Removed ${currentCount} expired legacy packages of type ${machineId}`);
+                }
+            }
+        }
+    });
+    
+    if (removedPackages > 0) {
+        console.log(`🗑️ Removed ${removedPackages} expired packages`);
+        
+        // Save changes to Firebase
+        if (typeof window.updateUserProfile === 'function') {
+            window.updateUserProfile().then(() => {
+                console.log('✅ Expired packages removed and saved to Firebase');
+            }).catch(error => {
+                console.error('❌ Failed to save expired package removal:', error);
+            });
+        }
+        
+        // Recalculate earliest expiry after removing expired packages
+        earliestExpiry = null;
+        machineTypes.forEach(machineId => {
+            const packageKey = `package_${machineId}`;
+            if (userProfile[packageKey] && userProfile[packageKey].expiry) {
+                const expiryDate = new Date(userProfile[packageKey].expiry);
+                if (!earliestExpiry || expiryDate < earliestExpiry) {
+                    earliestExpiry = expiryDate;
+                }
+            }
+        });
+    }
+
+    // Calculate time left for earliest expiring package
+    const timeLeft = earliestExpiry ? (earliestExpiry - now) : 0;
 
     if (timeLeft <= 0) {
         countdownElement.textContent = 'Einige Pakete verfallen!';
@@ -761,29 +860,47 @@ window.buyMachine = async function(machineType) {
                     const currentCount = window.userProfile.ownedMachines[machineType] || 0;
                     window.userProfile.ownedMachines[machineType] = currentCount + 1;
                     
-                    // FIXED: Only the NEW package gets 7 days, existing packages keep their expiry
+                    // JEDES PAKET VERFÄLLT NACH 7 TAGEN AB KAUF
                     const expiryDate = new Date();
                     expiryDate.setDate(expiryDate.getDate() + 7);
                     
-                    console.log('🔄 NEW PACKAGE ONLY gets 7 days - existing packages keep their expiry...');
+                    console.log('🔄 JEDES PAKET VERFÄLLT NACH 7 TAGEN AB KAUF...');
                     
-                    // Create or update individual package tracking for the new machine ONLY
+                    // Create individual package tracking for EACH machine
                     const packageKey = `package_${machineType}`;
                     if (!window.userProfile[packageKey]) {
+                        // First package of this type
                         window.userProfile[packageKey] = {
-                            count: 0,
-                            expiry: expiryDate.toISOString()
+                            count: 1,
+                            expiry: expiryDate.toISOString(),
+                            packages: [{
+                                id: Date.now(), // Unique ID for this package
+                                expiry: expiryDate.toISOString(),
+                                type: machineType
+                            }]
                         };
                         console.log(`⏰ NEW package ${machineType} created with 7-day expiry: ${expiryDate.toISOString()}`);
                     } else {
-                        // If package already exists, extend it by 7 days (only this specific package)
-                        const currentExpiry = new Date(window.userProfile[packageKey].expiry);
-                        const newExpiry = new Date(currentExpiry.getTime() + (7 * 24 * 60 * 60 * 1000));
-                        window.userProfile[packageKey].expiry = newExpiry.toISOString();
-                        console.log(`⏰ EXISTING package ${machineType} extended by 7 days: ${newExpiry.toISOString()}`);
+                        // Add new package to existing ones - JEDES bekommt 7 Tage ab Kauf
+                        const newPackage = {
+                            id: Date.now(), // Unique ID for this package
+                            expiry: expiryDate.toISOString(), // IMMER 7 Tage ab jetzt
+                            type: machineType
+                        };
+                        
+                        window.userProfile[packageKey].packages = window.userProfile[packageKey].packages || [];
+                        window.userProfile[packageKey].packages.push(newPackage);
+                        window.userProfile[packageKey].count = window.userProfile[packageKey].packages.length;
+                        
+                        // Set expiry to the earliest expiring package
+                        const earliestExpiry = window.userProfile[packageKey].packages
+                            .map(p => new Date(p.expiry))
+                            .sort((a, b) => a - b)[0];
+                        window.userProfile[packageKey].expiry = earliestExpiry.toISOString();
+                        
+                        console.log(`⏰ Added new package ${machineType} with 7-day expiry: ${expiryDate.toISOString()}`);
+                        console.log(`⏰ Total packages of type ${machineType}: ${window.userProfile[packageKey].count}`);
                     }
-                    
-                    window.userProfile[packageKey].count = window.userProfile.ownedMachines[machineType];
                     
                     console.log('🛒 Machine purchased:', machineType, 'New count:', window.userProfile.ownedMachines[machineType]);
                     console.log('📦 All ownedMachines:', window.userProfile.ownedMachines);

@@ -186,27 +186,185 @@ const translations = {
         'geocard.dev-drop': 'Dev',
         'geocard.user-drop': 'User',
         'geocard.normal-drop': 'Normal',
-    'create-user-drop-title': 'User GeoDrop erstellen',
-    'drop-name': 'Drop Name',
-    'drop-name-placeholder': 'Gib einen Namen ein...',
-    'what-to-photograph': 'Was fotografieren?',
-    'photograph-description-placeholder': 'Beschreibe was fotografiert werden soll...',
-    'map-legend-title': 'Kartenlegende',
-    'your-location-desc': 'Verwende meinen Standort',
-    'interactive-map': 'Interaktive Karte',
-    'map-legend-button': 'Karten-Legende anzeigen',
-    'legend-normal-drops': 'Normale GeoDrops',
-    'legend-normal-drops-desc': 'Kleine Dart-Scheibe - Offizielle GeoDrops',
-    'legend-user-drops': 'User GeoDrops',
-    'legend-user-drops-desc': 'Mittlere Größe - Von Spielern erstellte GeoDrops',
-    'legend-dev-drops': 'Dev GeoDrop',
-    'legend-dev-drops-desc': 'Größere Dart-Scheibe (2.5x größer) - Entwickler-Test-Drops',
-    'location-title': 'Standort',
-    'use-my-location': 'Meinen Standort verwenden',
-    'location-info-default': 'Klicke auf den Button um deine aktuelle Position zu laden',
-    'photo-upload-title': 'Foto-Upload',
-    'select-geodrop': 'GeoDrop auswählen:',
-    'take-photo': 'Foto aufnehmen',
+        'geocard.title': '🗺️ GeoCard',
+        'geocard.geocard-title': '🗺️ GeoCard',
+        'geocard.interactive-map': '🌍 Interaktive Karte',
+        'geocard.map-legend-button': '🗺️ Karten-Legende anzeigen',
+        'geocard.user-drop-button': '➕ User Drop erstellen',
+        'geocard.location-title': '📍 Standort',
+        'geocard.use-my-location': '📍 Meinen Standort verwenden',
+        'geocard.location-info-default': 'Klicke auf den Button um deine aktuelle Position zu laden',
+        'geocard.photo-upload-title': '📸 Foto-Upload',
+        'geocard.select-geodrop': 'GeoDrop auswählen:',
+        'geocard.take-photo': '📸 Foto aufnehmen',
+        'geocard.dev-drops': '🎯 Dev Drops',
+        'geocard.user-drops': '👤 User Drops',
+        'geocard.dev-test-coordinates': '🎯 Dev Test-Koordinaten',
+        'geocard.latitude': 'Breitengrad (Lat)',
+        'geocard.longitude': 'Längengrad (Lng)',
+        'geocard.set-test-coordinates': '🎯 Test-Koordinaten setzen',
+        'geocard.dev-test-warning': '⚠️ Nur für Entwickler! Diese Koordinaten überschreiben deine GPS-Position.',
+        'geocard.create-test-melk': '🏰 Test Melk Drop erstellen',
+        'geocard.create-test-schonbrunn': '🏰 Test Schönbrunn Drop erstellen',
+        'geocard.create-all-states': '🇦🇹 Alle Bundesländer Drops erstellen',
+        'geocard.create-remaining-states': '🔄 Fehlende Bundesländer Drops erstellen',
+        'geocard.reload-all-lists': '🔄 Alle Listen neu laden',
+        'geocard.clear-user-drops': '🗑️ User Drops löschen',
+        'geocard.restore-user-drops': '🔄 User Drops wiederherstellen',
+        'geocard.check-user-drop-count': '📊 User Drop Anzahl prüfen',
+        'geocard.cleanup-duplicates': '🧹 Duplikate bereinigen',
+        'geocard.upload-debug': '🔧 Upload Debug',
+        'geocard.dev-coordinate-adjustment': '🎯 Dev Koordinaten-Anpassung',
+        'geocard.latitude-lat': 'Breitengrad (Lat)',
+        'geocard.longitude-lng': 'Längengrad (Lng)',
+        'geocard.latitude-placeholder': 'z.B. 52.520008',
+        'geocard.longitude-placeholder': 'z.B. 13.404954',
+        'geocard.admin-mode-required': '🔒 Admin-Modus erforderlich',
+        'geocard.current-position': '📍 Aktuelle Position',
+        'geocard.admin-status': 'Admin-Status:',
+        'geocard.dev-coordinates': 'Dev-Koordinaten:',
+        'geocard.end-dev-session': '🔚 Dev-Session beenden',
+        'geocard.geodrops-overview': '📋 GeoDrops Übersicht',
+        'geocard.reload-drops-tab': '🔄 Drops neu laden',
+        'geocard.dev-geodrops-tab': '🎯 Dev GeoDrops',
+        'geocard.user-geodrops-tab': '👤 User GeoDrops',
+        'geocard.loading-dev-drops-table': 'Lade Dev GeoDrops-Tabelle...',
+        'geocard.create-user-drop-title': 'User GeoDrop erstellen',
+        'geocard.drop-name': 'Drop Name',
+        'geocard.drop-name-placeholder': 'Gib einen Namen ein...',
+        'geocard.what-to-photograph': 'Was fotografieren?',
+        'geocard.photograph-description-placeholder': 'Beschreibe was fotografiert werden soll...',
+        'geocard.map-legend-title': 'Kartenlegende',
+        'geocard.your-location-desc': 'Verwende meinen Standort',
+        'geocard.legend-normal-drops': 'Normale GeoDrops',
+        'geocard.legend-normal-drops-desc': 'Kleine Dart-Scheibe - Offizielle GeoDrops',
+        'geocard.legend-user-drops': 'User GeoDrops',
+        'geocard.legend-user-drops-desc': 'Mittlere Größe - Von Spielern erstellte GeoDrops',
+        'geocard.legend-dev-drops': 'Dev GeoDrop',
+        'geocard.legend-dev-drops-desc': 'Größere Dart-Scheibe (2.5x größer) - Entwickler-Test-Drops',
+        'geocard.location-title': 'Standort',
+        'geocard.use-my-location': 'Meinen Standort verwenden',
+        'geocard.location-info-default': 'Klicke auf den Button um deine aktuelle Position zu laden',
+        'geocard.photo-upload-title': 'Foto-Upload',
+        'geocard.select-geodrop': 'GeoDrop auswählen:',
+        'geocard.take-photo': 'Foto aufnehmen',
+        'geocard.reference-image-upload': 'Referenzbild hochladen',
+        'geocard.reference-image-description': 'Optional: Ein Referenzbild für andere Spieler',
+        'geocard.reward-pixeldrops': 'Belohnung (PixelDrops)',
+        'geocard.user-drops-fixed': 'User Drops haben eine feste Belohnung von 10 PixelDrops',
+        'geocard.location': 'Standort',
+        'geocard.use-current-position': '📍 Aktuelle Position verwenden',
+        'geocard.location-auto-description': 'Deine aktuelle GPS-Position wird automatisch verwendet',
+        'geocard.create-user-drop': '✅ User Drop erstellen',
+        'geocard.cancel': '❌ Abbrechen',
+        
+        // GeoBoard
+        'geoboard.title': '📊 GeoBoard',
+        'geoboard.leaderboard': '🏆 Rangliste',
+        'geoboard.statistics': '📈 Statistiken',
+        'geoboard.your-statistics': '📈 Deine Statistiken',
+        'geoboard.global-statistics': '🌍 Globale Statistiken',
+        'geoboard.loading-leaderboard': 'Lade Rangliste...',
+        'geoboard.username': 'Benutzername:',
+        'geoboard.pixeldrops': 'PixelDrops:',
+        'geoboard.tbnb': 'tBNB:',
+        'geoboard.drops': 'Drops:',
+        'geoboard.boost': 'Boost:',
+        'geoboard.rank': 'Rang:',
+        'geoboard.users': 'User',
+        'geoboard.packages': 'Pakete',
+        'geoboard.total-pixeldrops': 'Gesamt-PixelDrop:',
+        'geoboard.total-tbnb': 'Gesamt-tBNB:',
+        'geoboard.total-drops': 'Gesamt-Drops:',
+        'geoboard.total-packages': 'Gesamt-Pakete:',
+        
+        // Colloseum
+        'colloseum.title': '🏛️ Colloseum',
+        'colloseum.nomination': '🎯 Nominierung',
+        'colloseum.rating': '⭐ Bewertung',
+        'colloseum.top-5': '🏆 Top 5',
+        'colloseum.nominations-today': 'Nominierungen heute:',
+        'colloseum.reward-per-nomination': 'Belohnung pro Nominierung:',
+        'colloseum.nominate-image': '🎯 Bild nominieren',
+        'colloseum.ratings-today': 'Bewertungen heute:',
+        'colloseum.next-settlement': 'Nächste Abrechnung:',
+        'colloseum.rate-images': '⭐ Bilder bewerten',
+        'colloseum.nominated-images': '📸 Nominierte Bilder (diese Woche)',
+        'colloseum.loading-top-5': 'Lade Top 5...',
+        'colloseum.loading-nominated': 'Lade nominierte Bilder...',
+        'colloseum.no-ratings-yet': 'Noch keine Bewertungen',
+        'colloseum.no-nominated-this-week': 'Noch keine nominierte Bilder diese Woche',
+        'colloseum.limit-reached': 'Limit erreicht',
+        'colloseum.sunday-24': 'Sonntag 24:00',
+        'colloseum.5-pixeldrops': '5 PixelDrops',
+        'colloseum.nominate-modal-title': '🎯 Bild nominieren',
+        'colloseum.choose-image': 'Wähle ein Bild aus, das du für das Colloseum nominieren möchtest:',
+        'colloseum.nomination-reward': 'Du erhältst 5 PixelDrops pro Nominierung (max. 3 pro Tag)',
+        'colloseum.loading-available': 'Lade verfügbare Bilder...',
+        'colloseum.no-available-images': 'Keine verfügbaren Bilder zum Nominieren',
+        'colloseum.error-loading-images': 'Fehler beim Laden der Bilder',
+        'colloseum.nominate': '🎯 Nominieren',
+        'colloseum.like': '❤️ Like',
+        'colloseum.image-nominated': 'Bild erfolgreich nominiert! Du erhältst 5 PixelDrops.',
+        'colloseum.image-liked': '✅ Bild geliked!',
+        'colloseum.already-liked': 'Du hast dieses Bild bereits geliked!',
+        'colloseum.rating-limit-reached': 'Du hast heute bereits 3 Bilder bewertet!',
+        'colloseum.please-login': 'Bitte zuerst anmelden!',
+        'colloseum.error-liking': '❌ Fehler beim Liken des Bildes',
+        'colloseum.error-nominating': '❌ Fehler beim Nominieren des Bildes',
+        'colloseum.image-not-found': '❌ Bild nicht gefunden',
+        
+        // Referrals
+        'referrals.title': '👥 Referrals',
+        'referrals.statistics': '📊 Referral Statistiken',
+        'referrals.your-referral-link': '🔗 Dein Referral Link',
+        'referrals.your-referrals': '👥 Deine Referrals',
+        'referrals.direct-referrals': 'Direkte Referrals:',
+        'referrals.referral-earnings': 'Referral Einnahmen:',
+        'referrals.active-referrals': 'Aktive Referrals:',
+        'referrals.your-referral-code': 'Dein Referral Code:',
+        'referrals.share-link': 'Teile diesen Link mit Freunden:',
+        'referrals.copy': '📋 Kopieren',
+        'referrals.rewards': '💰 Belohnungen',
+        'referrals.how-it-works': '📋 Wie funktioniert das Referral-System?',
+        'referrals.direct-referrals-5': '🎯 Direkte Referrals (5%):',
+        'referrals.indirect-referrals-1': '🔄 Indirekte Referrals (1%):',
+        'referrals.automatic-system': '⚡ Automatisches System:',
+        'referrals.indirect-referrals': '🔄 Indirekte Referrals',
+        'referrals.loading-referrals': 'Lade Referrals...',
+        'referrals.rewards-title': '💰 Belohnungen',
+        'referrals.rewards-direct': '• 5% von allen Käufen deiner Referrals (Maschinen, Coins)',
+        'referrals.rewards-indirect': '• 1% von Käufen der Referrals deiner Referrals',
+        'referrals.rewards-automatic': '• Automatische Gutschrift bei jedem Kauf',
+        'referrals.how-it-works-title': '📋 Wie funktioniert das Referral-System?',
+        'referrals.direct-title': '🎯 Direkte Referrals (5%):',
+        'referrals.direct-desc1': '• Jeder User, der sich über deinen Link registriert',
+        'referrals.direct-desc2': '• Du erhältst 5% von allen seinen Käufen',
+        'referrals.direct-desc3': '• Maschinen, Coins, Premium-Features',
+        'referrals.indirect-title': '🔄 Indirekte Referrals (1%):',
+        'referrals.indirect-desc1': '• User, die von deinen Referrals geworben wurden',
+        'referrals.indirect-desc2': '• Du erhältst 1% von deren Käufen',
+        'referrals.indirect-desc3': '• Beispiel: A → B → C (du erhältst 1% von C\'s Käufen)',
+        'referrals.automatic-title': '⚡ Automatisches System:',
+        'referrals.automatic-desc1': '• Keine manuelle Auszahlung nötig',
+        'referrals.automatic-desc2': '• Sofortige Gutschrift bei jedem Kauf',
+        'referrals.automatic-desc3': '• Alle Transaktionen werden geloggt',
+        'referrals.link-copied': '✅ Referral-Link kopiert!',
+        'referrals.error-copying': '❌ Fehler beim Kopieren des Links',
+        'referrals.loading-indirect': 'Lade indirekte Referrals...',
+        'referrals.error-loading-indirect': 'Fehler beim Laden der indirekten Referrals',
+        'referrals.no-direct-referrals': 'Noch keine direkten Referrals',
+        'referrals.no-indirect-referrals': 'Noch keine indirekten Referrals',
+        'referrals.indirect-explanation': 'Diese Liste zeigt alle User, die von deinen direkten Referrals geworben wurden. Du erhältst 1% von deren Käufen.',
+        'referrals.indirect-explanation-2': 'Indirekte Referrals entstehen, wenn deine Referrals selbst User werben.',
+        'referrals.indirect-explanation-3': 'Deine direkten Referrals haben noch niemanden geworben.',
+        'referrals.total-indirect': 'Gesamt indirekte Referrals:',
+        'referrals.total-earnings-1': 'Gesamt Einnahmen (1%):',
+        'referrals.joined': 'Beigetreten:',
+        'referrals.referred-by': 'Geworben von:',
+        'referrals.active': 'Aktiv',
+        'referrals.inactive': 'Inaktiv',
+        'referrals.earned': 'Verdient:',
         
         // Common
         'common.loading': 'Lädt...',
@@ -275,6 +433,82 @@ const translations = {
         'settings.username-tip': '💡 Tip: The username replaces your email address in the game',
         'settings.email-settings': '📧 Email Settings',
         'settings.current-email': 'Current Email:',
+        
+        // GeoBoard
+        'geoboard.title': '📊 GeoBoard',
+        'geoboard.leaderboard': '🏆 Leaderboard',
+        'geoboard.statistics': '📈 Statistics',
+        'geoboard.your-statistics': '📈 Your Statistics',
+        'geoboard.global-statistics': '🌍 Global Statistics',
+        'geoboard.loading-leaderboard': 'Loading leaderboard...',
+        'geoboard.username': 'Benutzername:',
+        'geoboard.pixeldrops': 'PixelDrops:',
+        'geoboard.tbnb': 'tBNB:',
+        'geoboard.drops': 'Drops:',
+        'geoboard.boost': 'Boost:',
+        'geoboard.rank': 'Rank:',
+        'geoboard.users': 'Users',
+        'geoboard.packages': 'Pakete',
+        'geoboard.total-pixeldrops': 'Total PixelDrops:',
+        'geoboard.total-tbnb': 'Total tBNB:',
+        'geoboard.total-drops': 'Total Drops:',
+        'geoboard.total-packages': 'Total Packages:',
+        
+        // Colloseum
+        'colloseum.title': '🏛️ Colloseum',
+        'colloseum.nomination': '🎯 Nomination',
+        'colloseum.rating': '⭐ Rating',
+        'colloseum.top-5': '🏆 Top 5',
+        'colloseum.nominations-today': 'Nominations today:',
+        'colloseum.reward-per-nomination': 'Reward per nomination:',
+        'colloseum.5-pixeldrops': '5 PixelDrops',
+        'colloseum.nominate-image': '🎯 Nominate image',
+        'colloseum.ratings-today': 'Ratings today:',
+        'colloseum.next-settlement': 'Next settlement:',
+        'colloseum.sunday-24': 'Sunday 24:00',
+        'colloseum.rate-images': '⭐ Rate images',
+        'colloseum.nominated-images': '📸 Nominated images (this week)',
+        'colloseum.loading-top-5': 'Loading Top 5...',
+        'colloseum.loading-nominated': 'Loading nominated images...',
+        'colloseum.no-ratings-yet': 'No ratings yet',
+        'colloseum.no-nominated-this-week': 'No nominated images this week',
+        'colloseum.limit-reached': 'Limit reached',
+        
+        // Referrals
+        'referrals.title': '👥 Referrals',
+        'referrals.statistics': '📊 Referral Statistics',
+        'referrals.direct-referrals': 'Direct Referrals:',
+        'referrals.referral-earnings': 'Referral Earnings:',
+        'referrals.active-referrals': 'Active Referrals:',
+        'referrals.your-referral-code': 'Your Referral Code:',
+        'referrals.your-referral-link': 'Your Referral Link',
+        'referrals.share-link': 'Share this link with friends:',
+        'referrals.copy': '📋 Copy',
+        'referrals.rewards': '💰 Rewards',
+        'referrals.direct-referrals-5': '5% from all purchases of your referrals (machines, coins)',
+        'referrals.indirect-referrals-1': '1% from purchases of referrals of your referrals',
+        'referrals.automatic-system': 'Automatic credit on every purchase',
+        'referrals.how-it-works': '📋 How does the referral system work?',
+        'referrals.your-referrals': '👥 Your Referrals',
+        'referrals.indirect-referrals': '🔄 Indirect Referrals',
+        'referrals.loading-referrals': 'Loading referrals...',
+        'referrals.rewards-title': '💰 Rewards',
+        'referrals.rewards-direct': '• 5% from all purchases of your referrals (machines, coins)',
+        'referrals.rewards-indirect': '• 1% from purchases of referrals of your referrals',
+        'referrals.rewards-automatic': '• Automatic credit on every purchase',
+        'referrals.how-it-works-title': '📋 How does the Referral System work?',
+        'referrals.direct-title': '🎯 Direct Referrals (5%):',
+        'referrals.direct-desc1': '• Every user who registers through your link',
+        'referrals.direct-desc2': '• You get 5% from all their purchases',
+        'referrals.direct-desc3': '• Machines, coins, premium features',
+        'referrals.indirect-title': '🔄 Indirect Referrals (1%):',
+        'referrals.indirect-desc1': '• Users who were referred by your referrals',
+        'referrals.indirect-desc2': '• You get 1% from their purchases',
+        'referrals.indirect-desc3': '• Example: A → B → C (you get 1% from C\'s purchases)',
+        'referrals.automatic-title': '⚡ Automatic System:',
+        'referrals.automatic-desc1': '• No manual payout required',
+        'referrals.automatic-desc2': '• Immediate credit on every purchase',
+        'referrals.automatic-desc3': '• All transactions are logged',
         'settings.new-email': 'New Email:',
         'settings.confirm-password': 'Confirm Password:',
         'settings.update-email': '📧 Update Email',
@@ -407,27 +641,168 @@ const translations = {
         'geocard.dev-drop': 'Dev',
         'geocard.user-drop': 'User',
         'geocard.normal-drop': 'Normal',
-    'create-user-drop-title': 'Create User GeoDrop',
-    'drop-name': 'Drop Name',
-    'drop-name-placeholder': 'Enter a name...',
-    'what-to-photograph': 'What to photograph?',
-    'photograph-description-placeholder': 'Describe what should be photographed...',
-    'map-legend-title': 'Map Legend',
-    'your-location-desc': 'Use My Location',
-    'interactive-map': 'Interactive Map',
-    'map-legend-button': 'Show Map Legend',
-    'legend-normal-drops': 'Normal GeoDrops',
-    'legend-normal-drops-desc': 'Small dart board - Official GeoDrops',
-    'legend-user-drops': 'User GeoDrops',
-    'legend-user-drops-desc': 'Medium size - Player-created GeoDrops',
-    'legend-dev-drops': 'Dev GeoDrop',
-    'legend-dev-drops-desc': 'Larger dart board (2.5x bigger) - Developer test drops',
-    'location-title': 'Location',
-    'use-my-location': 'Use My Location',
-    'location-info-default': 'Click the button to load your current position',
-    'photo-upload-title': 'Photo Upload',
-    'select-geodrop': 'Select GeoDrop:',
-    'take-photo': 'Take Photo',
+        'geocard.title': '🗺️ GeoCard',
+        'geocard.geocard-title': '🗺️ GeoCard',
+        'geocard.interactive-map': '🌍 Interactive Map',
+        'geocard.map-legend-button': '🗺️ Show Map Legend',
+        'geocard.user-drop-button': '➕ Create User Drop',
+        'geocard.location-title': '📍 Location',
+        'geocard.use-my-location': '📍 Use My Location',
+        'geocard.location-info-default': 'Click the button to load your current position',
+        'geocard.photo-upload-title': '📸 Photo Upload',
+        'geocard.select-geodrop': 'Select GeoDrop:',
+        'geocard.take-photo': '📸 Take Photo',
+        'geocard.dev-drops': '🎯 Dev Drops',
+        'geocard.user-drops': '👤 User Drops',
+        'geocard.dev-test-coordinates': '🎯 Dev Test Coordinates',
+        'geocard.latitude': 'Latitude (Lat)',
+        'geocard.longitude': 'Longitude (Lng)',
+        'geocard.set-test-coordinates': '🎯 Set Test Coordinates',
+        'geocard.dev-test-warning': '⚠️ For developers only! These coordinates override your GPS position.',
+        'geocard.create-test-melk': '🏰 Create Test Melk Drop',
+        'geocard.create-test-schonbrunn': '🏰 Create Test Schönbrunn Drop',
+        'geocard.create-all-states': '🇦🇹 Create All State Drops',
+        'geocard.create-remaining-states': '🔄 Create Missing State Drops',
+        'geocard.reload-all-lists': '🔄 Reload All Lists',
+        'geocard.clear-user-drops': '🗑️ Clear User Drops',
+        'geocard.restore-user-drops': '🔄 Restore User Drops',
+        'geocard.check-user-drop-count': '📊 Check User Drop Count',
+        'geocard.cleanup-duplicates': '🧹 Cleanup Duplicates',
+        'geocard.upload-debug': '🔧 Upload Debug',
+        'geocard.dev-coordinate-adjustment': '🎯 Dev Coordinate Adjustment',
+        'geocard.latitude-lat': 'Latitude (Lat)',
+        'geocard.longitude-lng': 'Longitude (Lng)',
+        'geocard.latitude-placeholder': 'e.g. 52.520008',
+        'geocard.longitude-placeholder': 'e.g. 13.404954',
+        'geocard.admin-mode-required': '🔒 Admin Mode Required',
+        'geocard.current-position': '📍 Current Position',
+        'geocard.admin-status': 'Admin Status:',
+        'geocard.dev-coordinates': 'Dev Coordinates:',
+        'geocard.end-dev-session': '🔚 End Dev Session',
+        'geocard.geodrops-overview': '📋 GeoDrops Overview',
+        'geocard.reload-drops-tab': '🔄 Reload Drops',
+        'geocard.dev-geodrops-tab': '🎯 Dev GeoDrops',
+        'geocard.user-geodrops-tab': '👤 User GeoDrops',
+        'geocard.loading-dev-drops-table': 'Loading Dev GeoDrops table...',
+        'geocard.create-user-drop-title': 'Create User GeoDrop',
+        'geocard.drop-name': 'Drop Name',
+        'geocard.drop-name-placeholder': 'Enter a name...',
+        'geocard.what-to-photograph': 'What to photograph?',
+        'geocard.photograph-description-placeholder': 'Describe what should be photographed...',
+        'geocard.map-legend-title': 'Map Legend',
+        'geocard.your-location-desc': 'Use My Location',
+        'geocard.legend-normal-drops': 'Normal GeoDrops',
+        'geocard.legend-normal-drops-desc': 'Small dart board - Official GeoDrops',
+        'geocard.legend-user-drops': 'User GeoDrops',
+        'geocard.legend-user-drops-desc': 'Medium size - Player-created GeoDrops',
+        'geocard.legend-dev-drops': 'Dev GeoDrop',
+        'geocard.legend-dev-drops-desc': 'Larger dart board (2.5x bigger) - Developer test drops',
+        'geocard.location-title': 'Location',
+        'geocard.use-my-location': 'Use My Location',
+        'geocard.location-info-default': 'Click the button to load your current position',
+        'geocard.photo-upload-title': 'Photo Upload',
+        'geocard.select-geodrop': 'Select GeoDrop:',
+        'geocard.take-photo': 'Take Photo',
+        'geocard.reference-image-upload': 'Upload Reference Image',
+        'geocard.reference-image-description': 'Optional: A reference image for other players',
+        'geocard.reward-pixeldrops': 'Reward (PixelDrops)',
+        'geocard.user-drops-fixed': 'User Drops have a fixed reward of 10 PixelDrops',
+        'geocard.location': 'Location',
+        'geocard.use-current-position': '📍 Use Current Position',
+        'geocard.location-auto-description': 'Your current GPS position will be used automatically',
+        'geocard.create-user-drop': '✅ Create User Drop',
+        'geocard.cancel': '❌ Cancel',
+        
+        // GeoBoard
+        'geoboard.title': '📊 GeoBoard',
+        'geoboard.leaderboard': '🏆 Leaderboard',
+        'geoboard.statistics': '📈 Statistics',
+        'geoboard.your-statistics': '📈 Your Statistics',
+        'geoboard.global-statistics': '🌍 Global Statistics',
+        'geoboard.loading-leaderboard': 'Loading leaderboard...',
+        'geoboard.username': 'Benutzername:',
+        'geoboard.pixeldrops': 'PixelDrops:',
+        'geoboard.tbnb': 'tBNB:',
+        'geoboard.drops': 'Drops:',
+        'geoboard.boost': 'Boost:',
+        'geoboard.rank': 'Rank:',
+        'geoboard.users': 'Users',
+        'geoboard.packages': 'Pakete',
+        'geoboard.total-pixeldrops': 'Total PixelDrops:',
+        'geoboard.total-tbnb': 'Total tBNB:',
+        'geoboard.total-drops': 'Total Drops:',
+        'geoboard.total-packages': 'Total Packages:',
+        
+        // Colloseum
+        'colloseum.title': '🏛️ Colloseum',
+        'colloseum.nomination': '🎯 Nomination',
+        'colloseum.rating': '⭐ Rating',
+        'colloseum.top-5': '🏆 Top 5',
+        'colloseum.nominations-today': 'Nominations today:',
+        'colloseum.reward-per-nomination': 'Reward per nomination:',
+        'colloseum.nominate-image': '🎯 Nominate Image',
+        'colloseum.ratings-today': 'Ratings today:',
+        'colloseum.next-settlement': 'Next settlement:',
+        'colloseum.rate-images': '⭐ Rate Images',
+        'colloseum.nominated-images': '📸 Nominated Images (this week)',
+        'colloseum.loading-top-5': 'Loading Top 5...',
+        'colloseum.loading-nominated': 'Loading nominated images...',
+        'colloseum.no-ratings-yet': 'No ratings yet',
+        'colloseum.no-nominated-this-week': 'No nominated images this week yet',
+        'colloseum.limit-reached': 'Limit reached',
+        'colloseum.sunday-24': 'Sunday 24:00',
+        'colloseum.5-pixeldrops': '5 PixelDrops',
+        'colloseum.nominate-modal-title': '🎯 Nominate Image',
+        'colloseum.choose-image': 'Choose an image you want to nominate for the Colloseum:',
+        'colloseum.nomination-reward': 'You get 5 PixelDrops per nomination (max. 3 per day)',
+        'colloseum.loading-available': 'Loading available images...',
+        'colloseum.no-available-images': 'No available images to nominate',
+        'colloseum.error-loading-images': 'Error loading images',
+        'colloseum.nominate': '🎯 Nominate',
+        'colloseum.like': '❤️ Like',
+        'colloseum.image-nominated': 'Image successfully nominated! You get 5 PixelDrops.',
+        'colloseum.image-liked': '✅ Image liked!',
+        'colloseum.already-liked': 'You have already liked this image!',
+        'colloseum.rating-limit-reached': 'You have already rated 3 images today!',
+        'colloseum.please-login': 'Please login first!',
+        'colloseum.error-liking': '❌ Error liking image',
+        'colloseum.error-nominating': '❌ Error nominating image',
+        'colloseum.image-not-found': '❌ Image not found',
+        
+        // Referrals
+        'referrals.title': '👥 Referrals',
+        'referrals.statistics': '📊 Referral Statistics',
+        'referrals.your-referral-link': '🔗 Your Referral Link',
+        'referrals.your-referrals': '👥 Your Referrals',
+        'referrals.direct-referrals': 'Direct Referrals:',
+        'referrals.referral-earnings': 'Referral Earnings:',
+        'referrals.active-referrals': 'Active Referrals:',
+        'referrals.your-referral-code': 'Your Referral Code:',
+        'referrals.share-link': 'Share this link with friends:',
+        'referrals.copy': '📋 Copy',
+        'referrals.rewards': '💰 Rewards',
+        'referrals.how-it-works': '📋 How does the Referral System work?',
+        'referrals.direct-referrals-5': '🎯 Direct Referrals (5%):',
+        'referrals.indirect-referrals-1': '🔄 Indirect Referrals (1%):',
+        'referrals.automatic-system': '⚡ Automatic System:',
+        'referrals.indirect-referrals': '🔄 Indirect Referrals',
+        'referrals.loading-referrals': 'Loading referrals...',
+        'referrals.link-copied': '✅ Referral link copied!',
+        'referrals.error-copying': '❌ Error copying link',
+        'referrals.loading-indirect': 'Loading indirect referrals...',
+        'referrals.error-loading-indirect': 'Error loading indirect referrals',
+        'referrals.no-direct-referrals': 'No direct referrals yet',
+        'referrals.no-indirect-referrals': 'No indirect referrals yet',
+        'referrals.indirect-explanation': 'This list shows all users who were referred by your direct referrals. You get 1% of their purchases.',
+        'referrals.indirect-explanation-2': 'Indirect referrals are created when your referrals refer users themselves.',
+        'referrals.indirect-explanation-3': 'Your direct referrals haven\'t referred anyone yet.',
+        'referrals.total-indirect': 'Total indirect referrals:',
+        'referrals.total-earnings-1': 'Total earnings (1%):',
+        'referrals.joined': 'Joined:',
+        'referrals.referred-by': 'Referred by:',
+        'referrals.active': 'Active',
+        'referrals.inactive': 'Inactive',
+        'referrals.earned': 'Earned:',
         
         // Common
         'common.loading': 'Loading...',
@@ -537,9 +912,11 @@ window.changeLanguage = function(newLanguage) {
     // Update current language
     currentLanguage = newLanguage;
     
-    // Save to localStorage
+    // Save to localStorage with consistent key
     try {
         localStorage.setItem('geodrop-language', currentLanguage);
+        // Also remove old key if it exists to avoid conflicts
+        localStorage.removeItem('selectedLanguage');
     } catch (error) {
         console.warn('⚠️ Error saving language to localStorage:', error);
     }
@@ -578,9 +955,11 @@ window.switchLanguage = function(language) {
     // Update global language variables
     window.currentLang = language;
     
-    // Save to localStorage
+    // Save to localStorage with consistent key
     try {
         localStorage.setItem('geodrop-language', currentLanguage);
+        // Also remove old key if it exists to avoid conflicts
+        localStorage.removeItem('selectedLanguage');
     } catch (error) {
         console.warn('⚠️ Error saving language to localStorage:', error);
     }
@@ -610,12 +989,27 @@ window.switchLanguage = function(language) {
         window.firebaseTranslations.switchLanguage(language);
     }
     
+    // Update GeoBoard translations if function exists
+    if (window.updateGeoBoardTranslations) {
+        window.updateGeoBoardTranslations(language);
+    }
+    
+    // Also try to apply GeoBoard translations directly
+    if (window.applyGeoBoardTranslations) {
+        window.applyGeoBoardTranslations();
+    }
+    
     // Update modal placeholders if function exists
     if (window.updateModalPlaceholders) {
         setTimeout(() => {
             window.updateModalPlaceholders();
         }, 200);
     }
+    
+    // Dispatch languageChanged event for other pages
+    window.dispatchEvent(new CustomEvent('languageChanged', {
+        detail: { language: currentLanguage }
+    }));
     
     // Update marker popups if function exists
     if (window.updateMarkerPopups) {
@@ -654,9 +1048,11 @@ window.toggleLanguage = function() {
     // Update global language variables
     window.currentLang = newLanguage;
     
-    // Save to localStorage
+    // Save to localStorage with consistent key
     try {
         localStorage.setItem('geodrop-language', currentLanguage);
+        // Also remove old key if it exists to avoid conflicts
+        localStorage.removeItem('selectedLanguage');
     } catch (error) {
         console.warn('⚠️ Error saving language to localStorage:', error);
     }
@@ -682,12 +1078,27 @@ window.toggleLanguage = function() {
         window.firebaseTranslations.switchLanguage(newLanguage);
     }
     
+    // Update GeoBoard translations if function exists
+    if (window.updateGeoBoardTranslations) {
+        window.updateGeoBoardTranslations(newLanguage);
+    }
+    
+    // Also try to apply GeoBoard translations directly
+    if (window.applyGeoBoardTranslations) {
+        window.applyGeoBoardTranslations();
+    }
+    
     // Update modal placeholders if function exists
     if (window.updateModalPlaceholders) {
         setTimeout(() => {
             window.updateModalPlaceholders();
         }, 200);
     }
+    
+    // Dispatch languageChanged event for other pages
+    window.dispatchEvent(new CustomEvent('languageChanged', {
+        detail: { language: currentLanguage }
+    }));
     
     // Update marker popups if function exists
     if (window.updateMarkerPopups) {
@@ -852,6 +1263,8 @@ window.resetLanguageSettings = function() {
         // Reset to German
         currentLanguage = 'de';
         localStorage.setItem('geodrop-language', 'de');
+        // Also remove old key if it exists to avoid conflicts
+        localStorage.removeItem('selectedLanguage');
         
         // Update UI
         updateLanguageDisplay();
@@ -982,12 +1395,12 @@ function updateLanguageDisplay() {
 function applyLanguage() {
     console.log('🌍 Applying language to UI elements...');
     
-    // Apply translations to elements with data-lang attribute
-    const elements = document.querySelectorAll('[data-lang]');
+    // Apply translations to elements with data-translate attribute
+    const elements = document.querySelectorAll('[data-translate]');
     let updatedCount = 0;
     
     elements.forEach(element => {
-        const key = element.getAttribute('data-lang');
+        const key = element.getAttribute('data-translate');
         const translation = t(key);
         
         if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
@@ -1042,6 +1455,40 @@ function updateSpecificElements() {
     
     // Update Geocard elements
     updateGeocardElements();
+    
+    // Update GeoBoard elements
+    if (window.applyGeoBoardTranslations) {
+        window.applyGeoBoardTranslations();
+    }
+    
+    // Also update GeoBoard if it's currently visible
+    const geoboardPage = document.getElementById('geoboard');
+    if (geoboardPage && geoboardPage.style.display !== 'none') {
+        setTimeout(() => {
+            const elements = geoboardPage.querySelectorAll('[data-translate]');
+            let updatedCount = 0;
+            
+            elements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                const translation = window.t ? window.t(key) : null;
+                
+                if (translation) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        if (element.type === 'button' || element.type === 'submit') {
+                            element.value = translation;
+                        } else {
+                            element.placeholder = translation;
+                        }
+                    } else {
+                        element.textContent = translation;
+                    }
+                    updatedCount++;
+                }
+            });
+            
+            console.log(`✅ Applied ${updatedCount} GeoBoard translations on language change`);
+        }, 100);
+    }
 }
 
 // Update page titles / Seitentitel aktualisieren
@@ -1183,6 +1630,8 @@ window.setLanguage = function(language) {
     currentLanguage = language;
     try {
         localStorage.setItem('geodrop-language', currentLanguage);
+        // Also remove old key if it exists to avoid conflicts
+        localStorage.removeItem('selectedLanguage');
     } catch (error) {
         console.warn('⚠️ Error saving language to localStorage:', error);
     }
@@ -1252,6 +1701,45 @@ window.updateRadioButtons = function() {
     }
 };
 
+// Sync all language switchers / Alle Sprach-Switcher synchronisieren
+window.syncAllLanguageSwitchers = function(language) {
+    console.log('🔄 Syncing all language switchers to:', language);
+    
+    // Update radio buttons in settings
+    const langDe = document.getElementById('lang-de');
+    const langEn = document.getElementById('lang-en');
+    if (langDe && langEn) {
+        langDe.checked = language === 'de';
+        langEn.checked = language === 'en';
+        console.log('✅ Settings radio buttons synced');
+    }
+    
+    // Update startseite language button
+    const languageFlag = document.getElementById('language-flag');
+    const languageText = document.getElementById('language-text');
+    if (languageFlag && languageText) {
+        languageFlag.textContent = language === 'de' ? '🇩🇪' : '🇺🇸';
+        languageText.textContent = language === 'de' ? 'DE' : 'EN';
+        console.log('✅ Startseite button synced');
+    }
+    
+    // Update language selector if it exists
+    const languageSelector = document.getElementById('language-selector');
+    if (languageSelector) {
+        languageSelector.value = language;
+        console.log('✅ Language selector synced');
+    }
+    
+    // Update current language display
+    const currentLanguageDisplay = document.getElementById('settings-current-language-display');
+    if (currentLanguageDisplay) {
+        currentLanguageDisplay.textContent = language === 'de' ? 'Deutsch' : 'English';
+        console.log('✅ Current language display synced');
+    }
+    
+    console.log('✅ All language switchers synced to:', language);
+};
+
 // Expose for global access / Für globalen Zugriff bereitstellen
 window.t = t;
 window.initLanguageSystem = initLanguageSystem;
@@ -1260,6 +1748,7 @@ window.updateLanguageDisplay = updateLanguageDisplay;
 window.updateStartseiteButton = updateStartseiteButton;
 window.updateRadioButtons = updateRadioButtons;
 window.updateGeocardElements = updateGeocardElements;
+window.syncAllLanguageSwitchers = window.syncAllLanguageSwitchers;
 
 // Test function to manually reload map markers with current language
 window.testMapLanguageSwitch = function() {

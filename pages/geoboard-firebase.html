@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoBoard - GeoDrop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="../config/config-secrets-public.js"></script>
+    <script src="../js/firebase.js"></script>
+    <script src="../js/bonus-functions.js"></script>
+    <script src="../js/colloseum.js"></script>
+    <script src="../js/colloseum-scheduler.js"></script>
+    <script src="../js/firebase-translations.js"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Language Switcher -->
+    <div class="fixed top-4 right-4 z-50">
+        <div class="bg-gray-800 bg-opacity-90 backdrop-blur-md border border-gray-600 rounded-lg p-1 flex shadow-lg">
+            <button onclick="switchLanguage('de')" id="main-lang-de-btn" class="px-3 py-1 rounded text-white font-semibold hover:bg-gray-700 transition-all text-sm bg-gray-700">
+                🇩🇪
+            </button>
+            <button onclick="switchLanguage('en')" id="main-lang-en-btn" class="px-3 py-1 rounded text-white font-semibold hover:bg-gray-700 transition-all text-sm">
+                🇺🇸
+            </button>
+        </div>
+    </div>
+    
+    <div class="max-w-6xl mx-auto p-6">
+        <h2 class="text-3xl font-bold text-white mb-8">
+            <span style="background: rgba(0, 0, 0, 0.7); padding: 8px 12px; border-radius: 8px; display: inline-block;" data-translate="geoboard-title">📊 GeoBoard</span>
+        </h2>
+        
+        <!-- Tab Navigation -->
+        <div class="mb-8">
+            <div class="flex space-x-2">
+                <button id="geoboard-tab" class="mehr-tab-btn active" data-tab="geoboard-content" onclick="switchToGeoBoard()" data-translate="geoboard-title">
+                    📊 GeoBoard
+                </button>
+                <button id="colloseum-tab" class="mehr-tab-btn" data-tab="colloseum-content" onclick="switchToColloseum()" data-translate="colloseum-title">
+                    🏛️ Colloseum
+                </button>
+                <button id="referrals-tab" class="mehr-tab-btn" data-tab="referrals-content" onclick="switchToReferrals()" data-translate="referrals-title">
+                    👥 Referrals
+                </button>
+            </div>
+        </div>
+        
+        <!-- GeoBoard Content -->
+        <div id="geoboard-content" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Leaderboard -->
+            <div class="bg-gray-700 rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-white mb-4" data-translate="geoboard-leaderboard">🏆 Rangliste</h3>
+                <div id="leaderboard" class="space-y-3">
+                    <div class="text-center text-gray-400 p-4" data-translate="geoboard-loading-leaderboard">Lade Rangliste...</div>
+                </div>
+            </div>
+            
+            <!-- Statistics -->
+            <div class="bg-gray-700 rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-white mb-4" data-translate="geoboard-statistics">📈 Statistiken</h3>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                        <span class="text-gray-300" data-translate="geoboard-total-pixeldrops">Gesamt-PixelDrop:</span>
+                        <span class="text-purple-400 font-bold" id="stats-coins">0</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                        <span class="text-gray-300" data-translate="geoboard-total-tbnb">Gesamt-tBNB:</span>
+                        <span class="text-yellow-400 font-bold" id="stats-tbnb">0.00</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                        <span class="text-gray-300" data-translate="geoboard-total-drops">Gesamt-Drops:</span>
+                        <span class="text-blue-400 font-bold" id="stats-drops">0</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                        <span class="text-gray-300" data-translate="geoboard-boost">Boost:</span>
+                        <span class="text-green-400 font-bold" id="stats-boost">1.0x</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                        <span class="text-gray-300" data-translate="geoboard-total-packages">Gesamt-Pakete:</span>
+                        <span class="text-orange-400 font-bold" id="global-packages">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Colloseum Content -->
+        <div id="colloseum-content" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Nominierung -->
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4" data-translate="colloseum-nomination">🎯 Nominierung</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300" data-translate="colloseum-nominations-today">Nominierungen heute:</span>
+                            <span class="text-blue-400 font-bold" id="nominations-today">0/3</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300" data-translate="colloseum-reward-per-nomination">Belohnung pro Nominierung:</span>
+                            <span class="text-green-400 font-bold" data-translate="colloseum-5-pixeldrops">5 PixelDrops</span>
+                        </div>
+                        <button id="nominate-btn" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" onclick="showNominationModal()" data-translate="colloseum-nominate-image">
+                            🎯 Bild nominieren
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Bewertung -->
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4" data-translate="colloseum-rating">⭐ Bewertung</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300" data-translate="colloseum-ratings-today">Bewertungen heute:</span>
+                            <span class="text-purple-400 font-bold" id="ratings-today">0/3</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300" data-translate="colloseum-next-settlement">Nächste Abrechnung:</span>
+                            <span class="text-yellow-400 font-bold" id="next-abrechnung" data-translate="colloseum-sunday-24">Sonntag 24:00</span>
+                        </div>
+                        <button id="rate-btn" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors" data-translate="colloseum-rate-images">
+                            ⭐ Bilder bewerten
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Top 5 -->
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4" data-translate="colloseum-top-5">🏆 Top 5</h3>
+                    <div id="top-5" class="space-y-3">
+                        <div class="text-center text-gray-400 p-4" data-translate="colloseum-loading-top-5">Lade Top 5...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Nominierte Bilder -->
+            <div class="mt-8 bg-gray-700 rounded-lg p-6">
+                <h3 class="text-xl font-semibold text-white mb-4" data-translate="colloseum-nominated-images">📸 Nominierte Bilder (diese Woche)</h3>
+                <div id="nominated-images" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div class="text-center text-gray-400 p-8" data-translate="colloseum-loading-nominated">Lade nominierte Bilder...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Referrals Content -->
+        <div id="referrals-content" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Referral Statistics -->
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4" data-translate="referrals-statistics">📊 Referral Statistiken</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300" data-translate="referrals-direct-referrals">Direkte Referrals:</span>
+                            <span class="text-blue-400 font-bold" id="direct-referrals-count">0</span>
+                        </div>
+                       <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                           <span class="text-gray-300" data-translate="referrals-referral-earnings">Referral Einnahmen:</span>
+                           <span class="text-green-400 font-bold" id="referral-earnings">0 tBNB</span>
+                       </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300" data-translate="referrals-active-referrals">Aktive Referrals:</span>
+                            <span class="text-purple-400 font-bold" id="active-referrals-count">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-gray-600 rounded-lg">
+                            <span class="text-gray-300" data-translate="referrals-your-referral-code">Dein Referral Code:</span>
+                            <span class="text-yellow-400 font-bold" id="user-referral-code">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Referral Link -->
+                <div class="bg-gray-700 rounded-lg p-6">
+                    <h3 class="text-xl font-semibold text-white mb-4" data-translate="referrals-your-referral-link">🔗 Dein Referral Link</h3>
+                    <div class="space-y-4">
+                        <div class="bg-gray-600 rounded-lg p-4">
+                            <p class="text-gray-300 mb-2" data-translate="referrals-share-link">Teile diesen Link mit Freunden:</p>
+                            <div class="flex space-x-2">
+                                <input type="text" id="referral-link-display" readonly class="flex-1 px-4 py-2 bg-gray-500 text-white rounded-lg border border-gray-400 text-sm">
+                                <button onclick="copyReferralLinkFromGeoBoard()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm" data-translate="referrals-copy">
+                                    📋 Kopieren
+                                </button>
+                            </div>
+                        </div>
+                        <div class="bg-green-900 border border-green-600 rounded-lg p-4">
+                            <h4 class="text-green-400 font-semibold mb-2" data-translate="referrals-rewards">💰 Belohnungen</h4>
+                           <ul class="text-gray-300 text-sm space-y-1">
+                               <li>• 5% von allen Käufen deiner Referrals (Maschinen, Coins)</li>
+                               <li>• 1% von Käufen der Referrals deiner Referrals</li>
+                               <li>• Automatische Gutschrift bei jedem Kauf</li>
+                           </ul>
+                        </div>
+                        
+                        <div class="bg-blue-900 border border-blue-600 rounded-lg p-4">
+                            <h4 class="text-blue-400 font-semibold mb-2" data-translate="referrals-how-it-works">📋 Wie funktioniert das Referral-System?</h4>
+                            <div class="text-gray-300 text-sm space-y-2">
+                                <p><strong data-translate="referrals-direct-referrals-5">🎯 Direkte Referrals (5%):</strong></p>
+                                <ul class="ml-4 space-y-1">
+                                    <li>• Jeder User, der sich über deinen Link registriert</li>
+                                    <li>• Du erhältst 5% von allen seinen Käufen</li>
+                                    <li>• Maschinen, Coins, Premium-Features</li>
+                                </ul>
+                                
+                                <p><strong data-translate="referrals-indirect-referrals-1">🔄 Indirekte Referrals (1%):</strong></p>
+                                <ul class="ml-4 space-y-1">
+                                    <li>• User, die von deinen Referrals geworben wurden</li>
+                                    <li>• Du erhältst 1% von deren Käufen</li>
+                                    <li>• Beispiel: A → B → C (du erhältst 1% von C's Käufen)</li>
+                                </ul>
+                                
+                                <p><strong data-translate="referrals-automatic-system">⚡ Automatisches System:</strong></p>
+                                <ul class="ml-4 space-y-1">
+                                    <li>• Keine manuelle Auszahlung nötig</li>
+                                    <li>• Sofortige Gutschrift bei jedem Kauf</li>
+                                    <li>• Alle Transaktionen werden geloggt</li>
+                                </ul>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Referrals List -->
+            <div class="mt-8 bg-gray-700 rounded-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-white" data-translate="referrals-your-referrals">👥 Deine Referrals</h3>
+                    <button onclick="showIndirectReferralsModal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm" data-translate="referrals-indirect-referrals">
+                        🔄 Indirekte Referrals
+                    </button>
+                </div>
+                <div id="referrals-list" class="space-y-3">
+                    <div class="text-center text-gray-400 p-8" data-translate="referrals-loading-referrals">Lade Referrals...</div>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+        // Initialize Firebase Translations when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🌍 Initializing Firebase Translations for GeoBoard...');
+            
+            // Wait for Firebase to be ready
+            const waitForFirebase = () => {
+                if (window.firebaseTranslations) {
+                    console.log('🔥 Firebase Translations ready, applying translations...');
+                    
+                    // Apply translations for current tab
+                    const currentTab = getCurrentActiveTab();
+                    if (currentTab) {
+                        window.firebaseTranslations.applyTranslations(currentTab);
+                    }
+                    
+                    // Set up tab switching with translations
+                    setupTabSwitching();
+                    
+                } else {
+                    console.log('⏳ Waiting for Firebase Translations...');
+                    setTimeout(waitForFirebase, 500);
+                }
+            };
+            waitForFirebase();
+        });
+
+        // Get current active tab
+        function getCurrentActiveTab() {
+            const activeTab = document.querySelector('.mehr-tab-btn.active');
+            if (activeTab) {
+                const tabId = activeTab.id;
+                if (tabId === 'geoboard-tab') return 'geoboard';
+                if (tabId === 'colloseum-tab') return 'colloseum';
+                if (tabId === 'referrals-tab') return 'referrals';
+            }
+            return 'geoboard'; // Default
+        }
+
+        // Setup tab switching with translations
+        function setupTabSwitching() {
+            // Override the original tab switching functions
+            window.switchToGeoBoard = function() {
+                console.log('📊 Switching to GeoBoard with translations...');
+                switchTab('geoboard');
+                if (window.firebaseTranslations) {
+                    window.firebaseTranslations.applyTranslations('geoboard');
+                }
+            };
+            
+            window.switchToColloseum = function() {
+                console.log('🏛️ Switching to Colloseum with translations...');
+                switchTab('colloseum');
+                if (window.firebaseTranslations) {
+                    window.firebaseTranslations.applyTranslations('colloseum');
+                }
+            };
+            
+            window.switchToReferrals = function() {
+                console.log('👥 Switching to Referrals with translations...');
+                switchTab('referrals');
+                if (window.firebaseTranslations) {
+                    window.firebaseTranslations.applyTranslations('referrals');
+                }
+            };
+        }
+
+        // Generic tab switching function
+        function switchTab(tabName) {
+            const geoboardTab = document.getElementById('geoboard-tab');
+            const colloseumTab = document.getElementById('colloseum-tab');
+            const referralsTab = document.getElementById('referrals-tab');
+            const geoboardContent = document.getElementById('geoboard-content');
+            const colloseumContent = document.getElementById('colloseum-content');
+            const referralsContent = document.getElementById('referrals-content');
+            
+            // Reset all tabs
+            [geoboardTab, colloseumTab, referralsTab].forEach(tab => {
+                if (tab) {
+                    tab.classList.remove('text-white', 'border-blue-500', 'bg-gray-800');
+                    tab.classList.add('text-gray-400', 'border-transparent');
+                }
+            });
+            
+            [geoboardContent, colloseumContent, referralsContent].forEach(content => {
+                if (content) {
+                    content.classList.add('hidden');
+                }
+            });
+            
+            // Activate selected tab
+            if (tabName === 'geoboard') {
+                if (geoboardTab) geoboardTab.classList.add('text-white', 'border-blue-500', 'bg-gray-800');
+                if (geoboardTab) geoboardTab.classList.remove('text-gray-400', 'border-transparent');
+                if (geoboardContent) geoboardContent.classList.remove('hidden');
+            } else if (tabName === 'colloseum') {
+                if (colloseumTab) colloseumTab.classList.add('text-white', 'border-blue-500', 'bg-gray-800');
+                if (colloseumTab) colloseumTab.classList.remove('text-gray-400', 'border-transparent');
+                if (colloseumContent) colloseumContent.classList.remove('hidden');
+            } else if (tabName === 'referrals') {
+                if (referralsTab) referralsTab.classList.add('text-white', 'border-blue-500', 'bg-gray-800');
+                if (referralsTab) referralsTab.classList.remove('text-gray-400', 'border-transparent');
+                if (referralsContent) referralsContent.classList.remove('hidden');
+            }
+        }
+
+        // Copy referral link function
+        function copyReferralLinkFromGeoBoard() {
+            const referralInput = document.getElementById('referral-link-display');
+            if (referralInput) {
+                referralInput.select();
+                referralInput.setSelectionRange(0, 99999);
+                
+                try {
+                    document.execCommand('copy');
+                    const message = window.firebaseTranslations ? 
+                        window.firebaseTranslations.getTranslation('referrals-link-copied', 'referrals') : 
+                        '✅ Referral-Link kopiert!';
+                    alert(message);
+                } catch (err) {
+                    navigator.clipboard.writeText(referralInput.value).then(() => {
+                        const message = window.firebaseTranslations ? 
+                            window.firebaseTranslations.getTranslation('referrals-link-copied', 'referrals') : 
+                            '✅ Referral-Link kopiert!';
+                        alert(message);
+                    }).catch(() => {
+                        const message = window.firebaseTranslations ? 
+                            window.firebaseTranslations.getTranslation('referrals-error-copying', 'referrals') : 
+                            '❌ Fehler beim Kopieren des Links';
+                        alert(message);
+                    });
+                }
+            }
+        }
+
+        // Placeholder functions for other features
+        function showNominationModal() {
+            console.log('🎯 Show nomination modal');
+        }
+
+        function showIndirectReferralsModal() {
+            console.log('🔄 Show indirect referrals modal');
+        }
+
+        function loadLeaderboard() {
+            console.log('🏆 Load leaderboard');
+        }
+
+        // Local translations for test page
+        const translations = {
+            de: {
+                'geoboard-title': '📊 GeoBoard',
+                'colloseum-title': '🏛️ Colloseum',
+                'referrals-title': '👥 Referrals',
+                'geoboard-leaderboard': '🏆 Rangliste',
+                'geoboard-statistics': '📈 Statistiken',
+                'geoboard-total-pixeldrops': 'Gesamt PixelDrops',
+                'geoboard-total-tbnb': 'Gesamt tBNB',
+                'geoboard-total-drops': 'Gesamt Drops',
+                'geoboard-boost': 'Boost',
+                'geoboard-total-packages': 'Gesamt Pakete',
+                'colloseum-nomination': '🏛️ Nominierung',
+                'colloseum-nominations-today': 'Nominierungen heute',
+                'colloseum-reward-per-nomination': 'Belohnung pro Nominierung',
+                'colloseum-5-pixeldrops': '5 PixelDrops',
+                'colloseum-nominate-image': 'Bild nominieren',
+                'colloseum-rating': '🏆 Bewertung',
+                'colloseum-ratings-today': 'Bewertungen heute',
+                'colloseum-next-settlement': 'Nächste Abrechnung',
+                'colloseum-sunday-24': 'Sonntag 24:00',
+                'colloseum-rate-images': 'Bilder bewerten',
+                'referrals-statistics': '📊 Statistiken',
+                'referrals-direct-referrals': 'Direkte Referrals',
+                'referrals-referral-earnings': 'Referral-Einnahmen',
+                'referrals-active-referrals': 'Aktive Referrals',
+                'referrals-your-referral-code': 'Dein Referral-Code',
+                'referrals-your-referral-link': 'Dein Referral-Link',
+                'referrals-share-link': 'Link teilen',
+                'referrals-copy': 'Kopieren',
+                'referrals-rewards': '💰 Belohnungen',
+                'referrals-direct-referrals-5': 'Direkte Referrals (5%)',
+                'referrals-indirect-referrals-1': 'Indirekte Referrals (1%)',
+                'referrals-automatic-system': 'Automatisches System',
+                'referrals-how-it-works': '📋 Wie funktioniert das Referral-System?',
+                'referrals-your-referrals': 'Deine Referrals',
+                'referrals-indirect-referrals': 'Indirekte Referrals'
+            },
+            en: {
+                'geoboard-title': '📊 GeoBoard',
+                'colloseum-title': '🏛️ Colloseum',
+                'referrals-title': '👥 Referrals',
+                'geoboard-leaderboard': '🏆 Leaderboard',
+                'geoboard-statistics': '📈 Statistics',
+                'geoboard-total-pixeldrops': 'Total PixelDrops',
+                'geoboard-total-tbnb': 'Total tBNB',
+                'geoboard-total-drops': 'Total Drops',
+                'geoboard-boost': 'Boost',
+                'geoboard-total-packages': 'Total Packages',
+                'colloseum-nomination': '🏛️ Nomination',
+                'colloseum-nominations-today': 'Nominations today',
+                'colloseum-reward-per-nomination': 'Reward per nomination',
+                'colloseum-5-pixeldrops': '5 PixelDrops',
+                'colloseum-nominate-image': 'Nominate image',
+                'colloseum-rating': '🏆 Rating',
+                'colloseum-ratings-today': 'Ratings today',
+                'colloseum-next-settlement': 'Next settlement',
+                'colloseum-sunday-24': 'Sunday 24:00',
+                'colloseum-rate-images': 'Rate images',
+                'referrals-statistics': '📊 Statistics',
+                'referrals-direct-referrals': 'Direct Referrals',
+                'referrals-referral-earnings': 'Referral Earnings',
+                'referrals-active-referrals': 'Active Referrals',
+                'referrals-your-referral-code': 'Your Referral Code',
+                'referrals-your-referral-link': 'Your Referral Link',
+                'referrals-share-link': 'Share Link',
+                'referrals-copy': 'Copy',
+                'referrals-rewards': '💰 Rewards',
+                'referrals-direct-referrals-5': 'Direct Referrals (5%)',
+                'referrals-indirect-referrals-1': 'Indirect Referrals (1%)',
+                'referrals-automatic-system': 'Automatic System',
+                'referrals-how-it-works': '📋 How does the Referral System work?',
+                'referrals-your-referrals': 'Your Referrals',
+                'referrals-indirect-referrals': 'Indirect Referrals'
+            }
+        };
+
+        // Language switching function
+        function switchLanguage(lang) {
+            console.log('🌍 Switching language to:', lang);
+            
+            // Update current language
+            window.currentLang = lang;
+            localStorage.setItem('geodrop-language', lang);
+            
+            // Apply local translations
+            applyTranslations(lang);
+            
+            // Update button states
+            document.getElementById('main-lang-de-btn').className = 'px-3 py-1 rounded text-white font-semibold hover:bg-gray-700 transition-all text-sm' + (lang === 'de' ? ' bg-gray-700' : '');
+            document.getElementById('main-lang-en-btn').className = 'px-3 py-1 rounded text-white font-semibold hover:bg-gray-700 transition-all text-sm' + (lang === 'en' ? ' bg-gray-700' : '');
+        }
+
+        // Apply translations function
+        function applyTranslations(lang) {
+            console.log('🔄 Applying translations for language:', lang);
+            const elements = document.querySelectorAll('[data-translate]');
+            let updatedCount = 0;
+            
+            elements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                const translation = translations[lang] && translations[lang][key];
+                
+                if (translation) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        if (element.type === 'button' || element.type === 'submit') {
+                            element.value = translation;
+                        } else {
+                            element.placeholder = translation;
+                        }
+                    } else {
+                        element.textContent = translation;
+                    }
+                    updatedCount++;
+                } else {
+                    console.log('⚠️ No translation found for key:', key);
+                }
+            });
+            
+            console.log(`✅ Applied ${updatedCount} translations`);
+        }
+
+        function updateStats() {
+            console.log('📈 Update stats');
+        }
+
+        // Initialize translations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLang = localStorage.getItem('geodrop-language') || 'de';
+            window.currentLang = savedLang;
+            applyTranslations(savedLang);
+            
+            // Set initial button states
+            document.getElementById('main-lang-de-btn').className = 'px-3 py-1 rounded text-white font-semibold hover:bg-gray-700 transition-all text-sm' + (savedLang === 'de' ? ' bg-gray-700' : '');
+            document.getElementById('main-lang-en-btn').className = 'px-3 py-1 rounded text-white font-semibold hover:bg-gray-700 transition-all text-sm' + (savedLang === 'en' ? ' bg-gray-700' : '');
+        });
+    </script>
+</body>
+</html>

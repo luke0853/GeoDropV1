@@ -108,48 +108,22 @@
             <script>
                 // Mark current language as selected when page loads
                 document.addEventListener('DOMContentLoaded', function() {
-                    const currentLanguage = localStorage.getItem('selectedLanguage') || 'de';
+                    // Use the same localStorage key as the main language system
+                    const currentLanguage = localStorage.getItem('geodrop-language') || 'de';
                     const deRadio = document.getElementById('lang-de');
                     const enRadio = document.getElementById('lang-en');
                     
-                    if (currentLanguage === 'de') {
-                        deRadio.checked = true;
-                        enRadio.checked = false;
-                    } else if (currentLanguage === 'en') {
-                        deRadio.checked = false;
-                        enRadio.checked = true;
+                    if (deRadio && enRadio) {
+                        if (currentLanguage === 'de') {
+                            deRadio.checked = true;
+                            enRadio.checked = false;
+                        } else if (currentLanguage === 'en') {
+                            deRadio.checked = false;
+                            enRadio.checked = true;
+                        }
+                        console.log('✅ Settings radio buttons initialized with language:', currentLanguage);
                     }
                 });
-                
-                // Update radio buttons when language is switched
-                function switchLanguage(lang) {
-                    const deRadio = document.getElementById('lang-de');
-                    const enRadio = document.getElementById('lang-en');
-                    
-                    if (lang === 'de') {
-                        deRadio.checked = true;
-                        enRadio.checked = false;
-                    } else if (lang === 'en') {
-                        deRadio.checked = false;
-                        enRadio.checked = true;
-                    }
-                    
-                    // Save language preference
-                    localStorage.setItem('selectedLanguage', lang);
-                    
-                    // Update language display
-                    const currentLanguageDisplay = document.getElementById('settings-current-language-display');
-                    if (currentLanguageDisplay) {
-                        currentLanguageDisplay.textContent = lang === 'de' ? 'Deutsch' : 'English';
-                    }
-                    
-                    // Update all other language switchers using global function
-                    if (window.syncAllLanguageSwitchers) {
-                        window.syncAllLanguageSwitchers(lang);
-                    }
-                    
-                    console.log('Language switched to:', lang);
-                }
             </script>
             
             <!-- Language Preview -->

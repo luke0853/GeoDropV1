@@ -1,44 +1,44 @@
 <div class="max-w-6xl mx-auto p-6">
-    <h2 class="text-3xl font-bold text-white mb-8 text-center animate-pulse">📊 GeoBoard</h2>
+    <h2 class="text-3xl font-bold text-white mb-8 text-center animate-pulse" data-lang="geoboard.title">📊 GeoBoard</h2>
     
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Leaderboard -->
         <div class="bg-gradient-to-r from-gray-700 to-gray-600 rounded-lg p-6 shadow-lg border border-gray-500">
-            <h3 class="text-xl font-semibold text-white mb-4 text-center">🏆 Rangliste</h3>
+            <h3 class="text-xl font-semibold text-white mb-4 text-center" data-lang="geoboard.leaderboard">🏆 Rangliste</h3>
             <div id="leaderboard" class="space-y-3">
                 <div class="text-center text-gray-400 p-4">
                     <div class="animate-spin text-4xl mb-2">⏳</div>
-                    <p>Lade Rangliste...</p>
+                    <p data-lang="geoboard.loading-leaderboard">Lade Rangliste...</p>
                 </div>
             </div>
         </div>
         
         <!-- Statistics -->
         <div class="bg-gradient-to-r from-gray-700 to-gray-600 rounded-lg p-6 shadow-lg border border-gray-500">
-            <h3 class="text-xl font-semibold text-white mb-4 text-center">📈 Deine Statistiken</h3>
+            <h3 class="text-xl font-semibold text-white mb-4 text-center" data-lang="geoboard.your-statistics">📈 Deine Statistiken</h3>
             <div class="space-y-4">
                 <div class="flex justify-between items-center p-3 bg-gradient-to-r from-gray-600 to-gray-500 rounded-lg shadow-md">
-                    <span class="text-gray-300">Username:</span>
+                    <span class="text-gray-300" data-lang="geoboard.username">Username:</span>
                     <span class="text-white font-bold text-lg" id="stats-username">-</span>
                 </div>
                 <div class="flex justify-between items-center p-3 bg-gradient-to-r from-gray-600 to-gray-500 rounded-lg shadow-md">
-                    <span class="text-gray-300">PixelDrops:</span>
+                    <span class="text-gray-300" data-lang="geoboard.pixeldrops">PixelDrops:</span>
                     <span class="text-purple-400 font-bold text-lg" id="stats-coins">0</span>
                 </div>
                 <div class="flex justify-between items-center p-3 bg-gradient-to-r from-gray-600 to-gray-500 rounded-lg shadow-md">
-                    <span class="text-gray-300">tBNB:</span>
+                    <span class="text-gray-300" data-lang="geoboard.tbnb">tBNB:</span>
                     <span class="text-yellow-400 font-bold text-lg" id="stats-tbnb">0.00</span>
                 </div>
                 <div class="flex justify-between items-center p-3 bg-gradient-to-r from-gray-600 to-gray-500 rounded-lg shadow-md">
-                    <span class="text-gray-300">Drops:</span>
+                    <span class="text-gray-300" data-lang="geoboard.drops">Drops:</span>
                     <span class="text-blue-400 font-bold text-lg" id="stats-drops">0</span>
                 </div>
                 <div class="flex justify-between items-center p-3 bg-gradient-to-r from-gray-600 to-gray-500 rounded-lg shadow-md">
-                    <span class="text-gray-300">Boost:</span>
+                    <span class="text-gray-300" data-lang="geoboard.boost">Boost:</span>
                     <span class="text-green-400 font-bold text-lg" id="stats-boost">1.0x</span>
                 </div>
                 <div class="flex justify-between items-center p-3 bg-gradient-to-r from-gray-600 to-gray-500 rounded-lg shadow-md">
-                    <span class="text-gray-300">Rang:</span>
+                    <span class="text-gray-300" data-lang="geoboard.rank">Rang:</span>
                     <span class="text-orange-400 font-bold text-lg" id="stats-rank">-</span>
                 </div>
             </div>
@@ -47,31 +47,31 @@
     
     <!-- Global Statistics -->
     <div class="bg-gradient-to-r from-purple-900 to-blue-900 rounded-lg p-6 mt-8 shadow-lg border border-purple-500">
-        <h3 class="text-xl font-semibold text-white mb-4 text-center">🌍 Globale Statistiken</h3>
+        <h3 class="text-xl font-semibold text-white mb-4 text-center" data-lang="geoboard.global-statistics">🌍 Globale Statistiken</h3>
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div class="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg p-4 text-center animate-pulse">
                 <div class="text-3xl mb-2">👥</div>
-                <p class="text-white font-semibold">User</p>
+                <p class="text-white font-semibold" data-lang="geoboard.users">User</p>
                 <p class="text-blue-200 text-2xl font-bold" id="global-users">0</p>
             </div>
             <div class="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg p-4 text-center">
                 <div class="text-3xl mb-2">🎯</div>
-                <p class="text-white font-semibold">Drops</p>
+                <p class="text-white font-semibold" data-lang="geoboard.drops">Drops</p>
                 <p class="text-green-200 text-2xl font-bold" id="global-drops">0</p>
             </div>
             <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-4 text-center">
                 <div class="text-3xl mb-2">💎</div>
-                <p class="text-white font-semibold">PixelDrops</p>
+                <p class="text-white font-semibold" data-lang="geoboard.pixeldrops">PixelDrops</p>
                 <p class="text-purple-200 text-2xl font-bold" id="global-coins">0</p>
             </div>
             <div class="bg-gradient-to-r from-yellow-600 to-orange-600 rounded-lg p-4 text-center">
                 <div class="text-3xl mb-2">💰</div>
-                <p class="text-white font-semibold">tBNB</p>
+                <p class="text-white font-semibold" data-lang="geoboard.tbnb">tBNB</p>
                 <p class="text-yellow-200 text-2xl font-bold" id="global-tbnb">0.00</p>
             </div>
             <div class="bg-gradient-to-r from-red-600 to-pink-600 rounded-lg p-4 text-center animate-pulse">
                 <div class="text-3xl mb-2">📦</div>
-                <p class="text-white font-semibold">Packages</p>
+                <p class="text-white font-semibold" data-lang="geoboard.packages">Packages</p>
                 <p class="text-red-200 text-2xl font-bold" id="global-packages">0</p>
             </div>
         </div>

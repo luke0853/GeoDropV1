@@ -294,7 +294,7 @@
         // Language System
         let currentLang = 'de'; // Default language
         
-        const translations = {
+        const localTranslations = {
             de: {
                 // Main Content
                 'startseite-title': 'GeoDrop',
@@ -444,7 +444,7 @@
         // Language switching functions
         function switchLanguage(lang) {
             currentLang = lang;
-            localStorage.setItem('selectedLanguage', lang);
+            localStorage.setItem('geodrop-language', lang);
             updateAllTexts();
             updateLanguageButtons();
         }
@@ -471,11 +471,11 @@
         function updateAllTexts() {
             document.querySelectorAll('[data-translate]').forEach(element => {
                 const key = element.getAttribute('data-translate');
-                if (translations[currentLang] && translations[currentLang][key]) {
+                if (localTranslations[currentLang] && localTranslations[currentLang][key]) {
                     if (element.tagName === 'INPUT' && element.type !== 'submit') {
-                        element.placeholder = translations[currentLang][key];
+                        element.placeholder = localTranslations[currentLang][key];
                     } else {
-                        element.textContent = translations[currentLang][key];
+                        element.textContent = localTranslations[currentLang][key];
                     }
                 }
             });
@@ -554,7 +554,7 @@
             const password = document.getElementById('startseite-auth-password').value;
             
             if (!email || !password) {
-                showMessage(translations[currentLang]['email-required'], true);
+                showMessage(localTranslations[currentLang]['email-required'], true);
                 return;
             }
             
@@ -572,7 +572,7 @@
             const password = document.getElementById('startseite-auth-password').value;
             
             if (!email || !password) {
-                showMessage(translations[currentLang]['email-required'], true);
+                showMessage(localTranslations[currentLang]['email-required'], true);
                 return;
             }
             
@@ -668,7 +668,7 @@
             console.log('🏠 Startseite geladen');
             
             // Initialize language system
-            const savedLang = localStorage.getItem('selectedLanguage');
+            const savedLang = localStorage.getItem('geodrop-language');
             if (savedLang && (savedLang === 'de' || savedLang === 'en')) {
                 currentLang = savedLang;
             }

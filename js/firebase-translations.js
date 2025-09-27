@@ -14,7 +14,7 @@ class FirebaseTranslations {
             console.log('🌍 Initializing Firebase Translations...');
             
             // Load current language from localStorage
-            const savedLang = localStorage.getItem('selectedLanguage');
+            const savedLang = localStorage.getItem('geodrop-language');
             if (savedLang && (savedLang === 'de' || savedLang === 'en')) {
                 this.currentLanguage = savedLang;
             }
@@ -116,7 +116,7 @@ class FirebaseTranslations {
             console.log(`🔄 Switching language to: ${newLanguage}`);
             
             this.currentLanguage = newLanguage;
-            localStorage.setItem('selectedLanguage', newLanguage);
+            localStorage.setItem('geodrop-language', newLanguage);
             
             // Reload translations for current page
             await this.loadTranslationsForCurrentPage();
