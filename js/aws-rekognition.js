@@ -234,10 +234,10 @@ class AWSRekognitionService {
             console.log('🔍 No objects detected - checking if image might be valid despite this...');
             
             // Check if this might be a valid dark image (like a black object, night scene, etc.)
-            // For now, we'll allow it but with lower confidence
-            validation.valid = true;
-            validation.reasons.push('Wenige Objekte erkannt - Bild wird trotzdem akzeptiert');
-            validation.confidence = 30; // Lower confidence but still valid
+            // STRICT VALIDATION: Reject images with no clear objects
+            validation.valid = false;
+            validation.reasons.push('Keine klaren Objekte erkannt - Bild wird abgelehnt');
+            validation.confidence = 0; // No confidence - reject
         }
 
         // Check image comparison if reference image provided

@@ -1702,6 +1702,14 @@ window.createUserDrop = async function() {
         createButton.style.opacity = '0.6';
     }
     
+    // GLOBAL DUPLICATE PREVENTION FLAG
+    if (window.userDropCreationInProgress) {
+        console.log('⚠️ User Drop creation already in progress globally, ignoring duplicate click');
+        showMessage('⚠️ User Drop wird bereits erstellt, bitte warten...', true);
+        return;
+    }
+    window.userDropCreationInProgress = true;
+    
     // Check if user is logged in
     if (!window.currentUser) {
         showMessage('❌ Bitte zuerst anmelden!', true);
@@ -1980,6 +1988,9 @@ window.createUserDrop = async function() {
             createButton.textContent = window.t ? window.t('geocard.create-user-drop') : '✅ User Drop erstellen';
             createButton.style.opacity = '1';
         }
+        
+        // RESET GLOBAL DUPLICATE PREVENTION FLAG
+        window.userDropCreationInProgress = false;
     }
 };
 
@@ -4906,28 +4917,15 @@ window.openCamera = function() {
     console.log('🔍 Drop ID:', currentDrop.id);
     console.log('🔍 Full Drop Object:', currentDrop);
     
-    // FORCE DEV DROP PATH FOR GeoDrop2
-    if (currentDrop.id === 'GeoDrop2' || currentDrop.collection === 'devDrops') {
-        // DEV DROPS: Teste verschiedene mögliche Dateinamen
-        const possibleFiles = [
-            'GeoDrop2.jpg',
-            'GeoDrop2.jpeg', 
-            'GeoDrop2.png',
-            'GeoDrop2.webp',
-            'geodrop2.jpg',
-            'geodrop2.jpeg',
-            'geodrop2.png',
-            'geodrop2.webp'
-        ];
-        
-        // DIE DATEI IST DA! Sie heißt nur "GeoDrop2" ohne Erweiterung!
-        // Firebase Storage zeigt: GeoDrop2 (image/jpeg, 148.04 KB)
-        referenceImageUrl = `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder%2FGeoDrop2?alt=media`;
-        console.log(`✅ DATEI GEFUNDEN: GeoDrop2 (image/jpeg, 148.04 KB)`);
+    // DEV DROPS: Lade das korrekte Referenzbild basierend auf Drop ID
+    if (currentDrop.collection === 'devDrops') {
+        // Verwende die tatsächliche Drop ID für das Referenzbild
+        referenceImageUrl = `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder%2F${currentDrop.id}?alt=media`;
+        console.log(`✅ DEV DROP: Lade Referenzbild für ${currentDrop.id}`);
         console.log(`🔗 URL: ${referenceImageUrl}`);
-        console.log(`📋 Datei-Name: GeoDrop2 (ohne Erweiterung)`);
-        console.log(`📋 Datei-Typ: image/jpeg`);
-        console.log(`📋 Datei-Größe: 148.04 KB`);
+        console.log(`📋 Drop ID: ${currentDrop.id}`);
+        console.log(`📋 Collection: ${currentDrop.collection}`);
+        console.log(`🔍 DEBUG: currentDrop object:`, JSON.stringify(currentDrop, null, 2));
     } else if (currentDrop.collection === 'userDrops') {
         // USER DROPS: referenzbilder_userdrop/UserDrop1_Schloss_Schoenbrunn.jpg
         const possibleExtensions = ['jpg', 'jpeg', 'png', 'webp'];
@@ -7058,6 +7056,7 @@ window.autoStartUpload = async function() {
         // Check if claim was successful
         console.log('🎯 Checking claim result:', result);
         if (result && result.success) {
+            try {
                 // Success - show reward message
                 const reward = result.reward || 100;
                 const successText = window.t ? window.t('geocard.success-reward') : 'Erfolgreich! Du hast';
@@ -7068,11 +7067,16 @@ window.autoStartUpload = async function() {
                 // Show success animation
                 createSuccessAnimation();
                 
-                // Clear form
+                // Clear form - SAFE VERSION
                 photoInput.value = '';
-                dropSelect.value = '';
+                const dropSelect = document.getElementById('geocard-drop-select-de') || document.getElementById('geocard-drop-select-en');
+                if (dropSelect) dropSelect.value = '';
                 document.getElementById('photo-preview').innerHTML = '';
                 window.capturedPhotoFile = null;
+            } catch (error) {
+                console.error('❌ Error in success handling:', error);
+                showMessage('❌ Fehler beim Verarbeiten der Belohnung', true);
+            }
                 
         } else {
             // Failed - show error message
