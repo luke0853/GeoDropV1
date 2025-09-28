@@ -27,8 +27,8 @@ const AWS_CONFIG = {
         // Minimum confidence for object detection
         minConfidence: 80,          // 80% confidence required
         
-        // Maximum file size (5MB)
-        maxFileSize: 5 * 1024 * 1024,
+        // Maximum file size (50MB)
+        maxFileSize: 50 * 1024 * 1024,
         
         // Supported image formats
         supportedFormats: ['image/jpeg', 'image/png', 'image/webp'],
