@@ -10,9 +10,9 @@ async function validateImageForGeoDrop(file, drop) {
             return { valid: false, error: 'Bitte wähle eine gültige Bilddatei aus!' };
         }
         
-        // Check file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-            return { valid: false, error: 'Bild ist zu groß! Maximal 10MB erlaubt.' };
+        // Check file size (max 50MB - will be compressed automatically)
+        if (file.size > 50 * 1024 * 1024) {
+            return { valid: false, error: 'Bild ist zu groß! Maximal 50MB erlaubt.' };
         }
         
         // For Dev Drops or Dev users, use proper validation (not lenient)
@@ -133,10 +133,10 @@ window.claimGeoDrop = async function() {
             return { success: false, error: 'Unsupported file format' };
         }
         
-        // Check file size (5MB limit)
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        // Check file size (50MB limit - will be compressed automatically)
+        const maxSize = 50 * 1024 * 1024; // 50MB
         if (file.size > maxSize) {
-            showMessage(`❌ File too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum: 5MB`, true);
+            showMessage(`❌ File too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum: 50MB`, true);
             return { success: false, error: 'File too large' };
         }
         

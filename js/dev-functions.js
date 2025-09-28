@@ -898,10 +898,10 @@ window.uploadDevImageWithDrop = async function() {
             return;
         }
         
-        // Check file size (5MB limit)
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        // Check file size (50MB limit - will be compressed automatically)
+        const maxSize = 50 * 1024 * 1024; // 50MB
         if (file.size > maxSize) {
-            showMessage(`❌ Datei zu groß: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum: 5MB`, true);
+            showMessage(`❌ Datei zu groß: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum: 50MB`, true);
             return;
         }
         
