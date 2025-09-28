@@ -5340,27 +5340,27 @@ window.claimGeoDropFromGeoCard = async function() {
         return;
     }
     
-    // AUTOMATISCHE BILDKOMPRIMIERUNG
+    // AUTOMATISCHE BILDKOMPRIMIERUNG - IMMER AKTIV
     let photoFile = photoInput.files[0];
     console.log('🖼️ Original file size:', (photoFile.size / 1024 / 1024).toFixed(2) + 'MB');
     
-    if (photoFile.size > 2 * 1024 * 1024) { // 2MB - niedrigere Schwelle
-        console.log('📦 Compressing large image...');
-        showMessage('📦 Komprimiere großes Bild...', false);
+    // KOMPRIMIERE ALLE BILDER - KEINE LIMITS!
+    console.log('📦 Compressing image for optimal upload...');
+    showMessage('📦 Optimiere Bild für Upload...', false);
+    
+    try {
+        const compressedFile = await compressImage(photoFile);
+        console.log('✅ Compressed file size:', (compressedFile.size / 1024).toFixed(2) + 'KB');
         
-        try {
-            const compressedFile = await compressImage(photoFile);
-            console.log('✅ Compressed file size:', (compressedFile.size / 1024).toFixed(2) + 'KB');
-            
-            // Store compressed file for later use
-            window.compressedPhotoFile = compressedFile;
-            photoFile = compressedFile; // Use compressed version
-            
-            showMessage(`✅ Bild komprimiert: ${(compressedFile.size / 1024).toFixed(0)}KB`, false);
-        } catch (compressionError) {
-            console.error('❌ Compression failed:', compressionError);
-            showMessage('⚠️ Kompression fehlgeschlagen, verwende Original', false);
-        }
+        // Store compressed file for later use
+        window.compressedPhotoFile = compressedFile;
+        photoFile = compressedFile; // Use compressed version
+        
+        const reduction = ((photoInput.files[0].size - compressedFile.size) / photoInput.files[0].size * 100).toFixed(1);
+        showMessage(`✅ Bild optimiert: ${(compressedFile.size / 1024).toFixed(0)}KB (${reduction}% kleiner)`, false);
+    } catch (compressionError) {
+        console.error('❌ Compression failed:', compressionError);
+        showMessage('⚠️ Optimierung fehlgeschlagen, verwende Original', false);
     }
     
     // GPS POSITION ABFRAGEN
