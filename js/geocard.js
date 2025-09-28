@@ -5539,11 +5539,11 @@ function calculateDistance(lat1, lng1, lat2, lng2) {
 // Automatische Bildkompression
 async function compressImage(file, maxWidth = 1920, maxHeight = 1080, quality = 0.8) {
     // Dynamische Qualität basierend auf Dateigröße
-    if (file.size > 10 * 1024 * 1024) { // > 10MB
+    if (file.size > 20 * 1024 * 1024) { // > 20MB
         quality = 0.6; // Niedrigere Qualität für sehr große Bilder
         maxWidth = 1280;
         maxHeight = 720;
-    } else if (file.size > 5 * 1024 * 1024) { // > 5MB
+    } else if (file.size > 10 * 1024 * 1024) { // > 10MB
         quality = 0.7;
         maxWidth = 1600;
         maxHeight = 900;
