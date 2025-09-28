@@ -1,5 +1,35 @@
 // GeoCard Functions - Map and Location Functions
 
+// Add event listener for photo input on mobile
+document.addEventListener('DOMContentLoaded', function() {
+    const photoInput = document.getElementById('photo-input');
+    if (photoInput) {
+        photoInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                console.log('📸 Photo selected:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2) + 'MB');
+                
+                // Show preview
+                const preview = document.getElementById('photo-preview');
+                if (preview) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.innerHTML = `
+                            <div class="text-sm text-gray-300 mb-2">📸 Ausgewähltes Foto:</div>
+                            <img src="${e.target.result}" class="w-full h-32 object-cover rounded border border-gray-600" alt="Foto Preview">
+                            <div class="text-xs text-gray-400 mt-1">${file.name} (${(file.size / 1024).toFixed(1)} KB)</div>
+                            <div class="text-xs text-green-400 mt-1">✅ Bereit zum Upload</div>
+                        `;
+                    };
+                    reader.readAsDataURL(file);
+                }
+                
+                showMessage('📸 Foto ausgewählt: ' + file.name, false);
+            }
+        });
+    }
+});
+
 // Get drop description based on current language and Firebase dual-language fields
 function getDropDescription(drop, currentLang) {
     // If dual language fields exist, use them
