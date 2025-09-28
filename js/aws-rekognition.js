@@ -567,6 +567,106 @@ class AWSRekognitionService {
             };
         }
     }
+
+    /**
+     * Analysiert ein Foto auf öffentliche Orte
+     * @param {File} imageFile - Das zu analysierende Foto
+     * @returns {Promise<Object>} - Analyseergebnis
+     */
+    async analyzeImageForPublicPlaces(imageFile) {
+        try {
+            console.log('🏛️ Analyzing image for public places...');
+            
+            // Convert image to base64 for AWS Rekognition
+            const imageBuffer = await this.fileToBuffer(imageFile);
+            
+            // Use AWS Rekognition to detect labels
+            const params = {
+                Image: { Bytes: imageBuffer },
+                MaxLabels: 20,
+                MinConfidence: 50
+            };
+            
+            const result = await this.rekognition.detectLabels(params).promise();
+            
+            // Definiere Labels die auf öffentliche Orte hinweisen
+            const publicPlaceLabels = [
+                'Building', 'Architecture', 'Monument', 'Statue', 'Fountain',
+                'Park', 'Garden', 'Playground', 'Bench', 'Path', 'Sidewalk',
+                'Street', 'Road', 'Intersection', 'Traffic Light', 'Sign',
+                'Store', 'Shop', 'Restaurant', 'Cafe', 'Mall', 'Shopping Center',
+                'Museum', 'Library', 'School', 'University', 'Hospital',
+                'Church', 'Temple', 'Mosque', 'Synagogue', 'Cathedral',
+                'Stadium', 'Arena', 'Theater', 'Cinema', 'Concert Hall',
+                'Airport', 'Train Station', 'Bus Stop', 'Subway', 'Platform',
+                'Beach', 'Pier', 'Boardwalk', 'Marina', 'Harbor',
+                'Mountain', 'Hill', 'Viewpoint', 'Observation Deck',
+                'Bridge', 'Tunnel', 'Overpass', 'Underpass'
+            ];
+
+            // Definiere Labels die auf private Orte hinweisen
+            const privatePlaceLabels = [
+                'Bedroom', 'Bathroom', 'Kitchen', 'Living Room', 'Dining Room',
+                'Garage', 'Basement', 'Attic', 'Closet', 'Wardrobe',
+                'Garden', 'Backyard', 'Patio', 'Deck', 'Balcony',
+                'Pool', 'Hot Tub', 'Sauna', 'Gym', 'Home Gym',
+                'Office', 'Study', 'Library', 'Home Office',
+                'Nursery', 'Children Room', 'Playroom'
+            ];
+
+            let publicScore = 0;
+            let privateScore = 0;
+            let confidence = 0;
+            let detectedLabels = [];
+
+            // Analysiere gefundene Labels
+            for (const label of result.Labels || []) {
+                const labelName = label.Name;
+                const labelConfidence = label.Confidence || 0;
+                
+                if (publicPlaceLabels.includes(labelName)) {
+                    publicScore += labelConfidence;
+                    detectedLabels.push({ name: labelName, confidence: labelConfidence, type: 'public' });
+                } else if (privatePlaceLabels.includes(labelName)) {
+                    privateScore += labelConfidence;
+                    detectedLabels.push({ name: labelName, confidence: labelConfidence, type: 'private' });
+                }
+            }
+
+            // Berechne Gesamtkonfidenz
+            const totalScore = publicScore + privateScore;
+            if (totalScore > 0) {
+                confidence = Math.max(publicScore, privateScore) / totalScore;
+            }
+
+            // Entscheide ob es ein öffentlicher Ort ist
+            const isPublic = publicScore > privateScore && confidence > 0.3;
+            
+            const analysisResult = {
+                isPublic,
+                confidence,
+                publicScore,
+                privateScore,
+                detectedLabels,
+                analysis: {
+                    totalLabels: result.Labels?.length || 0,
+                    publicLabels: detectedLabels.filter(l => l.type === 'public').length,
+                    privateLabels: detectedLabels.filter(l => l.type === 'private').length
+                }
+            };
+
+            console.log('✅ Public place analysis completed:', analysisResult);
+            return analysisResult;
+
+        } catch (error) {
+            console.error('❌ Error analyzing image for public places:', error);
+            return {
+                isPublic: false,
+                confidence: 0,
+                error: error.message
+            };
+        }
+    }
 }
 
 // Create global instance

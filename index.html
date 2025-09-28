@@ -169,6 +169,7 @@
                 'geocard-title': '🗺️ GeoCard',
                 'interactive-map': '🌍 Interaktive Karte',
                 'map-legend-button': '🗺️ Karten-Legende anzeigen',
+                'drop-rules-button': '📋 Drop-Regeln',
                 'user-drop-button': '➕ User Drop erstellen',
                 'location-title': '📍 Standort',
                 'use-my-location': '📍 Meinen Standort verwenden',
@@ -537,6 +538,7 @@
                 'geocard-title': '🗺️ GeoCard',
                 'interactive-map': '🌍 Interactive Map',
                 'map-legend-button': '🗺️ Show Map Legend',
+                'drop-rules-button': '📋 Drop Rules',
                 'user-drop-button': '➕ Create User Drop',
                 'location-title': '📍 Location',
                 'use-my-location': '📍 Use My Location',
@@ -1101,6 +1103,11 @@
         @keyframes floating {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
         }
         
         .card-hover {
@@ -2193,7 +2200,69 @@
             </div>
             
             <div class="page" id="geocard" style="display: none;">
+                <!-- GeoCard Content -->
+                <div class="max-w-6xl mx-auto p-6">
+                    <h2 class="text-3xl font-bold text-white mb-8">
+                        <span style="background: rgba(0, 0, 0, 0.7); padding: 8px 12px; border-radius: 8px; display: inline-block;" data-translate="geocard.title">🗺️ GeoCard</span>
+                    </h2>
+                    
+                    <!-- Control Buttons -->
+                    <div class="flex flex-wrap gap-3 justify-center mb-8">
+                        <button onclick="showMapLegend()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            🗺️ <span data-translate="map-legend-button">Karten-Legende anzeigen</span>
+                        </button>
+                        <button onclick="showDropRules()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            📋 <span data-translate="drop-rules-button">Drop-Regeln</span>
+                        </button>
+                        <button onclick="showUserDropModal()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                            ➕ <span data-translate="user-drop-button">User Drop erstellen</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Map Container -->
+                    <div id="map" class="w-full h-96 bg-gray-700 rounded-lg mb-6"></div>
+                    
+                    <!-- Location Info -->
+                    <div class="bg-gray-800 rounded-lg p-4 mb-6">
+                        <h3 class="text-lg font-semibold text-white mb-2" data-translate="location-title">📍 Standort</h3>
+                        <div id="location-info" class="text-gray-300" data-translate="location-info-default">
+                            Klicke auf den Button um deine aktuelle Position zu laden
+                        </div>
+                        <button onclick="getCurrentLocation()" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+                            📍 <span data-translate="use-my-location">Meinen Standort verwenden</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Photo Upload Section -->
+                    <div class="bg-gray-800 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-white mb-4" data-translate="photo-upload-title">📸 Foto-Upload</h3>
+                        
+                        <!-- Drop Selection -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-300 mb-2" data-translate="select-geodrop">GeoDrop auswählen:</label>
+                            <div class="flex space-x-2 mb-2">
+                                <button id="dev-drops-btn" onclick="switchUploadListType('dev')" class="flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors bg-green-600 text-white" data-translate="dev-drops">🎯 Dev Drops</button>
+                                <button id="user-drops-btn" onclick="switchUploadListType('user')" class="flex-1 px-3 py-1 rounded-md text-xs font-medium transition-colors text-gray-300 hover:text-white" data-translate="user-drops">👤 User Drops</button>
+                            </div>
+                            <select id="geocard-drop-select" class="w-full p-2 bg-gray-700 text-white rounded border border-gray-600">
+                                <option value="" data-translate="select-dev-geodrop">Dev GeoDrop auswählen...</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Photo Input -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-300 mb-2">📸 Foto auswählen:</label>
+                            <input type="file" id="photo-input" accept="image/*" class="w-full p-2 bg-gray-700 text-white rounded border border-gray-600">
+                            <div id="photo-preview" class="mt-2"></div>
+                        </div>
+                        
+                        <!-- Upload Button -->
+                        <button onclick="autoStartUpload()" class="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+                            📤 <span data-translate="upload-photo">Foto hochladen</span>
+                        </button>
+                    </div>
                 </div>
+            </div>
             
             <div class="page" id="dev" style="display: none;">
                 </div>
@@ -2500,6 +2569,7 @@
 
     <script src="config/config-secure.js"></script>
     <script src="config/config-secrets.js"></script>
+    <script src="config/google-places-config.js"></script>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1490.0.min.js"></script>
     <script src="config/aws-config.js"></script>
     <script src="js/aws-rekognition.js"></script>
@@ -4169,8 +4239,18 @@
         // Start auto-update when page loads
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(startStatsAutoUpdate, 2000);
+            
+            // Auto-load drops for GeoCard when page loads
+            setTimeout(() => {
+                if (typeof window.autoLoadDropsForUpload === 'function') {
+                    window.autoLoadDropsForUpload();
+                }
+            }, 3000);
         });
     </script>
+    
+    <!-- Public Place Validator -->
+    <script src="js/public-place-validator.js"></script>
     
 </body>
 </html>

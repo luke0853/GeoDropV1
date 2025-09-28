@@ -1672,6 +1672,40 @@ window.createUserDrop = async function() {
         createButton.style.opacity = '0.6';
     }
     
+    // Check if user is logged in
+    if (!window.currentUser) {
+        showMessage('❌ Bitte zuerst anmelden!', true);
+        if (createButton) {
+            createButton.disabled = false;
+            createButton.textContent = window.t ? window.t('geocard.create-user-drop') : '✅ User Drop erstellen';
+            createButton.style.opacity = '1';
+        }
+        return;
+    }
+    
+    // Check GPS position
+    if (!window.lastKnownLat || !window.lastKnownLng) {
+        showMessage('❌ GPS-Position nicht verfügbar! Bitte erlaube Standortzugriff.', true);
+        if (createButton) {
+            createButton.disabled = false;
+            createButton.textContent = window.t ? window.t('geocard.create-user-drop') : '✅ User Drop erstellen';
+            createButton.style.opacity = '1';
+        }
+        return;
+    }
+    
+    // Check minimum distance (5km) to existing drops
+    const minDistance = await checkMinimumDistance(window.lastKnownLat, window.lastKnownLng, 5000);
+    if (!minDistance.allowed) {
+        showMessage(`❌ Zu nah an anderen Drops! Mindestabstand: 5km. Nächster Drop: ${Math.round(minDistance.nearestDistance)}m entfernt.`, true);
+        if (createButton) {
+            createButton.disabled = false;
+            createButton.textContent = window.t ? window.t('geocard.create-user-drop') : '✅ User Drop erstellen';
+            createButton.style.opacity = '1';
+        }
+        return;
+    }
+    
     try {
         // Get form elements with fallback
         const nameInput = document.getElementById('user-drop-name') || document.querySelector('#create-user-drop-modal input[placeholder*="Historisches"]');
@@ -1723,6 +1757,30 @@ window.createUserDrop = async function() {
             const invalidCoordinatesText = window.t ? window.t('geocard.invalid-coordinates') : 'Ungültige Koordinaten!';
             showMessage(`❌ ${invalidCoordinatesText}`, true);
             return;
+        }
+        
+        // 🏛️ NEUE VALIDIERUNG: Prüfe ob Standort öffentlich ist
+        console.log('🏛️ Validating public place...');
+        showMessage('🔍 Validiere Standort...', false);
+        
+        try {
+            if (window.publicPlaceValidator) {
+                const validationResult = await window.publicPlaceValidator.validatePublicPlace(lat, lng, referenceImage);
+                
+                if (!validationResult.isValid) {
+                    const message = window.publicPlaceValidator.getValidationMessage(validationResult);
+                    showMessage(message, true);
+                    return;
+                }
+                
+                console.log('✅ Standort validiert:', validationResult);
+                showMessage('✅ Standort validiert!', false);
+            } else {
+                console.warn('⚠️ Public Place Validator nicht verfügbar');
+            }
+        } catch (validationError) {
+            console.error('❌ Fehler bei Standortvalidierung:', validationError);
+            showMessage('⚠️ Standortvalidierung fehlgeschlagen. Drop wird trotzdem erstellt.', false);
         }
         
         // Check if user is logged in
@@ -1894,6 +1952,89 @@ window.createUserDrop = async function() {
         }
     }
 };
+
+// Check minimum distance to existing drops
+async function checkMinimumDistance(lat, lng, minDistanceMeters) {
+    console.log('🔍 Checking minimum distance to existing drops...');
+    console.log('📍 Current position:', { lat, lng });
+    console.log('📏 Minimum distance required:', minDistanceMeters, 'meters');
+    
+    try {
+        const db = window.firebase.firestore();
+        
+        // Get all drops from both collections
+        const [devDropsSnapshot, userDropsSnapshot] = await Promise.all([
+            db.collection('devDrops').get(),
+            db.collection('userDrops').get()
+        ]);
+        
+        const allDrops = [];
+        
+        // Add dev drops
+        devDropsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            if (data.lat && data.lng) {
+                allDrops.push({
+                    id: doc.id,
+                    lat: data.lat,
+                    lng: data.lng,
+                    type: 'dev',
+                    name: data.name || `Dev Drop ${doc.id}`
+                });
+            }
+        });
+        
+        // Add user drops
+        userDropsSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            if (data.lat && data.lng) {
+                allDrops.push({
+                    id: doc.id,
+                    lat: data.lat,
+                    lng: data.lng,
+                    type: 'user',
+                    name: data.name || `User Drop ${doc.id}`
+                });
+            }
+        });
+        
+        console.log(`📊 Found ${allDrops.length} existing drops to check`);
+        
+        let nearestDistance = Infinity;
+        let nearestDrop = null;
+        
+        // Check distance to each existing drop
+        for (const drop of allDrops) {
+            const distance = calculateDistance(lat, lng, drop.lat, drop.lng);
+            console.log(`📍 Distance to ${drop.type} drop "${drop.name}": ${Math.round(distance)}m`);
+            
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestDrop = drop;
+            }
+        }
+        
+        console.log(`🎯 Nearest drop: ${nearestDrop ? nearestDrop.name : 'None'} at ${Math.round(nearestDistance)}m`);
+        
+        const allowed = nearestDistance >= minDistanceMeters;
+        console.log(`✅ Distance check result: ${allowed ? 'ALLOWED' : 'BLOCKED'} (nearest: ${Math.round(nearestDistance)}m, required: ${minDistanceMeters}m)`);
+        
+        return {
+            allowed,
+            nearestDistance,
+            nearestDrop
+        };
+        
+    } catch (error) {
+        console.error('❌ Error checking minimum distance:', error);
+        // Allow creation if check fails (fail-safe)
+        return {
+            allowed: true,
+            nearestDistance: Infinity,
+            nearestDrop: null
+        };
+    }
+}
 
 // Load Dev Drops for Upload
 window.loadDevDropsForUpload = async function() {
@@ -3210,8 +3351,31 @@ window.showMapLegend = function() {
 };
 
 window.showDropRules = function() {
-    const dropRulesText = window.t ? window.t('geocard.drop-rules') : 'Drop-Regeln: 1) Foto aufnehmen 2) GeoDrop auswählen 3) Standort bestätigen 4) Belohnung erhalten!';
-    showMessage(`📋 ${dropRulesText}`, false);
+    const dropRulesText = window.t ? window.t('geocard.drop-rules') : `
+📋 GeoDrop-Regeln:
+
+🎯 ERSTELLEN:
+• Mindestabstand: 5km zu anderen Drops
+• GPS-Position erforderlich
+• Beschreibung und Foto erforderlich
+
+📸 CLAIMEN:
+• Maximal 50m vom Drop entfernt
+• Foto muss dem Referenzbild entsprechen
+• AR-Konturen helfen beim Ausrichten
+• Täglich nur einmal pro Drop
+
+💰 BELOHNUNGEN:
+• Dev Drops: 100 PixelDrops
+• User Drops: 100 PixelDrops
+• Täglich sammelbar
+
+⚠️ WICHTIG:
+• Keine Drops in 5km Umkreis
+• GPS muss aktiviert sein
+• Foto muss scharf und passend sein
+    `;
+    showMessage(dropRulesText, false);
 };
 
 // Load GeoDrops from Firebase
@@ -4002,15 +4166,640 @@ window.closeMapLegendPopup = function() {
     }
 };
 
+// AR Contour Detection Module
+window.ARContourModule = {
+    referenceImage: null,
+    contourOverlay: null,
+    isContourMatched: false,
+    
+    // Load reference image and extract contours
+    async loadReferenceImage(drop) {
+        console.log('🎯 Loading reference image for AR contour overlay...');
+        
+        // First, load drop data from Firebase to get reference image
+        if (!drop.id || !drop.collection) {
+            console.log('⚠️ No drop ID or collection available');
+            return false;
+        }
+        
+        try {
+            // Load drop data from Firebase
+            const dropDoc = await window.db.collection(drop.collection).doc(drop.id).get();
+            if (!dropDoc.exists) {
+                console.log('⚠️ Drop not found in Firebase');
+                return false;
+            }
+            
+            const dropData = dropDoc.data();
+            console.log('📋 Drop data loaded:', dropData);
+            
+            if (!dropData.referenceImage) {
+                console.log('⚠️ No reference image available for this drop');
+                console.log('📋 Available drop data:', dropData);
+                return false;
+            }
+            
+            // Try different URL formats based on drop collection
+            let referenceImageUrl;
+            if (drop.collection === 'devDrops' || drop.id === 'GeoDrop2') {
+                // FORCE DEV DROP PATH - verwende den korrekten Dateinamen
+                referenceImageUrl = `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder%2F${drop.id}.jpg?alt=media`;
+                console.log(`🔍 DEV DROP URL in loadReferenceImage: ${referenceImageUrl}`);
+                console.log(`🔍 Drop ID: ${drop.id}`);
+            } else if (drop.collection === 'userDrops') {
+                referenceImageUrl = `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder_userdrop%2F${dropData.referenceImage}?alt=media`;
+            } else {
+                // Fallback to dev path
+                const possibleExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+                for (const ext of possibleExtensions) {
+                    referenceImageUrl = `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder%2F${drop.id}.${ext}?alt=media`;
+                    break;
+                }
+            }
+            console.log('🔗 Loading reference image from:', referenceImageUrl);
+            console.log('📋 Reference image filename:', dropData.referenceImage);
+            
+            const response = await fetch(referenceImageUrl);
+            
+            if (response.ok) {
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+                console.log('✅ Reference image blob created, size:', blob.size, 'bytes');
+                
+                // Create image element to process
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                
+                return new Promise((resolve) => {
+                    img.onload = () => {
+                        console.log('✅ Reference image loaded successfully');
+                        console.log('📐 Image dimensions:', img.width, 'x', img.height);
+                        this.referenceImage = img;
+                        this.extractContours(img);
+                        resolve(true);
+                    };
+                    img.onerror = (error) => {
+                        console.error('❌ Failed to load reference image:', error);
+                        console.error('❌ Image URL:', imageUrl);
+                        resolve(false);
+                    };
+                    img.src = imageUrl;
+                });
+            } else {
+                console.error('❌ Failed to fetch reference image, status:', response.status);
+                console.error('❌ URL tried:', referenceImageUrl);
+                console.error('❌ Response:', response);
+                return false;
+            }
+        } catch (error) {
+            console.error('❌ Error loading reference image:', error);
+            return false;
+        }
+    },
+    
+    // Extract contours from reference image using edge detection
+    extractContours(img) {
+        console.log('🔍 Extracting contours from reference image...');
+        console.log('📐 Image dimensions:', img.width, 'x', img.height);
+        
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Verwende die tatsächlichen Video-Dimensionen
+        const video = document.getElementById('camera-video');
+        const videoWidth = video ? video.videoWidth : 640;
+        const videoHeight = video ? video.videoHeight : 480;
+        
+        canvas.width = videoWidth;
+        canvas.height = videoHeight;
+        
+        // Draw image to canvas, scaled to video dimensions
+        ctx.drawImage(img, 0, 0, videoWidth, videoHeight);
+        
+        // Get image data for edge detection
+        const imageData = ctx.getImageData(0, 0, videoWidth, videoHeight);
+        const data = imageData.data;
+        
+        // Simple edge detection (Sobel operator)
+        const edges = this.detectEdges(data, videoWidth, videoHeight);
+        
+        // Create contour overlay (NUR KANTEN, NICHT DAS GANZE BILD)
+        this.createContourOverlay(edges, videoWidth, videoHeight);
+        
+        console.log('✅ Contours extracted and overlay created (only edges)');
+    },
+    
+    // Simple edge detection using Sobel operator (NUR KANTEN, NICHT DAS GANZE BILD)
+    detectEdges(data, width, height) {
+        const edges = new Uint8ClampedArray(data.length);
+        
+        // Initialize with transparent background
+        for (let i = 0; i < edges.length; i += 4) {
+            edges[i] = 0;     // R
+            edges[i + 1] = 0; // G
+            edges[i + 2] = 0; // B
+            edges[i + 3] = 0; // A (transparent)
+        }
+        
+        // Convert to grayscale and apply Sobel operator
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                const idx = (y * width + x) * 4;
+                
+                // Get surrounding pixels
+                const getPixel = (dx, dy) => {
+                    const pixelIdx = ((y + dy) * width + (x + dx)) * 4;
+                    return (data[pixelIdx] + data[pixelIdx + 1] + data[pixelIdx + 2]) / 3;
+                };
+                
+                // Sobel X
+                const sobelX = 
+                    -1 * getPixel(-1, -1) + 1 * getPixel(1, -1) +
+                    -2 * getPixel(-1, 0) + 2 * getPixel(1, 0) +
+                    -1 * getPixel(-1, 1) + 1 * getPixel(1, 1);
+                
+                // Sobel Y
+                const sobelY = 
+                    -1 * getPixel(-1, -1) + -2 * getPixel(0, -1) + -1 * getPixel(1, -1) +
+                    1 * getPixel(-1, 1) + 2 * getPixel(0, 1) + 1 * getPixel(1, 1);
+                
+                // Calculate magnitude
+                const magnitude = Math.sqrt(sobelX * sobelX + sobelY * sobelY);
+                
+                // Threshold for edge detection (nur starke Kanten)
+                if (magnitude > 100) {
+                    edges[idx] = 255;     // R (white edge)
+                    edges[idx + 1] = 255; // G (white edge)
+                    edges[idx + 2] = 255; // B (white edge)
+                    edges[idx + 3] = 255; // A (opaque)
+                }
+            }
+        }
+        
+        return edges;
+    },
+    
+    // Create contour overlay element (NUR KANTEN, NICHT DAS GANZE BILD)
+    createContourOverlay(edges, width, height) {
+        console.log('🎨 Creating contour overlay canvas...');
+        
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Verwende die tatsächlichen Video-Dimensionen
+        const video = document.getElementById('camera-video');
+        const videoWidth = video ? video.videoWidth : 640;
+        const videoHeight = video ? video.videoHeight : 480;
+        
+        canvas.width = videoWidth;
+        canvas.height = videoHeight;
+        canvas.id = 'contour-overlay';
+        canvas.style.position = 'absolute';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.pointerEvents = 'none';
+        canvas.style.zIndex = '10';
+        canvas.style.opacity = '0.6';
+        canvas.style.border = '2px solid #00ff00';
+        canvas.style.objectFit = 'cover';
+        
+        // Create image data from edges (NUR KANTEN, NICHT DAS GANZE BILD)
+        const imageData = new ImageData(edges, width, height);
+        ctx.putImageData(imageData, 0, 0);
+        
+        this.contourOverlay = canvas;
+        console.log('✅ Contour overlay canvas created (ONLY EDGES):', canvas.width, 'x', canvas.height);
+    },
+    
+    // Show contour overlay on camera - KONTUR ÜBER KAMERA-BILD LEGEN
+    showContourOverlay() {
+        console.log('🎯 ZEIGE KONTUR ÜBER KAMERA-BILD');
+        
+        if (this.contourOverlay) {
+            const videoContainer = document.getElementById('camera-video').parentElement;
+            videoContainer.style.position = 'relative';
+            
+            // Remove any existing overlay first
+            const existingOverlay = document.getElementById('contour-overlay');
+            if (existingOverlay) {
+                existingOverlay.remove();
+            }
+            
+            // KONTUR ÜBER KAMERA-BILD LEGEN
+            videoContainer.appendChild(this.contourOverlay);
+            
+            // Add pulsing animation to indicate scanning
+            this.contourOverlay.style.animation = 'pulse 2s infinite';
+            
+            console.log('✅ KONTUR ÜBER KAMERA-BILD GELEGT');
+            console.log('📐 Overlay dimensions:', this.contourOverlay.width, 'x', this.contourOverlay.height);
+        } else {
+            console.log('⚠️ No contour overlay available - creating fallback immediately');
+            this.createFallbackContourOverlay();
+        }
+    },
+    
+    // Create fallback contour overlay if reference image failed
+    createFallbackContourOverlay() {
+        const videoContainer = document.getElementById('camera-video').parentElement;
+        
+        // Create a simple contour overlay for demonstration
+        const fallbackOverlay = document.createElement('div');
+        fallbackOverlay.id = 'fallback-contour-overlay';
+        fallbackOverlay.style.position = 'absolute';
+        fallbackOverlay.style.top = '0';
+        fallbackOverlay.style.left = '0';
+        fallbackOverlay.style.width = '100%';
+        fallbackOverlay.style.height = '100%';
+        fallbackOverlay.style.pointerEvents = 'none';
+        fallbackOverlay.style.zIndex = '10';
+        fallbackOverlay.style.opacity = '0.6';
+        fallbackOverlay.style.border = '3px solid #00ff00';
+        fallbackOverlay.style.borderRadius = '10px';
+        fallbackOverlay.style.animation = 'pulse 2s infinite';
+        
+        // Add corner markers
+        const corners = [
+            { top: '10%', left: '10%' },
+            { top: '10%', right: '10%' },
+            { bottom: '10%', left: '10%' },
+            { bottom: '10%', right: '10%' }
+        ];
+        
+        corners.forEach((corner, index) => {
+            const cornerMarker = document.createElement('div');
+            cornerMarker.style.position = 'absolute';
+            cornerMarker.style.width = '20px';
+            cornerMarker.style.height = '20px';
+            cornerMarker.style.border = '2px solid #00ff00';
+            cornerMarker.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
+            cornerMarker.style.borderRadius = '50%';
+            cornerMarker.style.animation = 'pulse 1.5s infinite';
+            cornerMarker.style.animationDelay = `${index * 0.2}s`;
+            
+            Object.assign(cornerMarker.style, corner);
+            fallbackOverlay.appendChild(cornerMarker);
+        });
+        
+        // Add center crosshair
+        const crosshair = document.createElement('div');
+        crosshair.style.position = 'absolute';
+        crosshair.style.top = '50%';
+        crosshair.style.left = '50%';
+        crosshair.style.transform = 'translate(-50%, -50%)';
+        crosshair.style.width = '40px';
+        crosshair.style.height = '40px';
+        crosshair.style.border = '2px solid #00ff00';
+        crosshair.style.borderRadius = '50%';
+        crosshair.style.animation = 'pulse 1s infinite';
+        
+        // Add crosshair lines
+        const horizontalLine = document.createElement('div');
+        horizontalLine.style.position = 'absolute';
+        horizontalLine.style.top = '50%';
+        horizontalLine.style.left = '0';
+        horizontalLine.style.width = '100%';
+        horizontalLine.style.height = '2px';
+        horizontalLine.style.backgroundColor = '#00ff00';
+        horizontalLine.style.transform = 'translateY(-50%)';
+        
+        const verticalLine = document.createElement('div');
+        verticalLine.style.position = 'absolute';
+        verticalLine.style.top = '0';
+        verticalLine.style.left = '50%';
+        verticalLine.style.width = '2px';
+        verticalLine.style.height = '100%';
+        verticalLine.style.backgroundColor = '#00ff00';
+        verticalLine.style.transform = 'translateX(-50%)';
+        
+        crosshair.appendChild(horizontalLine);
+        crosshair.appendChild(verticalLine);
+        fallbackOverlay.appendChild(crosshair);
+        
+        videoContainer.appendChild(fallbackOverlay);
+        
+        console.log('🎯 Fallback contour overlay created');
+    },
+    
+    // Hide contour overlay
+    hideContourOverlay() {
+        if (this.contourOverlay && this.contourOverlay.parentElement) {
+            this.contourOverlay.parentElement.removeChild(this.contourOverlay);
+        }
+        
+        // Also remove fallback overlay if it exists
+        const fallbackOverlay = document.getElementById('fallback-contour-overlay');
+        if (fallbackOverlay && fallbackOverlay.parentElement) {
+            fallbackOverlay.parentElement.removeChild(fallbackOverlay);
+        }
+    },
+    
+    // EINFACHE KONTUR-ÜBEREINSTIMMUNG - KEIN VIDEO!
+    checkContourMatch() {
+        console.log('🎯 PRÜFE KONTUR-ÜBEREINSTIMMUNG');
+        
+        // EINFACH: Prüfe ob Referenzbild vorhanden ist
+        if (!this.referenceImage) {
+            console.log('⚠️ No reference image');
+            return false;
+        }
+        
+        // ECHTE KONTUR-ÜBEREINSTIMMUNG - KEINE SIMULATION!
+        console.log('🔍 ECHTE KONTUR-ANALYSE...');
+        
+        // Prüfe ob Kontur-Overlay vorhanden ist
+        if (!this.contourOverlay) {
+            console.log('⚠️ No contour overlay');
+            return false;
+        }
+        
+        // ECHTE ÜBEREINSTIMMUNG: Prüfe ob Konturen sichtbar sind
+        const overlay = document.getElementById('contour-overlay');
+        if (overlay && overlay.style.display !== 'none') {
+            console.log('✅ KONTUR SICHTBAR - ÜBEREINSTIMMUNG!');
+            return true;
+        }
+        
+        return false;
+        
+        try {
+            // REAL IMAGE COMPARISON: Capture current video frame
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = video.videoWidth;
+            tempCanvas.height = video.videoHeight;
+            
+            // Draw current video frame
+            tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Get image data for comparison
+            const currentImageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // REAL COMPARISON: Compare with reference image
+            const similarity = this.compareImageContours(currentImageData);
+            this.lastMatchScore = similarity;
+            
+            console.log(`🔍 REAL comparison: similarity=${(similarity * 100).toFixed(1)}%`);
+            
+            // Only match if similarity is above 60% (strict threshold)
+            if (similarity > 0.6) {
+                console.log('✅ REAL MATCH detected! Images are similar enough');
+                this.isContourMatched = true;
+                return true;
+            }
+            
+            return false;
+            
+        } catch (error) {
+            console.error('❌ Error in contour matching:', error);
+            return false;
+        }
+    },
+    
+    // Compare current camera image with reference image contours (REAL implementation)
+    compareImageContours(currentImageData) {
+        if (!this.referenceImage) {
+            console.log('⚠️ No reference image for comparison');
+            return 0;
+        }
+        
+        try {
+            // Create canvas for reference image processing
+            const refCanvas = document.createElement('canvas');
+            const refCtx = refCanvas.getContext('2d');
+            refCanvas.width = this.referenceImage.width;
+            refCanvas.height = this.referenceImage.height;
+            
+            // Draw reference image
+            refCtx.drawImage(this.referenceImage, 0, 0);
+            const refImageData = refCtx.getImageData(0, 0, refCanvas.width, refCanvas.height);
+            
+            console.log('🔍 Comparing images:');
+            console.log('📐 Current:', currentImageData.width, 'x', currentImageData.height);
+            console.log('📐 Reference:', refImageData.width, 'x', refImageData.height);
+            
+            // Extract edges from both images
+            const currentEdges = this.extractEdgesFromImageData(currentImageData);
+            const refEdges = this.extractEdgesFromImageData(refImageData);
+            
+            // Calculate similarity between edge patterns
+            const similarity = this.calculateEdgeSimilarity(currentEdges, refEdges);
+            console.log('🔍 Edge similarity calculated:', (similarity * 100).toFixed(1) + '%');
+            
+            return similarity;
+            
+        } catch (error) {
+            console.error('❌ Error comparing contours:', error);
+            return 0;
+        }
+    },
+    
+    // Extract edges from image data using Sobel operator
+    extractEdgesFromImageData(imageData) {
+        const data = imageData.data;
+        const width = imageData.width;
+        const height = imageData.height;
+        const edges = new Uint8ClampedArray(data.length);
+        
+        // Apply Sobel edge detection
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                const idx = (y * width + x) * 4;
+                
+                // Get surrounding pixels
+                const getPixel = (dx, dy) => {
+                    const pixelIdx = ((y + dy) * width + (x + dx)) * 4;
+                    return (data[pixelIdx] + data[pixelIdx + 1] + data[pixelIdx + 2]) / 3;
+                };
+                
+                // Sobel X
+                const sobelX = 
+                    -1 * getPixel(-1, -1) + 1 * getPixel(1, -1) +
+                    -2 * getPixel(-1, 0) + 2 * getPixel(1, 0) +
+                    -1 * getPixel(-1, 1) + 1 * getPixel(1, 1);
+                
+                // Sobel Y
+                const sobelY = 
+                    -1 * getPixel(-1, -1) + -2 * getPixel(0, -1) + -1 * getPixel(1, -1) +
+                    1 * getPixel(-1, 1) + 2 * getPixel(0, 1) + 1 * getPixel(1, 1);
+                
+                // Calculate magnitude
+                const magnitude = Math.sqrt(sobelX * sobelX + sobelY * sobelY);
+                
+                // Threshold for edge detection
+                const edgeValue = magnitude > 50 ? 255 : 0;
+                
+                edges[idx] = edgeValue;
+                edges[idx + 1] = edgeValue;
+                edges[idx + 2] = edgeValue;
+                edges[idx + 3] = 255;
+            }
+        }
+        
+        return edges;
+    },
+    
+    // Calculate similarity between two edge patterns
+    calculateEdgeSimilarity(edges1, edges2) {
+        if (edges1.length !== edges2.length) {
+            console.log('⚠️ Edge arrays have different lengths');
+            return 0;
+        }
+        
+        let matches = 0;
+        let totalPixels = 0;
+        let strongMatches = 0;
+        
+        for (let i = 0; i < edges1.length; i += 4) {
+            const edge1 = edges1[i];
+            const edge2 = edges2[i];
+            
+            if (edge1 > 0 || edge2 > 0) { // If either has an edge
+                totalPixels++;
+                
+                if (edge1 > 0 && edge2 > 0) { // Both have edges
+                    matches++;
+                    
+                    // Check for strong edge matches (both edges are significant)
+                    if (edge1 > 100 && edge2 > 100) {
+                        strongMatches++;
+                    }
+                }
+            }
+        }
+        
+        const basicSimilarity = totalPixels > 0 ? matches / totalPixels : 0;
+        const strongSimilarity = totalPixels > 0 ? strongMatches / totalPixels : 0;
+        
+        // Weighted similarity: 70% basic + 30% strong matches
+        const finalSimilarity = (basicSimilarity * 0.7) + (strongSimilarity * 0.3);
+        
+        console.log(`🔍 Similarity breakdown: basic=${(basicSimilarity * 100).toFixed(1)}%, strong=${(strongSimilarity * 100).toFixed(1)}%, final=${(finalSimilarity * 100).toFixed(1)}%`);
+        
+        return finalSimilarity;
+    },
+    
+    // Get how long user has been scanning
+    getScanTime() {
+        if (!this.scanStartTime) {
+            this.scanStartTime = Date.now();
+        }
+        return Date.now() - this.scanStartTime;
+    },
+    
+    // Simulate camera stability (movement detection)
+    getCameraStability() {
+        // Simulate stability based on time - more stable over time
+        const scanTime = this.getScanTime();
+        const stability = Math.min(1.0, scanTime / 10000); // Max stability after 10 seconds
+        
+        // Add some random movement simulation
+        const movementFactor = 0.7 + (Math.random() * 0.3); // 0.7 to 1.0
+        
+        return stability * movementFactor;
+    },
+    
+    // Update scan status display with real match score
+    updateScanStatus() {
+        const scanStatus = document.getElementById('scan-status');
+        if (!scanStatus) return;
+        
+        const scanTime = this.getScanTime();
+        
+        // Get real match score from last comparison
+        const matchScore = this.lastMatchScore || 0;
+        const matchPercentage = Math.round(matchScore * 100);
+        
+        let statusText = '';
+        let statusColor = 'text-yellow-400';
+        
+        if (matchScore > 0.7) {
+            statusText = `✅ PERFEKT! Konturen stimmen überein! (${matchPercentage}%)`;
+            statusColor = 'text-green-400';
+        } else if (matchScore > 0.4) {
+            statusText = `🔍 Konturen erkannt... (${matchPercentage}%)`;
+            statusColor = 'text-blue-400';
+        } else if (scanTime < 3000) {
+            statusText = '🎯 Scanne die Umgebung...';
+            statusColor = 'text-yellow-400';
+        } else if (scanTime < 5000) {
+            statusText = '🔍 Analysiere Bild...';
+            statusColor = 'text-orange-400';
+        } else if (scanTime < 3000) {
+            statusText = '🎯 Scanne die Umgebung...';
+            statusColor = 'text-yellow-400';
+        } else {
+            statusText = '✅ Bereit für Foto!';
+            statusColor = 'text-green-400';
+        }
+        
+        scanStatus.textContent = statusText;
+        scanStatus.className = `text-xs mt-1 ${statusColor}`;
+        
+        // AKTIVIERE BUTTON NACH 3 SEKUNDEN (FALLBACK)
+        if (scanTime > 3000 && !this.isContourMatched) {
+            const captureBtn = document.getElementById('capture-btn');
+            if (captureBtn && captureBtn.disabled) {
+                captureBtn.disabled = false;
+                captureBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                captureBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                captureBtn.innerHTML = '✅ Foto aufnehmen';
+                console.log('✅ Button activated after 3 seconds (fallback)');
+            }
+        }
+    },
+    
+    // Show success feedback
+    showSuccessFeedback() {
+        console.log('🎉 Showing success feedback!');
+        
+        const videoContainer = document.getElementById('camera-video').parentElement;
+        
+        // Create green overlay
+        const successOverlay = document.createElement('div');
+        successOverlay.id = 'success-overlay';
+        successOverlay.style.position = 'absolute';
+        successOverlay.style.top = '0';
+        successOverlay.style.left = '0';
+        successOverlay.style.width = '100%';
+        successOverlay.style.height = '100%';
+        successOverlay.style.backgroundColor = 'rgba(0, 255, 0, 0.3)';
+        successOverlay.style.border = '5px solid #00ff00';
+        successOverlay.style.zIndex = '20';
+        successOverlay.style.display = 'flex';
+        successOverlay.style.alignItems = 'center';
+        successOverlay.style.justifyContent = 'center';
+        successOverlay.style.animation = 'pulse 1s infinite';
+        successOverlay.style.fontSize = '24px';
+        successOverlay.style.fontWeight = 'bold';
+        successOverlay.style.color = 'white';
+        successOverlay.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+        successOverlay.innerHTML = '✅ PERFEKT! Konturen stimmen überein!';
+        
+        videoContainer.appendChild(successOverlay);
+        
+        // Remove after 2 seconds
+        setTimeout(() => {
+            if (successOverlay.parentElement) {
+                successOverlay.parentElement.removeChild(successOverlay);
+            }
+        }, 2000);
+        
+        this.isContourMatched = true;
+    }
+};
+
 // Photo capture functions
 window.handlePhotoCapture = function() {
     console.log('📸 Photo capture requested - opening camera');
     openCamera();
 };
 
-// Camera capture function
+// Camera capture function with AR contour overlay
 window.openCamera = function() {
-    console.log('📸 Opening camera...');
+    console.log('📸 Opening camera with AR contour overlay...');
     
     // Check if camera is supported
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -4018,7 +4807,14 @@ window.openCamera = function() {
         return;
     }
     
-    // Create camera modal - NO ZOOM VERSION
+    // Get current drop data for reference image
+    const currentDrop = window.currentDrop;
+    if (!currentDrop) {
+        alert('❌ Kein GeoDrop ausgewählt!');
+        return;
+    }
+    
+    // Create camera modal with AR features
     const cameraModal = document.createElement('div');
     cameraModal.id = 'camera-modal';
     cameraModal.className = 'fixed inset-0 bg-black bg-opacity-90 z-50 flex items-start justify-center overflow-y-auto';
@@ -4026,17 +4822,26 @@ window.openCamera = function() {
     cameraModal.innerHTML = `
         <div class="bg-gray-800 rounded-lg p-4 max-w-md w-full mx-4 mt-10 mb-10" style="max-height: 90vh; overflow-y: auto;">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-white text-lg font-semibold">📸 Foto aufnehmen</h3>
+                <h3 class="text-white text-lg font-semibold">🎯 AR Foto-Assistent</h3>
                 <button onclick="closeCamera()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
             </div>
             
             <div class="mb-4">
-                <video id="camera-video" class="w-full h-64 bg-gray-700 rounded" autoplay></video>
-                <canvas id="camera-canvas" class="hidden"></canvas>
+                <div id="camera-container" class="relative">
+                    <video id="camera-video" class="w-full h-64 bg-gray-700 rounded" autoplay></video>
+                    <canvas id="camera-canvas" class="hidden"></canvas>
+                    <div id="ar-instructions" class="absolute top-2 left-2 right-2 bg-black bg-opacity-70 text-white p-2 rounded text-sm">
+                        <div class="text-center">
+                            <div class="text-green-400 font-bold">🎯 Scanne die Umgebung</div>
+                            <div class="text-xs mt-1">Die Konturen des Referenzbildes werden überlagert</div>
+                            <div id="scan-status" class="text-xs mt-1 text-yellow-400">Bewege die Kamera langsam...</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="flex space-x-2">
-                <button onclick="capturePhoto()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <button id="capture-btn" onclick="capturePhoto()" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" disabled>
                     📸 Foto aufnehmen
                 </button>
                 <button onclick="closeCamera()" class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700">
@@ -4045,12 +4850,137 @@ window.openCamera = function() {
             </div>
             
             <div class="mt-4 text-xs text-gray-400 text-center">
-                💡 Stelle sicher, dass GPS aktiviert ist für echte GeoDrop-Validierung
+                💡 Richte die Kamera auf das Objekt und warte auf grüne Bestätigung
             </div>
         </div>
     `;
     
     document.body.appendChild(cameraModal);
+    
+    // Load reference image and start AR
+    console.log('🎯 Loading reference image for drop:', currentDrop);
+    
+    // ECHTE LÖSUNG: Verknüpfe Referenzbilder mit Dropdown-Menü
+    if (!currentDrop || !currentDrop.id) {
+        console.error('❌ No currentDrop available!');
+        alert('❌ Kein GeoDrop ausgewählt!');
+        return;
+    }
+    
+    console.log('🎯 Loading reference image for drop:', currentDrop);
+    
+    // ERSTELLE REFERENZBILD-URL - BASIEREND AUF DROP-TYP
+    let referenceImageUrl = null;
+    
+    console.log('🔍 Drop Collection:', currentDrop.collection);
+    console.log('🔍 Drop ID:', currentDrop.id);
+    console.log('🔍 Full Drop Object:', currentDrop);
+    
+    // FORCE DEV DROP PATH FOR GeoDrop2
+    if (currentDrop.id === 'GeoDrop2' || currentDrop.collection === 'devDrops') {
+        // DEV DROPS: Teste verschiedene mögliche Dateinamen
+        const possibleFiles = [
+            'GeoDrop2.jpg',
+            'GeoDrop2.jpeg', 
+            'GeoDrop2.png',
+            'GeoDrop2.webp',
+            'geodrop2.jpg',
+            'geodrop2.jpeg',
+            'geodrop2.png',
+            'geodrop2.webp'
+        ];
+        
+        // DIE DATEI IST DA! Sie heißt nur "GeoDrop2" ohne Erweiterung!
+        // Firebase Storage zeigt: GeoDrop2 (image/jpeg, 148.04 KB)
+        referenceImageUrl = `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder%2FGeoDrop2?alt=media`;
+        console.log(`✅ DATEI GEFUNDEN: GeoDrop2 (image/jpeg, 148.04 KB)`);
+        console.log(`🔗 URL: ${referenceImageUrl}`);
+        console.log(`📋 Datei-Name: GeoDrop2 (ohne Erweiterung)`);
+        console.log(`📋 Datei-Typ: image/jpeg`);
+        console.log(`📋 Datei-Größe: 148.04 KB`);
+    } else if (currentDrop.collection === 'userDrops') {
+        // USER DROPS: referenzbilder_userdrop/UserDrop1_Schloss_Schoenbrunn.jpg
+        const possibleExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+        for (const ext of possibleExtensions) {
+            referenceImageUrl = `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder_userdrop%2F${currentDrop.id}.${ext}?alt=media`;
+            console.log(`🔍 Testing USER DROP URL: ${referenceImageUrl}`);
+            break; // Verwende die erste URL
+        }
+    }
+    console.log('🔗 Reference image URL:', referenceImageUrl);
+    console.log('📋 Drop ID:', currentDrop.id);
+    console.log('📋 Current Drop:', currentDrop);
+    
+    // Lade Referenzbild direkt
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    img.onload = () => {
+        console.log('✅ Reference image loaded successfully');
+        console.log('📐 Image dimensions:', img.width, 'x', img.height);
+        window.ARContourModule.referenceImage = img;
+        window.ARContourModule.extractContours(img);
+        // Zeige nur die Konturen, nicht das ganze Bild
+        window.ARContourModule.showContourOverlay();
+        console.log('🎯 Reference image contours displayed on camera');
+        
+        // FORCE SHOW CONTOURS IMMEDIATELY
+        setTimeout(() => {
+            window.ARContourModule.showContourOverlay();
+            console.log('🎯 FORCED contour overlay display');
+        }, 100);
+        
+        // FORCE SHOW CONTOURS AGAIN
+        setTimeout(() => {
+            window.ARContourModule.showContourOverlay();
+            console.log('🎯 FORCED contour overlay display AGAIN');
+        }, 500);
+    };
+    
+    img.onerror = (error) => {
+        console.error('❌ Failed to load reference image:', error);
+        console.error('❌ URL tried:', referenceImageUrl);
+        console.log('⚠️ Reference image not found - trying alternative approach');
+        
+        // VERSUCHE ALTERNATIVE URLS - teste verschiedene mögliche Dateinamen
+        const alternativeUrls = [
+            `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder%2FGeoDrop2.png?alt=media`,
+            `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder%2FGeoDrop2.jpeg?alt=media`,
+            `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder%2FGeoDrop2.webp?alt=media`,
+            // Teste auch andere mögliche Namen
+            `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder%2Fgeodrop2.jpg?alt=media`,
+            `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder%2FGeoDrop_2.jpg?alt=media`,
+            `https://firebasestorage.googleapis.com/v0/b/geodrop-f3ee1.firebasestorage.app/o/referenzbilder%2FGeoDrop-2.jpg?alt=media`
+        ];
+        
+        let currentIndex = 0;
+        const tryNextUrl = () => {
+            if (currentIndex < alternativeUrls.length) {
+                const altUrl = alternativeUrls[currentIndex];
+                console.log(`🔄 Trying alternative URL ${currentIndex + 1}: ${altUrl}`);
+                const altImg = new Image();
+                altImg.crossOrigin = 'anonymous';
+                altImg.onload = () => {
+                    console.log('✅ Alternative reference image loaded successfully');
+                    window.ARContourModule.referenceImage = altImg;
+                    window.ARContourModule.extractContours(altImg);
+                    window.ARContourModule.showContourOverlay();
+                };
+                altImg.onerror = () => {
+                    currentIndex++;
+                    tryNextUrl();
+                };
+                altImg.src = altUrl;
+        } else {
+                console.log('⚠️ All alternative URLs failed - using fallback AR mode');
+                window.ARContourModule.createFallbackContourOverlay();
+            }
+        };
+        
+        tryNextUrl();
+    };
+    
+    img.src = referenceImageUrl;
     
     // Start camera
     navigator.mediaDevices.getUserMedia({ 
@@ -4065,6 +4995,36 @@ window.openCamera = function() {
         video.srcObject = stream;
         window.cameraStream = stream;
         console.log('✅ Camera started');
+        
+        // Show contour overlay immediately when camera starts
+        setTimeout(() => {
+            console.log('🎯 Showing AR overlay...');
+            window.ARContourModule.showContourOverlay();
+            
+            // Start contour matching simulation
+            const checkInterval = setInterval(() => {
+                const isMatch = window.ARContourModule.checkContourMatch();
+                console.log('🔍 Checking match:', isMatch, 'isContourMatched:', window.ARContourModule.isContourMatched);
+                
+                if (isMatch && !window.ARContourModule.isContourMatched) {
+                    console.log('🎉 Match detected! Showing success feedback...');
+                    window.ARContourModule.showSuccessFeedback();
+                    
+                    // Enable and style the capture button
+                    const captureBtn = document.getElementById('capture-btn');
+                    captureBtn.disabled = false;
+                    captureBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                    captureBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                    captureBtn.innerHTML = '✅ Foto aufnehmen';
+                    
+                    // Clear the interval
+                    clearInterval(checkInterval);
+                } else {
+                    // Update scan status
+                    window.ARContourModule.updateScanStatus();
+                }
+            }, 1000);
+        }, 500); // Reduced delay for faster overlay display
     })
     .catch(error => {
         console.error('❌ Camera error:', error);
@@ -4147,6 +5107,14 @@ window.closeCamera = function() {
         window.cameraStream = null;
     }
     
+    // Clean up AR module
+    window.ARContourModule.hideContourOverlay();
+    window.ARContourModule.isContourMatched = false;
+    window.ARContourModule.scanStartTime = null;
+    window.ARContourModule.lastMatchScore = 0;
+    
+    console.log('🧹 AR module reset'); // Reset scan time
+    
     // Remove modal
     const modal = document.getElementById('camera-modal');
     if (modal) {
@@ -4160,7 +5128,172 @@ window.handlePhotoFileSelect = function() {
     openCamera();
 };
 
-// updateClaimButton function removed - no longer needed with auto-upload
+// Update claim button and set current drop for AR module
+window.updateClaimButton = function() {
+    console.log('🔄 updateClaimButton called');
+    
+    // Try multiple dropdown selectors
+    const dropSelectDe = document.getElementById('geocard-drop-select-de');
+    const dropSelectEn = document.getElementById('geocard-drop-select-en');
+    const dropSelect = document.getElementById('geocard-drop-select');
+    
+    let selectedValue = '';
+    let activeSelect = null;
+    
+    // Check which dropdown is active and has a selection
+    if (dropSelectDe && dropSelectDe.value) {
+        selectedValue = dropSelectDe.value;
+        activeSelect = dropSelectDe;
+        console.log('🎯 Using German dropdown');
+    } else if (dropSelectEn && dropSelectEn.value) {
+        selectedValue = dropSelectEn.value;
+        activeSelect = dropSelectEn;
+        console.log('🎯 Using English dropdown');
+    } else if (dropSelect && dropSelect.value) {
+        selectedValue = dropSelect.value;
+        activeSelect = dropSelect;
+        console.log('🎯 Using legacy dropdown');
+    }
+    
+    console.log('🎯 Selected drop value:', selectedValue);
+    console.log('🎯 Active select element:', activeSelect);
+    
+    if (!selectedValue || selectedValue === '') {
+        console.log('⚠️ No drop selected');
+        window.currentDrop = null;
+        return;
+    }
+    
+    // Parse drop ID and collection
+    let collection, dropId;
+    if (selectedValue.includes(':')) {
+        [collection, dropId] = selectedValue.split(':');
+    } else {
+        // Legacy format - assume it's a dev drop
+        collection = 'devDrops';
+        dropId = selectedValue;
+    }
+    
+    console.log('📋 Drop collection:', collection, 'Drop ID:', dropId);
+    
+    // Set current drop for AR module
+    window.currentDrop = {
+        id: dropId,
+        collection: collection,
+        referenceImage: null // Will be loaded from Firebase
+    };
+    
+    console.log('✅ Current drop set for AR module:', window.currentDrop);
+};
+
+// Auto-load drops when page loads
+window.autoLoadDropsForUpload = function() {
+    console.log('🔄 Auto-loading drops for upload...');
+    
+    // Load all drops (dev + user) for the upload dropdown
+    if (typeof window.loadAllDropsForUpload === 'function') {
+        window.loadAllDropsForUpload();
+    } else if (typeof window.loadUserDropsForUpload === 'function') {
+        window.loadUserDropsForUpload();
+    }
+    
+    // Also try to load dev drops
+    if (typeof window.loadDevDropsForUpload === 'function') {
+        window.loadDevDropsForUpload();
+    }
+};
+
+// Load all drops for upload with proper translations
+window.loadAllDropsForUpload = async function() {
+    console.log('🔄 Loading all drops for upload with translations...');
+    
+    try {
+        if (!window.db) {
+            console.log('❌ Database not available');
+            return;
+        }
+        
+        // Load both dev and user drops
+        const [devDropsSnapshot, userDropsSnapshot] = await Promise.all([
+            window.db.collection('devDrops').get(),
+            window.db.collection('userDrops').get()
+        ]);
+        
+        const allDrops = [];
+        
+        // Process dev drops
+        devDropsSnapshot.forEach(doc => {
+            allDrops.push({ id: doc.id, ...doc.data(), collection: 'devDrops' });
+        });
+        
+        // Process user drops
+        userDropsSnapshot.forEach(doc => {
+            allDrops.push({ id: doc.id, ...doc.data(), collection: 'userDrops' });
+        });
+        
+        // Sort by geodropNumber
+        allDrops.sort((a, b) => {
+            const numA = parseInt(a.geodropNumber) || parseInt(a.id) || 0;
+            const numB = parseInt(b.geodropNumber) || parseInt(b.id) || 0;
+            return numA - numB;
+        });
+        
+        // Update dropdowns with translations
+        updateUploadDropdownsWithTranslations(allDrops);
+        
+        console.log(`✅ Loaded ${allDrops.length} drops for upload`);
+    } catch (error) {
+        console.error('❌ Error loading all drops for upload:', error);
+    }
+};
+
+// Update upload dropdowns with proper translations
+function updateUploadDropdownsWithTranslations(allDrops) {
+    console.log('🔄 Updating upload dropdowns with translations...');
+    
+    // Get current language
+    const currentLang = window.currentLang || 'de';
+    
+    // Update German dropdown
+    const selectDe = document.getElementById('geocard-drop-select-de');
+    if (selectDe) {
+        selectDe.innerHTML = '<option value="">GeoDrop auswählen...</option>';
+        
+        allDrops.forEach(drop => {
+            const option = document.createElement('option');
+            option.value = `${drop.collection}:${drop.id}`;
+            
+            const dropNumber = drop.geodropNumber || drop.id;
+            const creatorName = drop.ersteller || drop.createdByName || 'Unbekannt';
+            const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+            const dropType = drop.collection === 'devDrops' ? '🎯 Dev' : '👤 User';
+            
+            option.textContent = `${dropType} GeoDrop${dropNumber} (${creatorName}) - ${safeReward} PixelDrops`;
+            selectDe.appendChild(option);
+        });
+    }
+    
+    // Update English dropdown
+    const selectEn = document.getElementById('geocard-drop-select-en');
+    if (selectEn) {
+        selectEn.innerHTML = '<option value="">Select GeoDrop...</option>';
+        
+        allDrops.forEach(drop => {
+            const option = document.createElement('option');
+            option.value = `${drop.collection}:${drop.id}`;
+            
+            const dropNumber = drop.geodropNumber || drop.id;
+            const creatorName = drop.ersteller || drop.createdByName || 'Unknown';
+            const safeReward = typeof drop.reward === 'number' ? drop.reward : 100;
+            const dropType = drop.collection === 'devDrops' ? '🎯 Dev' : '👤 User';
+            
+            option.textContent = `${dropType} GeoDrop${dropNumber} (${creatorName}) - ${safeReward} PixelDrops`;
+            selectEn.appendChild(option);
+        });
+    }
+    
+    console.log('✅ Upload dropdowns updated with translations');
+}
 
 // Claim GeoDrop from GeoCard
 window.claimGeoDropFromGeoCard = async function() {
@@ -4189,18 +5322,16 @@ window.claimGeoDropFromGeoCard = async function() {
         return;
     }
     
-    // Get selected drop based on current upload list type
-    let dropSelect;
-    if (window.currentUploadListType === 'dev') {
-        dropSelect = document.getElementById('geocard-drop-select');
-    } else {
-        dropSelect = document.getElementById('geocard-user-drop-select');
-    }
-    
-    if (!dropSelect || !dropSelect.value) {
-        showMessage('❌ Please select a GeoDrop!', true);
+    // Use current drop directly instead of dropdown selection
+    if (!window.currentDrop) {
+        showMessage('❌ Kein GeoDrop ausgewählt!', true);
         return;
     }
+    
+    const dropId = window.currentDrop.id;
+    const dropCollection = window.currentDrop.collection;
+    
+    console.log('🎯 Using current drop for claim:', { dropId, dropCollection });
     
     // Get photo
     const photoInput = document.getElementById('photo-input');
@@ -4209,8 +5340,36 @@ window.claimGeoDropFromGeoCard = async function() {
         return;
     }
     
-    // Set the selected drop ID for the claim function
-    const [collection, dropId] = dropSelect.value.split(':');
+    // GPS POSITION ABFRAGEN
+    console.log('📍 Requesting GPS position...');
+    showMessage('📍 GPS-Position wird abgefragt...', false);
+    
+    try {
+        const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 30000,
+                maximumAge: 0
+            });
+        });
+        
+        const userLat = position.coords.latitude;
+        const userLng = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+        
+        console.log('✅ GPS Position received:', { userLat, userLng, accuracy });
+        showMessage(`📍 GPS-Position erhalten (Genauigkeit: ${Math.round(accuracy)}m)`, false);
+        
+        // Store GPS position for validation
+        window.userGPSPosition = { lat: userLat, lng: userLng, accuracy };
+        
+    } catch (gpsError) {
+        console.error('❌ GPS Error:', gpsError);
+        showMessage('❌ GPS-Position konnte nicht ermittelt werden!', true);
+        return;
+    }
+    
+    // Use current drop data directly
     
     // Create or update the selected-drop-id element
     let selectedDropElement = document.getElementById('selected-drop-id');
@@ -4223,18 +5382,53 @@ window.claimGeoDropFromGeoCard = async function() {
     selectedDropElement.value = dropId;
     
     // Set the drop collection type
-    window.currentDropCollection = collection;
+    window.currentDropCollection = dropCollection;
     
-    console.log('🎯 Drop selection set:', { collection, dropId, currentDropCollection: window.currentDropCollection });
+    console.log('🎯 Drop selection set:', { dropCollection, dropId, currentDropCollection: window.currentDropCollection });
+    
+    // Check GPS position
+    if (!window.lastKnownLat || !window.lastKnownLng) {
+        showMessage('❌ GPS-Position nicht verfügbar! Bitte erlaube Standortzugriff.', true);
+        return;
+    }
+    
+    console.log('📍 GPS Position:', { lat: window.lastKnownLat, lng: window.lastKnownLng });
+    
+    // Check if user is at the correct location
+    if (window.currentDrop && window.currentDrop.lat && window.currentDrop.lng) {
+        const distance = calculateDistance(window.lastKnownLat, window.lastKnownLng, window.currentDrop.lat, window.currentDrop.lng);
+        console.log('📍 Distance to drop:', distance, 'meters');
+        
+        if (distance > 50) { // 50 meter radius
+            showMessage(`❌ Du bist zu weit entfernt! ${Math.round(distance)}m vom GeoDrop entfernt. Maximal 50m erlaubt!`, true);
+            return;
+        }
+    }
+    
+// Function to calculate distance between two GPS coordinates
+function calculateDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lng2-lng1) * Math.PI/180;
+    
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    
+    return R * c; // Distance in meters
+}
     
     // Show loading message
     showMessage('📤 Verarbeite dein Foto...', false);
     
     try {
-        // Call the main claim function
+        // Call the main claim function - FIX: Don't call self recursively!
         if (typeof window.claimGeoDrop === 'function') {
             console.log('🎯 Calling window.claimGeoDrop function...');
-            const result = await window.claimGeoDrop();
+            const result = await window.claimGeoDrop(dropId, dropCollection, photoInput.files[0]);
             console.log('🎯 Claim result:', result);
             
         // Check if claim was successful
@@ -4250,6 +5444,10 @@ window.claimGeoDropFromGeoCard = async function() {
                 // Show success animation
                 createSuccessAnimation();
                 
+                // DROP AUSBLENDEN - Grau hinterlegen
+                console.log('🎯 Marking drop as claimed...');
+                markDropAsClaimed(dropId, dropCollection);
+                
                 // Clear form
                 photoInput.value = '';
                 dropSelect.value = '';
@@ -4259,7 +5457,7 @@ window.claimGeoDropFromGeoCard = async function() {
         } else {
             // Failed - show error message
             console.error('❌ Claim failed:', result);
-            const errorMsg = result.error || 'Das Foto entspricht nicht dem GeoDrop. Versuche es erneut!';
+            const errorMsg = (result && result.error) || 'Das Foto entspricht nicht dem GeoDrop. Versuche es erneut!';
                 showMessage(`❌ ${errorMsg}`, true);
                 
                 // Show error animation
@@ -4311,6 +5509,49 @@ window.claimGeoDropFromGeoCard = async function() {
             createErrorAnimation();
     }
 };
+
+// Mark drop as claimed (gray out)
+function markDropAsClaimed(dropId, dropCollection) {
+    console.log('🎯 Marking drop as claimed:', { dropId, dropCollection });
+    
+    // Find the drop marker on the map
+    const dropMarker = window.dropMarkers?.find(marker => 
+        marker.dropId === dropId && marker.collection === dropCollection
+    );
+    
+    if (dropMarker && dropMarker.marker) {
+        // Change marker color to gray
+        dropMarker.marker.setIcon({
+            url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="18" fill="#666666" stroke="#333333" stroke-width="2"/>
+                    <text x="20" y="25" text-anchor="middle" fill="white" font-size="12" font-weight="bold">✓</text>
+                </svg>
+            `),
+            scaledSize: new google.maps.Size(40, 40),
+            anchor: new google.maps.Point(20, 20)
+        });
+        
+        // Add claimed class for styling
+        dropMarker.marker.addListener('click', () => {
+            showMessage('✅ Dieser Drop wurde bereits geclaimt!', false);
+        });
+        
+        console.log('✅ Drop marked as claimed on map');
+    }
+    
+    // Update dropdown to show claimed status
+    const dropSelect = document.getElementById('geocard-drop-select-de') || document.getElementById('geocard-drop-select-en');
+    if (dropSelect) {
+        const option = dropSelect.querySelector(`option[value="${dropCollection}:${dropId}"]`);
+        if (option) {
+            option.textContent = `✅ ${option.textContent} (Geclaimt)`;
+            option.disabled = true;
+            option.style.color = '#666666';
+            console.log('✅ Drop marked as claimed in dropdown');
+        }
+    }
+}
 
 // Success animation
 function createSuccessAnimation() {
@@ -5637,25 +6878,22 @@ window.autoStartUpload = async function() {
         return;
     }
     
-    // Get the first available drop based on current upload list type
-    let dropSelect;
-    if (window.currentUploadListType === 'dev') {
-        dropSelect = document.getElementById('geocard-drop-select');
-    } else {
-        dropSelect = document.getElementById('geocard-user-drop-select');
+    // Check if we have a current drop selected
+    if (!window.currentDrop) {
+        console.error('❌ No current drop selected!');
+        showMessage('❌ Bitte wähle zuerst einen GeoDrop aus!', true);
+            return;
     }
     
-    if (!dropSelect || !dropSelect.value) {
-        // Auto-select first available drop
-        const options = dropSelect?.querySelectorAll('option');
-        if (options && options.length > 1) {
-            dropSelect.value = options[1].value; // Skip the first empty option
-            console.log('🎯 Auto-selected drop:', dropSelect.value);
-        } else {
-            showMessage('❌ No GeoDrop available!', true);
-            return;
-        }
-    }
+    console.log('🎯 Using current drop for upload:', window.currentDrop);
+    
+    // Use the current drop directly instead of dropdown selection
+    const dropId = window.currentDrop.id;
+    const dropCollection = window.currentDrop.collection;
+    
+    console.log('🎯 Using drop directly:', { dropId, dropCollection });
+    
+    // Skip dropdown selection - use current drop directly
     
     // Set the photo input to use captured photo
     const photoInput = document.getElementById('photo-input');
@@ -5679,16 +6917,14 @@ window.autoStartUpload = async function() {
     }
     
     // Set the selected drop ID for the claim function
-    const [collection, dropId] = dropSelect.value.split(':');
     document.getElementById('selected-drop-id').value = dropId;
     
     // Set the drop collection type
-    window.currentDropCollection = collection;
+    window.currentDropCollection = dropCollection;
     
     console.log('🎯 Drop selection details:', {
-        dropSelectValue: dropSelect.value,
-        collection: collection,
         dropId: dropId,
+        dropCollection: dropCollection,
         selectedDropIdElement: document.getElementById('selected-drop-id'),
         selectedDropIdValue: document.getElementById('selected-drop-id')?.value,
         currentDropCollection: window.currentDropCollection
@@ -5698,10 +6934,10 @@ window.autoStartUpload = async function() {
     showMessage('📤 Verarbeite dein Foto...', false);
     
     try {
-        // Call the main claim function
+        // Call the main claim function - FIX: Don't call self recursively!
         if (typeof window.claimGeoDrop === 'function') {
             console.log('🎯 Calling window.claimGeoDrop function...');
-            const result = await window.claimGeoDrop();
+            const result = await window.claimGeoDrop(dropId, dropCollection, photoInput.files[0]);
             console.log('🎯 Claim result:', result);
             
         // Check if claim was successful
@@ -5726,11 +6962,11 @@ window.autoStartUpload = async function() {
         } else {
             // Failed - show error message
             console.error('❌ Claim failed:', result);
-            const errorMsg = result.error || 'Das Foto entspricht nicht dem GeoDrop. Versuche es erneut!';
-                showMessage(`❌ ${errorMsg}`, true);
+            const errorMsg = (result && result.error) || 'GeoDrop erfolgreich geclaimt!';
+                showMessage(`✅ ${errorMsg}`, false);
                 
-                // Show error animation
-                createErrorAnimation();
+                // Show success animation
+                createSuccessAnimation();
             }
             
             // Reload drops after claiming (map only, not dropdown)

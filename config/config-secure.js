@@ -92,6 +92,16 @@ const CONFIG = {
             }
     },
     
+    // Google Places API Configuration (für Standortvalidierung)
+    googlePlaces: {
+        // apiKey: "YOUR_GOOGLE_PLACES_API_KEY_HERE", // Wird aus config-secrets.js geladen
+        searchRadius: 50, // Suchradius in Metern
+        maxResults: 5, // Maximale Anzahl Ergebnisse
+        minConfidence: 0.7, // Minimale Konfidenz für öffentliche Orte
+        cacheDuration: 60 * 60 * 1000, // Cache-Dauer: 1 Stunde
+        enableFallback: true // Fallback-Validierung aktivieren
+    },
+    
     // App Configuration
     app: {
         name: "GeoDrop",
@@ -152,6 +162,7 @@ const CONFIG = {
             // Google Configuration
             google: {
                 // placesApiKey: "YOUR_GOOGLE_PLACES_API_KEY" // Wird aus config-secrets.js geladen
+                // mapsApiKey: "YOUR_GOOGLE_MAPS_API_KEY" // Wird aus config-secrets.js geladen
             },
             
 };
@@ -163,3 +174,11 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // Global verfügbar machen
 window.CONFIG = CONFIG;
+
+// Lade Google Places API Key aus config-secrets.js
+if (typeof SECRETS !== 'undefined' && SECRETS.googlePlaces && SECRETS.googlePlaces.apiKey) {
+    window.CONFIG.googlePlaces.apiKey = SECRETS.googlePlaces.apiKey;
+    console.log('✅ Google Places API Key geladen');
+} else {
+    console.warn('⚠️ Google Places API Key nicht in config-secrets.js gefunden');
+}
