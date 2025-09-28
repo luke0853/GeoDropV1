@@ -5340,6 +5340,29 @@ window.claimGeoDropFromGeoCard = async function() {
         return;
     }
     
+    // AUTOMATISCHE BILDKOMPRIMIERUNG
+    let photoFile = photoInput.files[0];
+    console.log('🖼️ Original file size:', (photoFile.size / 1024 / 1024).toFixed(2) + 'MB');
+    
+    if (photoFile.size > 2 * 1024 * 1024) { // 2MB - niedrigere Schwelle
+        console.log('📦 Compressing large image...');
+        showMessage('📦 Komprimiere großes Bild...', false);
+        
+        try {
+            const compressedFile = await compressImage(photoFile);
+            console.log('✅ Compressed file size:', (compressedFile.size / 1024).toFixed(2) + 'KB');
+            
+            // Store compressed file for later use
+            window.compressedPhotoFile = compressedFile;
+            photoFile = compressedFile; // Use compressed version
+            
+            showMessage(`✅ Bild komprimiert: ${(compressedFile.size / 1024).toFixed(0)}KB`, false);
+        } catch (compressionError) {
+            console.error('❌ Compression failed:', compressionError);
+            showMessage('⚠️ Kompression fehlgeschlagen, verwende Original', false);
+        }
+    }
+    
     // GPS POSITION ABFRAGEN
     console.log('📍 Requesting GPS position...');
     showMessage('📍 GPS-Position wird abgefragt...', false);
@@ -5428,7 +5451,10 @@ function calculateDistance(lat1, lng1, lat2, lng2) {
         // Call the main claim function - FIX: Don't call self recursively!
         if (typeof window.claimGeoDrop === 'function') {
             console.log('🎯 Calling window.claimGeoDrop function...');
-            const result = await window.claimGeoDrop(dropId, dropCollection, photoInput.files[0]);
+            // Use compressed file if available, otherwise original
+            const fileToUse = window.compressedPhotoFile || photoInput.files[0];
+            console.log('📁 Using file:', fileToUse.name, 'Size:', (fileToUse.size / 1024).toFixed(2) + 'KB');
+            const result = await window.claimGeoDrop(dropId, dropCollection, fileToUse);
             console.log('🎯 Claim result:', result);
             
         // Check if claim was successful
@@ -5509,6 +5535,62 @@ function calculateDistance(lat1, lng1, lat2, lng2) {
             createErrorAnimation();
     }
 };
+
+// Automatische Bildkompression
+async function compressImage(file, maxWidth = 1920, maxHeight = 1080, quality = 0.8) {
+    // Dynamische Qualität basierend auf Dateigröße
+    if (file.size > 10 * 1024 * 1024) { // > 10MB
+        quality = 0.6; // Niedrigere Qualität für sehr große Bilder
+        maxWidth = 1280;
+        maxHeight = 720;
+    } else if (file.size > 5 * 1024 * 1024) { // > 5MB
+        quality = 0.7;
+        maxWidth = 1600;
+        maxHeight = 900;
+    }
+    
+    console.log(`📦 Compression settings: ${maxWidth}x${maxHeight}, quality: ${quality}`);
+    return new Promise((resolve, reject) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+            // Berechne neue Dimensionen
+            let { width, height } = img;
+            
+            if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width = width * ratio;
+                height = height * ratio;
+            }
+            
+            // Setze Canvas-Größe
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Zeichne komprimiertes Bild
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Konvertiere zu Blob
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    // Erstelle neue Datei mit komprimierten Daten
+                    const compressedFile = new File([blob], file.name, {
+                        type: 'image/jpeg',
+                        lastModified: Date.now()
+                    });
+                    resolve(compressedFile);
+                } else {
+                    reject(new Error('Komprimierung fehlgeschlagen'));
+                }
+            }, 'image/jpeg', quality);
+        };
+        
+        img.onerror = () => reject(new Error('Bild konnte nicht geladen werden'));
+        img.src = URL.createObjectURL(file);
+    });
+}
 
 // Mark drop as claimed (gray out)
 function markDropAsClaimed(dropId, dropCollection) {
@@ -6937,7 +7019,10 @@ window.autoStartUpload = async function() {
         // Call the main claim function - FIX: Don't call self recursively!
         if (typeof window.claimGeoDrop === 'function') {
             console.log('🎯 Calling window.claimGeoDrop function...');
-            const result = await window.claimGeoDrop(dropId, dropCollection, photoInput.files[0]);
+            // Use compressed file if available, otherwise original
+            const fileToUse = window.compressedPhotoFile || photoInput.files[0];
+            console.log('📁 Using file:', fileToUse.name, 'Size:', (fileToUse.size / 1024).toFixed(2) + 'KB');
+            const result = await window.claimGeoDrop(dropId, dropCollection, fileToUse);
             console.log('🎯 Claim result:', result);
             
         // Check if claim was successful
