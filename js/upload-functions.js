@@ -508,8 +508,8 @@ window.uploadPhoto = function() {
     if (file) {
         const fileSize = file.size / 1024 / 1024; // Size in MB
         
-        if (fileSize > 10) {
-            showMessage('❌ File too large! Maximum 10MB allowed.', true);
+        if (fileSize > 50) {
+            showMessage('❌ File too large! Maximum 50MB allowed.', true);
             return;
         }
         
